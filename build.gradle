@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.6'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.liquibase.gradle' version '2.2.0'
 }
 
 group = 'com.example'
@@ -52,6 +53,15 @@ dependencies {
 	testImplementation 'com.h2database:h2'
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	liquibaseRuntime 'org.postgresql:postgresql:42.7.3'
+	liquibaseRuntime 'org.liquibase:liquibase-core:5.0.1'
+
+	// Critical: Picocli is required for Liquibase CLI integration (since v4.25+)
+	liquibaseRuntime 'info.picocli:picocli:4.7.6'
+
+	// SnakeYAML for YAML changelogs
+	liquibaseRuntime 'org.yaml:snakeyaml:2.2'
 }
 
 tasks.named('test') {
@@ -70,4 +80,18 @@ repositories {
 
 bootJar {
     archiveFileName = "warehouse-management.jar"
+}
+
+liquibase {
+	activities {
+		main {
+			changelogFile 'db.changelog-master.yaml'
+			url project.findProperty('liquibaseUrl') ?: 'jdbc:h2:mem:test'
+			username project.findProperty('liquibaseUsername') ?: 'sa'
+			password project.findProperty('liquibasePassword') ?: ''
+			driver 'org.postgresql.Driver'
+			searchPath 'src/main/resources'
+		}
+	}
+	runList = 'main'
 }

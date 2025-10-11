@@ -6,110 +6,236 @@ databaseChangeLog:
         - insert:
             tableName: users
             columns:
-              id: 1
-              first_name: "Иван"
-              last_name: "Петров"
-              role: "ADMIN"
-              email: "admin@warehouse.com"
-              password_hash: "$2a$10$exampleHash"
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: first_name
+                  value: "Иван"
+              - column:
+                  name: last_name
+                  value: "Петров"
+              - column:
+                  name: role
+                  value: "ADMIN"
+              - column:
+                  name: email
+                  value: "admin@warehouse.com"
+              - column:
+                  name: password_hash
+                  value: "$2a$10$exampleHash"
 
         - insert:
             tableName: users
             columns:
-              id: 2
-              first_name: "Мария"
-              last_name: "Сидорова"
-              role: "MANAGER"
-              email: "manager@warehouse.com"
-              password_hash: "$2a$10$exampleHash"
+              - column:
+                  name: id
+                  value: 2
+              - column:
+                  name: first_name
+                  value: "Мария"
+              - column:
+                  name: last_name
+                  value: "Сидорова"
+              - column:
+                  name: role
+                  value: "MANAGER"
+              - column:
+                  name: email
+                  value: "manager@warehouse.com"
+              - column:
+                  name: password_hash
+                  value: "$2a$10$exampleHash"
 
         - insert:
             tableName: users
             columns:
-              id: 3
-              first_name: "Алексей"
-              last_name: "Козлов"
-              role: "DRIVER"
-              email: "driver@warehouse.com"
-              password_hash: "$2a$10$exampleHash"
+              - column:
+                  name: id
+                  value: 3
+              - column:
+                  name: first_name
+                  value: "Алексей"
+              - column:
+                  name: last_name
+                  value: "Козлов"
+              - column:
+                  name: role
+                  value: "DRIVER"
+              - column:
+                  name: email
+                  value: "driver@warehouse.com"
+              - column:
+                  name: password_hash
+                  value: "$2a$10$exampleHash"
 
         - insert:
             tableName: storages
             columns:
-              id: 1
-              name: "Основной склад"
-              address: "ул. Складская, 1"
-              capacity: 1000
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: name
+                  value: "Основной склад"
+              - column:
+                  name: address
+                  value: "ул. Складская, 1"
+              - column:
+                  name: capacity
+                  value: 1000
 
         - insert:
             tableName: storages
             columns:
-              id: 2
-              name: "Запасной склад"
-              address: "ул. Резервная, 5"
-              capacity: 500
+              - column:
+                  name: id
+                  value: 2
+              - column:
+                  name: name
+                  value: "Запасной склад"
+              - column:
+                  name: address
+                  value: "ул. Резервная, 5"
+              - column:
+                  name: capacity
+                  value: 500
 
         - insert:
             tableName: vehicles
             columns:
-              id: 1
-              brand: "Volvo"
-              model: "FH16"
-              license_plate: "А123ВС77"
-              year: 2022
-              capacity: 20000
-              status: "AVAILABLE"
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: brand
+                  value: "Volvo"
+              - column:
+                  name: model
+                  value: "FH16"
+              - column:
+                  name: license_plate
+                  value: "А123ВС77"
+              - column:
+                  name: year
+                  value: 2022
+              - column:
+                  name: capacity
+                  value: 20000
+              - column:
+                  name: status
+                  value: "AVAILABLE"
 
         - insert:
             tableName: items
             columns:
-              id: 1
-              name: "Ноутбук Dell XPS"
-              type: "ELECTRONICS"
-              condition: "EXCELLENT"
-              serial_number: "DXPS2024001"
-              description: "Рабочий ноутбук для сотрудников"
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: name
+                  value: "Ноутбук Dell XPS"
+              - column:
+                  name: type
+                  value: "ELECTRONICS"
+              - column:
+                  name: condition
+                  value: "EXCELLENT"
+              - column:
+                  name: serial_number
+                  value: "DXPS2024001"
+              - column:
+                  name: description
+                  value: "Рабочий ноутбук для сотрудников"
 
         - insert:
             tableName: items
             columns:
-              id: 2
-              name: "Погрузчик вилочный"
-              type: "EQUIPMENT"
-              condition: "GOOD"
-              serial_number: "PGL2024001"
-              description: "Вилочный погрузчик 3 тонны"
+              - column:
+                  name: id
+                  value: 2
+              - column:
+                  name: name
+                  value: "Погрузчик вилочный"
+              - column:
+                  name: type
+                  value: "EQUIPMENT"
+              - column:
+                  name: condition
+                  value: "GOOD"
+              - column:
+                  name: serial_number
+                  value: "PGL2024001"
+              - column:
+                  name: description
+                  value: "Вилочный погрузчик 3 тонны"
 
         - insert:
             tableName: items
             columns:
-              id: 3
-              name: "Набор инструментов"
-              type: "TOOLS"
-              condition: "NEW"
-              serial_number: "INST2024001"
-              description: "Профессиональный набор инструментов"
+              - column:
+                  name: id
+                  value: 3
+              - column:
+                  name: name
+                  value: "Набор инструментов"
+              - column:
+                  name: type
+                  value: "TOOLS"
+              - column:
+                  name: condition
+                  value: "NEW"
+              - column:
+                  name: serial_number
+                  value: "INST2024001"
+              - column:
+                  name: description
+                  value: "Профессиональный набор инструментов"
 
         - insert:
             tableName: keeping
             columns:
-              storage_id: 1
-              item_id: 1
-              quantity: 5
-              shelf: "A-15"
+              - column:
+                  name: storage_id
+                  value: 1
+              - column:
+                  name: item_id
+                  value: 1
+              - column:
+                  name: quantity
+                  value: 5
+              - column:
+                  name: shelf
+                  value: "A-15"
 
         - insert:
             tableName: keeping
             columns:
-              storage_id: 1
-              item_id: 2
-              quantity: 2
-              shelf: "B-10"
+              - column:
+                  name: storage_id
+                  value: 1
+              - column:
+                  name: item_id
+                  value: 2
+              - column:
+                  name: quantity
+                  value: 2
+              - column:
+                  name: shelf
+                  value: "B-10"
 
         - insert:
             tableName: keeping
             columns:
-              storage_id: 2
-              item_id: 3
-              quantity: 10
-              shelf: "C-5"
+              - column:
+                  name: storage_id
+                  value: 2
+              - column:
+                  name: item_id
+                  value: 3
+              - column:
+                  name: quantity
+                  value: 10
+              - column:
+                  name: shelf
+                  value: "C-5"
