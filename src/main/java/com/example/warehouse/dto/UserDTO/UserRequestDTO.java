@@ -1,23 +1,18 @@
 package com.example.warehouse.dto.UserDTO;
 
-import com.example.warehouse.entity.User;
 import com.example.warehouse.enumeration.RoleType;
-
 import java.time.LocalDateTime;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+
+@Data
+@NoArgsConstructor
 public class UserRequestDTO {
-
-    public UserRequestDTO() {
-    }
 
     private Long id;
 

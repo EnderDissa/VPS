@@ -1,18 +1,12 @@
 package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.Storage;
-
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class StorageDTO {
 
     public StorageDTO(Storage storage) {

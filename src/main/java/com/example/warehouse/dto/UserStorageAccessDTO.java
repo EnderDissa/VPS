@@ -4,13 +4,11 @@ import com.example.warehouse.entity.UserStorageAccess;
 import com.example.warehouse.enumeration.AccessLevel;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class UserStorageAccessDTO {
 
     public UserStorageAccessDTO(UserStorageAccess access) {

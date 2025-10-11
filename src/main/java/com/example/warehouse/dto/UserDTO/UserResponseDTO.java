@@ -5,11 +5,9 @@ import com.example.warehouse.enumeration.RoleType;
 import java.time.LocalDateTime;
 import com.example.warehouse.entity.User;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class UserResponseDTO {
 
     private Long id;

@@ -6,11 +6,9 @@ import com.example.warehouse.enumeration.TransportStatus;
 import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class TransportationDTO {
 
     public TransportationDTO(Transportation transportation) {

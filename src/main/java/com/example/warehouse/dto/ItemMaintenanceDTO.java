@@ -4,14 +4,12 @@ import com.example.warehouse.entity.ItemMaintenance;
 import com.example.warehouse.enumeration.MaintenanceStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class ItemMaintenanceDTO {
 
     public ItemMaintenanceDTO(ItemMaintenance maintenance) {
