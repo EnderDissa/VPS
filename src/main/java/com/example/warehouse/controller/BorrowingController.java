@@ -2,7 +2,8 @@ package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.BorrowingDTO;
 import com.example.warehouse.enumeration.BorrowStatus;
-import com.example.warehouse.service.BorrowingService;
+import com.example.warehouse.service.interfaces.BorrowingService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

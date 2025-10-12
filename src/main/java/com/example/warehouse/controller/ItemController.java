@@ -3,7 +3,8 @@ package com.example.warehouse.controller;
 import com.example.warehouse.dto.ItemDTO;
 import com.example.warehouse.enumeration.ItemCondition;
 import com.example.warehouse.enumeration.ItemType;
-import com.example.warehouse.service.ItemService;
+import com.example.warehouse.service.interfaces.ItemService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

@@ -1,28 +1,36 @@
 package com.example.warehouse.repository;
 
-import com.example.warehouse.entity.Item;
 import com.example.warehouse.entity.ItemMaintenance;
 import com.example.warehouse.enumeration.MaintenanceStatus;
-
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import java.util.List;
 
 @Repository
 public interface ItemMaintenanceRepository extends JpaRepository<ItemMaintenance, Long> {
+
+    Page<ItemMaintenance> findByItemId(Long itemId, Pageable pageable);
+
+    Page<ItemMaintenance> findByStatus(MaintenanceStatus status, Pageable pageable);
+
+    Page<ItemMaintenance> findByItemIdAndStatus(Long itemId, MaintenanceStatus status, Pageable pageable);
+
+    Page<ItemMaintenance> findByTechnicianId(Long technicianId, Pageable pageable);
+
+    long countByStatus(MaintenanceStatus status);
+
+    List<ItemMaintenance> findByNextMaintenanceDateBetween(LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT im FROM ItemMaintenance im WHERE im.nextMaintenanceDate <= :date AND im.status = :status")
+    List<ItemMaintenance> findUpcomingMaintenance(@Param("date") LocalDateTime date,
+                                                  @Param("status") MaintenanceStatus status);
+
+    @Query("SELECT COUNT(im) FROM ItemMaintenance im WHERE im.item.id = :itemId")
+    long countByItemId(@Param("itemId") Long itemId);
 }

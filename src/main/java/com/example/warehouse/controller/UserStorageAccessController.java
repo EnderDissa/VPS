@@ -2,7 +2,8 @@ package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.UserStorageAccessDTO;
 import com.example.warehouse.enumeration.AccessLevel;
-import com.example.warehouse.service.UserStorageAccessService;
+import com.example.warehouse.service.interfaces.UserStorageAccessService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

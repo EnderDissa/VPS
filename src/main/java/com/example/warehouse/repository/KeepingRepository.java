@@ -1,30 +1,42 @@
 package com.example.warehouse.repository;
 
-import com.example.warehouse.entity.Item;
 import com.example.warehouse.entity.Keeping;
-
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface KeepingRepository extends JpaRepository<Keeping, Long> {
+
+    boolean existsByStorageIdAndItemId(Long storageId, Long itemId);
+
+    boolean existsByStorageIdAndItemIdAndIdNot(Long storageId, Long itemId, Long id);
+
+    Optional<Keeping> findByStorageIdAndItemId(Long storageId, Long itemId);
+
+    Page<Keeping> findByStorageId(Long storageId, Pageable pageable);
+
+    Page<Keeping> findByItemId(Long itemId, Pageable pageable);
+
+    Page<Keeping> findByStorageIdAndItemId(Long storageId, Long itemId, Pageable pageable);
+
+    List<Keeping> findByStorageId(Long storageId);
+
+    List<Keeping> findByItemId(Long itemId);
+
+    long countByStorageId(Long storageId);
+
+    long countByItemId(Long itemId);
+
+    @Query("SELECT k FROM Keeping k WHERE k.quantity < :minQuantity")
+    Page<Keeping> findByQuantityLessThan(@Param("minQuantity") Integer minQuantity, Pageable pageable);
+
+    @Query("SELECT SUM(k.quantity) FROM Keeping k WHERE k.storage.id = :storageId")
+    Integer getTotalQuantityInStorage(@Param("storageId") Long storageId);
 }

@@ -2,7 +2,8 @@ package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.ItemMaintenanceDTO;
 import com.example.warehouse.enumeration.MaintenanceStatus;
-import com.example.warehouse.service.ItemMaintenanceService;
+import com.example.warehouse.service.interfaces.ItemMaintenanceService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

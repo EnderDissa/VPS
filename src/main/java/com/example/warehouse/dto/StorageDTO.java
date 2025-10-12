@@ -4,19 +4,13 @@ import com.example.warehouse.entity.Storage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class StorageDTO {
-
-    public StorageDTO(Storage storage) {
-        if (storage == null) return;
-        this.id = storage.getId();
-        this.name = storage.getName();
-        this.address = storage.getAddress();
-        this.capacity = storage.getCapacity();
-        this.createdAt = storage.getCreatedAt();
-    }
 
     private Long id;
 

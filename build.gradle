@@ -41,6 +41,7 @@ dependencies {
 	implementation 'org.hibernate.orm:hibernate-core:7.1.1.Final'
 
 	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'com.h2database:h2'
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -85,13 +86,11 @@ bootJar {
 liquibase {
 	activities {
 		main {
-			changelogFile 'db.changelog-master.yaml'
-			url project.findProperty('liquibaseUrl') ?: 'jdbc:h2:mem:test'
-			username project.findProperty('liquibaseUsername') ?: 'sa'
-			password project.findProperty('liquibasePassword') ?: ''
+			changelogFile 'src/main/resources/db/changelog/db.changelog-master.yaml'
+			url 'jdbc:postgresql://localhost:5432/warehouse'
+			username 'your_username'
+			password 'your_password'
 			driver 'org.postgresql.Driver'
-			searchPath 'src/main/resources'
 		}
 	}
-	runList = 'main'
 }

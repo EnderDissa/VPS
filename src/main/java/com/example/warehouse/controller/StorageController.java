@@ -1,7 +1,8 @@
 package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.StorageDTO;
-import com.example.warehouse.service.StorageService;
+import com.example.warehouse.service.interfaces.StorageService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
