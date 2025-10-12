@@ -22,11 +22,11 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     boolean existsBySerialNumber(String serialNumber);
 
-    Page<Item> findByType(ItemType type, Pageable pageable);
+    List<Item> findByType(ItemType type, Pageable pageable);
 
-    Page<Item> findByCondition(ItemCondition condition, Pageable pageable);
+    List<Item> findByCondition(ItemCondition condition, Pageable pageable);
 
-    Page<Item> findByTypeAndCondition(ItemType type, ItemCondition condition, Pageable pageable);
+    List<Item> findByTypeAndCondition(ItemType type, ItemCondition condition, Pageable pageable);
 
     // Методы для курсорной пагинации
     List<Item> findByIdGreaterThan(Long id, Pageable pageable);
@@ -36,16 +36,4 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByIdGreaterThanAndCondition(Long id, ItemCondition condition, Pageable pageable);
 
     List<Item> findByIdGreaterThanAndTypeAndCondition(Long id, ItemType type, ItemCondition condition, Pageable pageable);
-
-    // Поиск по имени
-    List<Item> findByNameContainingIgnoreCase(String name, Sort sort);
-
-    // Статистика
-    long countByType(ItemType type);
-
-    long countByCondition(ItemCondition condition);
-
-    // Поиск по дате создания
-    @Query("SELECT i FROM Item i WHERE i.createdAt BETWEEN :start AND :end")
-    List<Item> findByCreatedAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

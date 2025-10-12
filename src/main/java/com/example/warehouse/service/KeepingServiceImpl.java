@@ -110,6 +110,7 @@ public class KeepingServiceImpl implements KeepingService {
         // Обновляем остальные поля
         existingKeeping.setQuantity(dto.getQuantity());
         existingKeeping.setShelf(dto.getShelf());
+        //last update еще нужно
 
         keepingRepository.save(existingKeeping);
         log.info("Keeping record with ID: {} updated successfully", id);
@@ -151,65 +152,65 @@ public class KeepingServiceImpl implements KeepingService {
         return keepingPage.map(keepingMapper::toDTO);
     }
 
-    // Дополнительные методы
-
-    @Transactional(readOnly = true)
-    public KeepingDTO findByStorageAndItem(Long storageId, Long itemId) {
-        log.debug("Finding keeping record by storageId: {} and itemId: {}", storageId, itemId);
-
-        Keeping keeping = keepingRepository.findByStorageIdAndItemId(storageId, itemId)
-                .orElseThrow(() -> new KeepingNotFoundException(
-                        "Keeping record not found for storage ID: " + storageId + " and item ID: " + itemId));
-
-        return keepingMapper.toDTO(keeping);
-    }
-
-    @Transactional
-    public KeepingDTO updateQuantity(Long id, Integer newQuantity) {
-        log.info("Updating quantity to {} for keeping record ID: {}", newQuantity, id);
-
-        if (newQuantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be positive");
-        }
-
-        Keeping keeping = keepingRepository.findById(id)
-                .orElseThrow(() -> new KeepingNotFoundException("Keeping record not found with ID: " + id));
-
-        keeping.setQuantity(newQuantity);
-        Keeping updatedKeeping = keepingRepository.save(keeping);
-
-        log.info("Quantity updated successfully for keeping record ID: {}", id);
-        return keepingMapper.toDTO(updatedKeeping);
-    }
-
-    @Transactional
-    public KeepingDTO addQuantity(Long id, Integer quantityToAdd) {
-        log.info("Adding quantity {} to keeping record ID: {}", quantityToAdd, id);
-
-        Keeping keeping = keepingRepository.findById(id)
-                .orElseThrow(() -> new KeepingNotFoundException("Keeping record not found with ID: " + id));
-
-        int newQuantity = keeping.getQuantity() + quantityToAdd;
-        if (newQuantity <= 0) {
-            throw new IllegalArgumentException("Resulting quantity must be positive");
-        }
-
-        keeping.setQuantity(newQuantity);
-        Keeping updatedKeeping = keepingRepository.save(keeping);
-
-        log.info("Quantity added successfully for keeping record ID: {}. New quantity: {}", id, newQuantity);
-        return keepingMapper.toDTO(updatedKeeping);
-    }
-
-    @Transactional(readOnly = true)
-    public long countByStorageId(Long storageId) {
-        log.debug("Counting keeping records for storage ID: {}", storageId);
-        return keepingRepository.countByStorageId(storageId);
-    }
-
-    @Transactional(readOnly = true)
-    public long countByItemId(Long itemId) {
-        log.debug("Counting keeping records for item ID: {}", itemId);
-        return keepingRepository.countByItemId(itemId);
-    }
+//    // Дополнительные методы
+//
+//    @Transactional(readOnly = true)
+//    public KeepingDTO findByStorageAndItem(Long storageId, Long itemId) {
+//        log.debug("Finding keeping record by storageId: {} and itemId: {}", storageId, itemId);
+//
+//        Keeping keeping = keepingRepository.findByStorageIdAndItemId(storageId, itemId)
+//                .orElseThrow(() -> new KeepingNotFoundException(
+//                        "Keeping record not found for storage ID: " + storageId + " and item ID: " + itemId));
+//
+//        return keepingMapper.toDTO(keeping);
+//    }
+//
+//    @Transactional
+//    public KeepingDTO updateQuantity(Long id, Integer newQuantity) {
+//        log.info("Updating quantity to {} for keeping record ID: {}", newQuantity, id);
+//
+//        if (newQuantity <= 0) {
+//            throw new IllegalArgumentException("Quantity must be positive");
+//        }
+//
+//        Keeping keeping = keepingRepository.findById(id)
+//                .orElseThrow(() -> new KeepingNotFoundException("Keeping record not found with ID: " + id));
+//
+//        keeping.setQuantity(newQuantity);
+//        Keeping updatedKeeping = keepingRepository.save(keeping);
+//
+//        log.info("Quantity updated successfully for keeping record ID: {}", id);
+//        return keepingMapper.toDTO(updatedKeeping);
+//    }
+//
+//    @Transactional
+//    public KeepingDTO addQuantity(Long id, Integer quantityToAdd) {
+//        log.info("Adding quantity {} to keeping record ID: {}", quantityToAdd, id);
+//
+//        Keeping keeping = keepingRepository.findById(id)
+//                .orElseThrow(() -> new KeepingNotFoundException("Keeping record not found with ID: " + id));
+//
+//        int newQuantity = keeping.getQuantity() + quantityToAdd;
+//        if (newQuantity <= 0) {
+//            throw new IllegalArgumentException("Resulting quantity must be positive");
+//        }
+//
+//        keeping.setQuantity(newQuantity);
+//        Keeping updatedKeeping = keepingRepository.save(keeping);
+//
+//        log.info("Quantity added successfully for keeping record ID: {}. New quantity: {}", id, newQuantity);
+//        return keepingMapper.toDTO(updatedKeeping);
+//    }
+//
+//    @Transactional(readOnly = true)
+//    public long countByStorageId(Long storageId) {
+//        log.debug("Counting keeping records for storage ID: {}", storageId);
+//        return keepingRepository.countByStorageId(storageId);
+//    }
+//
+//    @Transactional(readOnly = true)
+//    public long countByItemId(Long itemId) {
+//        log.debug("Counting keeping records for item ID: {}", itemId);
+//        return keepingRepository.countByItemId(itemId);
+//    }
 }

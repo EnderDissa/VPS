@@ -20,22 +20,8 @@ public interface StorageRepository extends JpaRepository<Storage, Long> {
 
     Page<Storage> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
-    List<Storage> findByNameContainingIgnoreCase(String name);
-
     List<Storage> findByCapacityGreaterThanEqual(Integer capacity);
-
-    List<Storage> findByCapacityLessThanEqual(Integer capacity);
-
-    @Query("SELECT s FROM Storage s WHERE s.capacity BETWEEN :minCapacity AND :maxCapacity")
-    List<Storage> findByCapacityBetween(@Param("minCapacity") Integer minCapacity,
-                                        @Param("maxCapacity") Integer maxCapacity);
 
     @Query("SELECT SUM(s.capacity) FROM Storage s")
     Integer getTotalCapacity();
-
-    @Query("SELECT COUNT(s) FROM Storage s WHERE s.capacity >= :minCapacity")
-    long countByCapacityGreaterThanEqual(@Param("minCapacity") Integer minCapacity);
-
-    @Query("SELECT s FROM Storage s ORDER BY s.capacity DESC")
-    List<Storage> findAllOrderByCapacityDesc();
 }

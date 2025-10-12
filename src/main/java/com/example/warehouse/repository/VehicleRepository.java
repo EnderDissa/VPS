@@ -1,8 +1,7 @@
 package com.example.warehouse.repository;
 
-import com.example.warehouse.entity.Transportation;
 import com.example.warehouse.entity.Vehicle;
-import com.example.warehouse.enumeration.TransportStatus;
+import com.example.warehouse.enumeration.VehicleStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,66 +9,43 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
-    Page<Transportation> findByStatus(TransportStatus status, Pageable pageable);
+    // Поиск по статусу
+    Page<Vehicle> findByStatus(VehicleStatus status, Pageable pageable);
 
-    Page<Transportation> findByItemId(Long itemId, Pageable pageable);
+    // Поиск по бренду
+    Page<Vehicle> findByBrandContainingIgnoreCase(String brand, Pageable pageable);
 
-    Page<Transportation> findByFromStorageId(Long fromStorageId, Pageable pageable);
+    // Поиск по модели
+    Page<Vehicle> findByModelContainingIgnoreCase(String model, Pageable pageable);
 
-    Page<Transportation> findByToStorageId(Long toStorageId, Pageable pageable);
+    // Поиск по номерному знаку
+    Optional<Vehicle> findByLicensePlate(String licensePlate);
 
-    Page<Transportation> findByStatusAndItemId(TransportStatus status, Long itemId, Pageable pageable);
+    // Комбинированный поиск по статусу и бренду
+    Page<Vehicle> findByStatusAndBrandContainingIgnoreCase(VehicleStatus status, String brand, Pageable pageable);
 
-    Page<Transportation> findByStatusAndFromStorageId(TransportStatus status, Long fromStorageId, Pageable pageable);
+    // Комбинированный поиск по статусу и модели
+    Page<Vehicle> findByStatusAndModelContainingIgnoreCase(VehicleStatus status, String model, Pageable pageable);
 
-    Page<Transportation> findByStatusAndToStorageId(TransportStatus status, Long toStorageId, Pageable pageable);
+    // Универсальный поиск с фильтрами
+    @Query("SELECT v FROM Vehicle v WHERE " +
+            "(:status IS NULL OR v.status = :status) AND " +
+            "(:brand IS NULL OR LOWER(v.brand) LIKE LOWER(CONCAT('%', :brand, '%'))) AND " +
+            "(:model IS NULL OR LOWER(v.model) LIKE LOWER(CONCAT('%', :model, '%')))")
+    Page<Vehicle> findByFilters(@Param("status") VehicleStatus status,
+                                @Param("brand") String brand,
+                                @Param("model") String model,
+                                Pageable pageable);
 
-    Page<Transportation> findByItemIdAndFromStorageId(Long itemId, Long fromStorageId, Pageable pageable);
+    // Проверка существования по номерному знаку (для валидации)
+    boolean existsByLicensePlate(String licensePlate);
 
-    Page<Transportation> findByStatusAndItemIdAndFromStorageIdAndToStorageId(
-            TransportStatus status, Long itemId, Long fromStorageId, Long toStorageId, Pageable pageable);
-
-    @Query("SELECT t FROM Transportation t WHERE t.status = 'IN_PROGRESS' AND t.scheduledArrival < :now")
-    Page<Transportation> findOverdueTransportations(@Param("now") LocalDateTime now, Pageable pageable);
-
-    @Query("SELECT COUNT(t) FROM Transportation t WHERE t.driver.id = :driverId AND t.status IN ('PLANNED', 'IN_PROGRESS') " +
-            "AND ((t.scheduledDeparture BETWEEN :start AND :end) OR (t.scheduledArrival BETWEEN :start AND :end))")
-    long countDriverTransportationsInPeriod(@Param("driverId") Long driverId,
-                                            @Param("start") LocalDateTime start,
-                                            @Param("end") LocalDateTime end);
-
-    @Query("SELECT COUNT(t) FROM Transportation t WHERE t.vehicle.id = :vehicleId AND t.status IN ('PLANNED', 'IN_PROGRESS') " +
-            "AND ((t.scheduledDeparture BETWEEN :start AND :end) OR (t.scheduledArrival BETWEEN :start AND :end))")
-    long countVehicleTransportationsInPeriod(@Param("vehicleId") Long vehicleId,
-                                             @Param("start") LocalDateTime start,
-                                             @Param("end") LocalDateTime end);
-
-    @Query("SELECT CASE WHEN COUNT(t) = 0 THEN true ELSE false END FROM Transportation t " +
-            "WHERE t.driver.id = :driverId AND t.status IN ('PLANNED', 'IN_PROGRESS') " +
-            "AND ((t.scheduledDeparture BETWEEN :start AND :end) OR (t.scheduledArrival BETWEEN :start AND :end))")
-    boolean isDriverAvailable(@Param("driverId") Long driverId,
-                              @Param("start") LocalDateTime start,
-                              @Param("end") LocalDateTime end);
-
-    @Query("SELECT CASE WHEN COUNT(t) = 0 THEN true ELSE false END FROM Transportation t " +
-            "WHERE t.vehicle.id = :vehicleId AND t.status IN ('PLANNED', 'IN_PROGRESS') " +
-            "AND ((t.scheduledDeparture BETWEEN :start AND :end) OR (t.scheduledArrival BETWEEN :start AND :end))")
-    boolean isVehicleAvailable(@Param("vehicleId") Long vehicleId,
-                               @Param("start") LocalDateTime start,
-                               @Param("end") LocalDateTime end);
-
-    long countByStatus(TransportStatus status);
-
-    // ДОБАВЛЕННЫЙ МЕТОД
-    long countByVehicleIdAndStatusIn(Long vehicleId, List<TransportStatus> statuses);
-
-    List<Transportation> findByDriverIdAndStatusIn(Long driverId, List<TransportStatus> statuses);
-
-    List<Transportation> findByVehicleIdAndStatusIn(Long vehicleId, List<TransportStatus> statuses);
+    // Проверка существования по номерному знаку исключая текущий ID (для обновления)
+    boolean existsByLicensePlateAndIdNot(String licensePlate, Long id);
 }

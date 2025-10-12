@@ -26,16 +26,9 @@ public interface KeepingRepository extends JpaRepository<Keeping, Long> {
 
     Page<Keeping> findByStorageIdAndItemId(Long storageId, Long itemId, Pageable pageable);
 
-    List<Keeping> findByStorageId(Long storageId);
-
-    List<Keeping> findByItemId(Long itemId);
-
     long countByStorageId(Long storageId);
 
     long countByItemId(Long itemId);
-
-    @Query("SELECT k FROM Keeping k WHERE k.quantity < :minQuantity")
-    Page<Keeping> findByQuantityLessThan(@Param("minQuantity") Integer minQuantity, Pageable pageable);
 
     @Query("SELECT SUM(k.quantity) FROM Keeping k WHERE k.storage.id = :storageId")
     Integer getTotalQuantityInStorage(@Param("storageId") Long storageId);

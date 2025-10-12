@@ -57,17 +57,17 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // @GetMapping
-    // @Operation(summary = "List users with pagination and total count")
-    // public ResponseEntity<List<UserResponseDTO>> list(
-    //         @RequestParam(defaultValue = "0") @Min(0) int page,
-    //         @RequestParam(defaultValue = "20") @Min(1) @Max(50) int size,
-    //         @RequestParam(required = false) RoleType role,
-    //         @RequestParam(required = false) String emailLike
-    // ) {
-    //     var result = service.findPage(page, size, role, emailLike);
-    //     var headers = new HttpHeaders();
-    //     headers.add("X-Total-Count", String.valueOf(result.getTotalElements()));
-    //     return new ResponseEntity<>(result.getContent(), headers, HttpStatus.OK);
-    // }
+//     @GetMapping
+//     @Operation(summary = "List users with pagination and total count")
+//     public ResponseEntity<List<UserResponseDTO>> list(
+//             @RequestParam(defaultValue = "0") @Min(0) int page,
+//             @RequestParam(defaultValue = "20") @Min(1) @Max(50) int size,
+//             @RequestParam(required = false) RoleType role,
+//             @RequestParam(required = false) String emailLike
+//     ) {
+//         var result = service.findPage(page, size, role, emailLike);
+//         var headers = new HttpHeaders();
+//         headers.add("X-Total-Count", String.valueOf(result.getTotalElements()));
+//         return new ResponseEntity<>(result.getContent(), headers, HttpStatus.OK);
+//     }
 }

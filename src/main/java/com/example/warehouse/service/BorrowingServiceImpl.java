@@ -72,7 +72,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         Borrowing borrowing = borrowingMapper.toEntity(dto);
         borrowing.setItem(item);
         borrowing.setUser(user);
-        borrowing.setStatus(BorrowStatus.ACTIVE); // Start as pending
+        borrowing.setStatus(BorrowStatus.ACTIVE);
 
         Borrowing savedBorrowing = borrowingRepository.save(borrowing);
         log.info("Borrowing created successfully with id: {}", savedBorrowing.getId());

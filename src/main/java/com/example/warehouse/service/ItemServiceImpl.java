@@ -115,19 +115,21 @@ public class ItemServiceImpl implements ItemService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<Item> itemsPage;
+        List<Item> itemsPage;
 
         if (type != null && condition != null) {
-            itemsPage = (Page<Item>) itemRepository.findByTypeAndCondition(type, condition, pageable);
+            itemsPage = itemRepository.findByTypeAndCondition(type, condition, pageable);
         } else if (type != null) {
-            itemsPage = (Page<Item>) itemRepository.findByType(type, pageable);  // Исправлено
+            itemsPage = itemRepository.findByType(type, pageable);  // Исправлено
         } else if (condition != null) {
-            itemsPage = (Page<Item>) itemRepository.findByCondition(condition, pageable);  // Исправлено
+            itemsPage = itemRepository.findByCondition(condition, pageable);  // Исправлено
         } else {
-            itemsPage = itemRepository.findAll(pageable);  // Исправлено
+            itemsPage = (List<Item>) itemRepository.findAll(pageable);  // Исправлено
         }
 
-        return itemsPage.map(itemMapper::toDTO);  // Исправлено
+        Page<Item> resPage = (Page<Item>) itemsPage;
+
+        return resPage.map(itemMapper::toDTO);  // Исправлено
     }
 
     @Override
@@ -159,13 +161,13 @@ public class ItemServiceImpl implements ItemService {
         } else {
             // Первая загрузка
             if (type != null && condition != null) {
-                availableItems = (List<Item>) itemRepository.findByTypeAndCondition(
+                availableItems = itemRepository.findByTypeAndCondition(
                         type, condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
             } else if (type != null) {
-                availableItems = (List<Item>) itemRepository.findByType(
+                availableItems = itemRepository.findByType(
                         type, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
             } else if (condition != null) {
-                availableItems = (List<Item>) itemRepository.findByCondition(
+                availableItems = itemRepository.findByCondition(
                         condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
             } else {
                 availableItems = itemRepository.findAll(
@@ -174,47 +176,6 @@ public class ItemServiceImpl implements ItemService {
         }
 
         return availableItems.stream()
-                .map(itemMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    // Дополнительные методы
-
-    @Transactional(readOnly = true)
-    public ItemDTO getBySerialNumber(String serialNumber) {
-        log.debug("Fetching item by serial number: {}", serialNumber);
-
-        Item item = itemRepository.findBySerialNumber(serialNumber)
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with serial number: " + serialNumber));
-
-        return itemMapper.toDTO(item);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean existsBySerialNumber(String serialNumber) {
-        return itemRepository.existsBySerialNumber(serialNumber);
-    }
-
-    @Transactional(readOnly = true)
-    public long countByType(ItemType type) {
-        log.debug("Counting items by type: {}", type);
-        return itemRepository.countByType(type);
-    }
-
-    @Transactional(readOnly = true)
-    public long countByCondition(ItemCondition condition) {
-        log.debug("Counting items by condition: {}", condition);
-        return itemRepository.countByCondition(condition);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ItemDTO> findByNameContaining(String name) {
-        log.debug("Searching items by name: {}", name);
-
-        List<Item> items = itemRepository.findByNameContainingIgnoreCase(name,
-                Sort.by(Sort.Direction.ASC, "name"));
-
-        return items.stream()
                 .map(itemMapper::toDTO)
                 .collect(Collectors.toList());
     }
