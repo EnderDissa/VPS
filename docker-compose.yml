@@ -1,22 +1,42 @@
 version: '3.8'
 
 services:
-  postgres:
+  # PostgreSQL Database
+  db:
     image: postgres:15
-    container_name: liquibase-postgres
+    container_name: warehouse-db
     environment:
-      POSTGRES_DB: myapp
+      POSTGRES_DB: warehouse
       POSTGRES_USER: liquibase
       POSTGRES_PASSWORD: securepassword
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U liquibase -d myapp"]
+      test: ["CMD-SHELL", "pg_isready -U liquibase -d warehouse"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # Spring Boot Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: warehouse-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/warehouse
+      SPRING_DATASOURCE_USERNAME: liquibase
+      SPRING_DATASOURCE_PASSWORD: securepassword
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_CHANGELOG: classpath:db/changelog/db.changelog-master.yaml
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
-  postgres_data:
+  pgdata:
