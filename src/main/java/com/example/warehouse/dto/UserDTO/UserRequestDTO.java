@@ -34,8 +34,5 @@ public class UserRequestDTO {
     @Email
     private String email;
 
-    @NotBlank(message = "Password hash is required")
-    private String password;
-
     private LocalDateTime createdAt;
 }

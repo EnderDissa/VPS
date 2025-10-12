@@ -46,10 +46,6 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @NotBlank(message = "Password hash is required")
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

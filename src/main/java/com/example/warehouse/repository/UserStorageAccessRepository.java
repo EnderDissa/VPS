@@ -1,32 +1,72 @@
 package com.example.warehouse.repository;
 
-import com.example.warehouse.entity.Storage;
 import com.example.warehouse.entity.UserStorageAccess;
 import com.example.warehouse.enumeration.AccessLevel;
-
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserStorageAccessRepository extends JpaRepository<UserStorageAccess, Long> {
+
+    boolean existsByUserIdAndStorageId(Long userId, Long storageId);
+
+    boolean existsByUserIdAndStorageIdAndIdNot(Long userId, Long storageId, Long id);
+
+    Optional<UserStorageAccess> findByUserIdAndStorageId(Long userId, Long storageId);
+
+    Page<UserStorageAccess> findByUserId(Long userId, Pageable pageable);
+
+    Page<UserStorageAccess> findByStorageId(Long storageId, Pageable pageable);
+
+    Page<UserStorageAccess> findByAccessLevel(AccessLevel accessLevel, Pageable pageable);
+
+    Page<UserStorageAccess> findByIsActive(Boolean isActive, Pageable pageable);
+
+    Page<UserStorageAccess> findByUserIdAndStorageId(Long userId, Long storageId, Pageable pageable);
+
+    Page<UserStorageAccess> findByUserIdAndAccessLevel(Long userId, AccessLevel accessLevel, Pageable pageable);
+
+    Page<UserStorageAccess> findByUserIdAndIsActive(Long userId, Boolean isActive, Pageable pageable);
+
+    Page<UserStorageAccess> findByStorageIdAndAccessLevel(Long storageId, AccessLevel accessLevel, Pageable pageable);
+
+    Page<UserStorageAccess> findByStorageIdAndIsActive(Long storageId, Boolean isActive, Pageable pageable);
+
+    Page<UserStorageAccess> findByAccessLevelAndIsActive(AccessLevel accessLevel, Boolean isActive, Pageable pageable);
+
+    Page<UserStorageAccess> findByUserIdAndStorageIdAndAccessLevel(Long userId, Long storageId, AccessLevel accessLevel, Pageable pageable);
+
+    Page<UserStorageAccess> findByUserIdAndStorageIdAndIsActive(Long userId, Long storageId, Boolean isActive, Pageable pageable);
+
+    Page<UserStorageAccess> findByUserIdAndAccessLevelAndIsActive(Long userId, AccessLevel accessLevel, Boolean isActive, Pageable pageable);
+
+    Page<UserStorageAccess> findByStorageIdAndAccessLevelAndIsActive(Long storageId, AccessLevel accessLevel, Boolean isActive, Pageable pageable);
+
+    Page<UserStorageAccess> findByUserIdAndStorageIdAndAccessLevelAndIsActive(
+            Long userId, Long storageId, AccessLevel accessLevel, Boolean isActive, Pageable pageable);
+
+    List<UserStorageAccess> findByUserId(Long userId);
+
+    List<UserStorageAccess> findByStorageId(Long storageId);
+
+    @Query("SELECT usa FROM UserStorageAccess usa WHERE usa.expiresAt < :now AND usa.isActive = true")
+    List<UserStorageAccess> findExpiredAccesses(@Param("now") LocalDateTime now);
+
+    long countByUserIdAndIsActive(Long userId, Boolean isActive);
+
+    long countByStorageIdAndIsActive(Long storageId, Boolean isActive);
+
+    @Query("SELECT COUNT(usa) FROM UserStorageAccess usa WHERE usa.user.id = :userId AND usa.storage.id = :storageId AND usa.isActive = true " +
+            "AND (usa.expiresAt IS NULL OR usa.expiresAt > :now)")
+    long countActiveAccessForUserAndStorage(@Param("userId") Long userId,
+                                            @Param("storageId") Long storageId,
+                                            @Param("now") LocalDateTime now);
 }

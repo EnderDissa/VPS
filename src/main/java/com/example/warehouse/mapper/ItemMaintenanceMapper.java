@@ -1,5 +1,6 @@
 package com.example.warehouse.mapper;
 
+import com.example.warehouse.entity.ItemMaintenance;
 import org.mapstruct.Mapper;
 import com.example.warehouse.dto.ItemMaintenanceDTO;
 import com.example.warehouse.entity.ItemMaintenance;
