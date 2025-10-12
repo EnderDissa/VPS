@@ -62,6 +62,10 @@ dependencies {
 
 	// SnakeYAML for YAML changelogs
 	liquibaseRuntime 'org.yaml:snakeyaml:2.2'
+	liquibaseRuntime sourceSets.main.output
+	liquibaseRuntime('org.liquibase.ext:liquibase-hibernate5:3.6')
+	liquibaseRuntime('com.oracle.jdbc:ojdbc8:12.2.0.1')
+	liquibaseRuntime('org.springframework.boot:spring-boot-starter-data-jpa')
 }
 
 tasks.named('test') {
@@ -72,6 +76,7 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+	liquibaseRuntime.extendsFrom runtimeClasspath
 }
 
 repositories {
@@ -90,7 +95,7 @@ liquibase {
 			username project.findProperty('liquibaseUsername') ?: 'sa'
 			password project.findProperty('liquibasePassword') ?: ''
 			driver 'org.postgresql.Driver'
-			searchPath 'src/main/resources'
+//			searchPath 'src/main/resources'
 		}
 	}
 	runList = 'main'

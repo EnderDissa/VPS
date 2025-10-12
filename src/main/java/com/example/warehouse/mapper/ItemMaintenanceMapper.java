@@ -2,9 +2,10 @@ package com.example.warehouse.mapper;
 
 import org.mapstruct.Mapper;
 import com.example.warehouse.dto.ItemMaintenanceDTO;
+import com.example.warehouse.entity.ItemMaintenance;
 
 @Mapper(componentModel = "spring")
-public interface ItemMaintenance {
+public interface ItemMaintenanceMapper {
     
     ItemMaintenanceDTO toDTO(ItemMaintenance object);
 

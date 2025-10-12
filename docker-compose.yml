@@ -32,7 +32,7 @@ services:
       SPRING_DATASOURCE_USERNAME: liquibase
       SPRING_DATASOURCE_PASSWORD: securepassword
       SPRING_LIQUIBASE_ENABLED: "true"
-      SPRING_LIQUIBASE_CHANGELOG: classpath:db/changelog/db.changelog-master.yaml
+      SPRING_LIQUIBASE_CHANGELOG: classpath:./db.changelog-master.yaml
     depends_on:
       db:
         condition: service_healthy
