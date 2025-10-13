@@ -1,22 +1,16 @@
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.6'
-	id 'io.spring.dependency-management' version '1.1.7'
-	id 'org.liquibase.gradle' version '2.2.0'
+	id 'io.spring.dependency-management' version '1.1.6'
+	id 'jacoco'
 }
 
 group = 'com.example'
-version = '0.0.1'
+version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
 	}
 }
 
@@ -25,78 +19,65 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 	implementation 'org.liquibase:liquibase-core'
 
 	implementation 'org.mapstruct:mapstruct:1.6.3'
-
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
-
-	implementation 'jakarta.persistence:jakarta.persistence-api:3.2.0'
-
-	implementation 'org.hibernate.orm:hibernate-core:7.1.1.Final'
-
-	runtimeOnly 'org.postgresql:postgresql'
-	runtimeOnly 'com.h2database:h2'
-
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
-	annotationProcessor 'org.projectlombok:lombok'
+	compileOnly 'org.projectlombok:lombok:1.18.40'
+	annotationProcessor 'org.projectlombok:lombok:1.18.40'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
+	runtimeOnly 'org.postgresql:postgresql:42.7.7'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'com.h2database:h2'
-
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-	liquibaseRuntime 'org.postgresql:postgresql:42.7.3'
-	liquibaseRuntime 'org.liquibase:liquibase-core:5.0.1'
-
-	// Critical: Picocli is required for Liquibase CLI integration (since v4.25+)
-	liquibaseRuntime 'info.picocli:picocli:4.7.6'
-
-	// SnakeYAML for YAML changelogs
-	liquibaseRuntime 'org.yaml:snakeyaml:2.2'
-	liquibaseRuntime sourceSets.main.output
-	liquibaseRuntime('org.liquibase.ext:liquibase-hibernate5:3.6')
-	liquibaseRuntime('com.oracle.jdbc:ojdbc8:12.2.0.1')
-	liquibaseRuntime('org.springframework.boot:spring-boot-starter-data-jpa')
+	testImplementation 'org.testcontainers:junit-jupiter:1.20.4'
+	testImplementation 'org.testcontainers:postgresql:1.20.4'
 }
 
-tasks.named('test') {
+jacoco {
+	toolVersion = "0.8.12"
+}
+
+tasks.withType(Test).configureEach {
 	useJUnitPlatform()
+	testLogging {
+		events "PASSED", "FAILED", "SKIPPED"
+		exceptionFormat "full"
+		showExceptions true
+		showCauses true
+		showStackTraces true
+		showStandardStreams true
+	}
+	reports {
+		html.required = true
+		junitXml.required = true
+	}
+	finalizedBy tasks.jacocoTestReport
 }
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-	liquibaseRuntime.extendsFrom runtimeClasspath
+jacocoTestReport {
+	dependsOn test
+	reports {
+		html.required = true
+		xml.required = true
+		csv.required = false
+	}
 }
 
-repositories {
-    mavenCentral()
-}
-
-bootJar {
-    archiveFileName = "warehouse-management.jar"
-}
-
-liquibase {
-	activities {
-		main {
-			changelogFile 'src/main/resources/db/changelog/db.changelog-master.yaml'
-			url 'jdbc:postgresql://localhost:5432/warehouse'
-			username 'your_username'
-			password 'your_password'
-			driver 'org.postgresql.Driver'
-			searchPath 'src/main/resources'
+jacocoTestCoverageVerification {
+	dependsOn jacocoTestReport
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.70
+			}
 		}
 	}
 }
+
+check.dependsOn jacocoTestCoverageVerification
