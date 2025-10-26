@@ -50,25 +50,21 @@ public class BorrowingServiceImpl implements BorrowingService {
     public BorrowingDTO create(BorrowingDTO dto) {
         log.debug("Creating new borrowing: {}", dto);
 
-        // Validate and fetch related entities
         Item item = itemRepository.findById(dto.itemId())
                 .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + dto.itemId()));
 
         User user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + dto.userId()));
 
-        // Validate item condition
         if (item.getCondition() == ItemCondition.NEEDS_MAINTENANCE || item.getCondition() == ItemCondition.UNDER_REPAIR || item.getCondition() == ItemCondition.DECOMMISSIONED) {
             throw new IllegalStateException("Cannot borrow item in condition: " + item.getCondition());
         }
 
-        // Check if user has active borrowings limit (example: max 5 active borrowings)
         long activeBorrowingsCount = borrowingRepository.countActiveBorrowingsByUser(user.getId());
         if (activeBorrowingsCount >= 5) {
             throw new IllegalStateException("User has reached maximum active borrowings limit (5)");
         }
 
-        // Create borrowing entity
         Borrowing borrowing = borrowingMapper.toEntity(dto);
         borrowing.setItem(item);
         borrowing.setUser(user);
@@ -91,7 +87,6 @@ public class BorrowingServiceImpl implements BorrowingService {
             throw new IllegalStateException("Only pending borrowings can be activated");
         }
 
-        // Check item availability
         Item item = borrowing.getItem();
         if (item.getCondition() == ItemCondition.UNDER_REPAIR || item.getCondition() == ItemCondition.NEEDS_MAINTENANCE || item.getCondition() == ItemCondition.DECOMMISSIONED) {
             throw new IllegalStateException("Cannot activate borrowing - item is not available: " + item.getCondition());
@@ -144,10 +139,9 @@ public class BorrowingServiceImpl implements BorrowingService {
         borrowing.setStatus(BorrowStatus.RETURNED);
         borrowing.setActualReturnDate(LocalDateTime.now());
 
-        // Check if returned late
         if (borrowing.getActualReturnDate().isAfter(borrowing.getExpectedReturnDate())) {
             log.warn("Borrowing {} was returned late", id);
-            // Here you could add late fee logic or notifications
+            // Here we could add late fee logic or notifications
         }
 
         Borrowing returnedBorrowing = borrowingRepository.save(borrowing);
@@ -182,7 +176,6 @@ public class BorrowingServiceImpl implements BorrowingService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "borrowDate"));
 
-        // Исправлено: Specification.where(null) вместо unrestricted()
         Specification<Borrowing> spec = Specification.unrestricted();
 
         if (status != null) {
@@ -205,7 +198,6 @@ public class BorrowingServiceImpl implements BorrowingService {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("borrowDate"), to));
         }
 
-        // Теперь этот метод будет доступен
         Page<Borrowing> borrowings = borrowingRepository.findAll(spec, pageable);
         return borrowings.map(borrowingMapper::toDTO);
     }
@@ -220,7 +212,6 @@ public class BorrowingServiceImpl implements BorrowingService {
 
         Page<Borrowing> overdueBorrowings = borrowingRepository.findOverdueBorrowings(now, pageable);
 
-        // Update status to OVERDUE for found borrowings
         List<Borrowing> borrowingsToUpdate = overdueBorrowings.getContent().stream()
                 .filter(b -> b.getStatus() == BorrowStatus.ACTIVE)
                 .toList();

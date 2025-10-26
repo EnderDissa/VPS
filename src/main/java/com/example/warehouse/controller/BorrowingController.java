@@ -51,7 +51,7 @@ public class BorrowingController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/extend")
+    @PutMapping("/{id}/extend")
     @Operation(summary = "Extend borrowing")
     public ResponseEntity<BorrowingDTO> extend(
             @PathVariable Long id,
@@ -60,13 +60,13 @@ public class BorrowingController {
         return ResponseEntity.ok(service.extend(id, newDueAt));
     }
 
-    @PostMapping("/{id}/return")
+    @PutMapping("/{id}/return")
     @Operation(summary = "Return borrowing")
     public ResponseEntity<BorrowingDTO> returnBorrowing(@PathVariable Long id) {
         return ResponseEntity.ok(service.returnBorrowing(id));
     }
 
-    @PostMapping("/{id}/cancel")
+    @PutMapping("/{id}/cancel")
     @Operation(summary = "Cancel borrowing")
     public ResponseEntity<Void> cancel(@PathVariable Long id) {
         service.cancel(id);

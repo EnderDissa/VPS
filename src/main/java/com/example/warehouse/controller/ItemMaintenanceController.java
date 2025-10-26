@@ -49,6 +49,8 @@ public class ItemMaintenanceController {
         return ResponseEntity.noContent().build();
     }
 
+
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete maintenance by id")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

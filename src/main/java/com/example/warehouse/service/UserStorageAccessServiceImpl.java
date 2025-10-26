@@ -45,38 +45,31 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         log.info("Creating new user storage access - userId: {}, storageId: {}, accessLevel: {}",
                 dto.userId(), dto.storageId(), dto.accessLevel());
 
-        // Проверяем существование user
         User user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.userId()));
 
-        // Проверяем существование storage
         Storage storage = storageRepository.findById(dto.storageId())
                 .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.storageId()));
 
-        // Проверяем существование grantedBy user
         User grantedBy = userRepository.findById(dto.grantedById())
                 .orElseThrow(() -> new UserNotFoundException("Granted by user not found with ID: " + dto.grantedById()));
 
-        // Проверяем уникальность комбинации user + storage
         if (userStorageAccessRepository.existsByUserIdAndStorageId(dto.userId(), dto.storageId())) {
             throw new DuplicateUserStorageAccessException(
                     "User storage access already exists for user ID: " + dto.userId() +
                             " and storage ID: " + dto.storageId());
         }
 
-        // Проверяем expiration date
         if (dto.expiresAt() != null && dto.expiresAt().isBefore(LocalDateTime.now())) {
             throw new OperationNotAllowedException("Expiration date must be in the future");
         }
 
-        // Создаем entity
         UserStorageAccess access = userStorageAccessMapper.toEntity(dto);
         access.setUser(user);
         access.setStorage(storage);
         access.setGrantedBy(grantedBy);
         access.setGrantedAt(LocalDateTime.now());
 
-        // Сохраняем
         UserStorageAccess savedAccess = userStorageAccessRepository.save(access);
         log.info("User storage access created successfully with ID: {}", savedAccess.getId());
 
@@ -99,19 +92,15 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
     public void update(Long id, UserStorageAccessDTO dto) {
         log.info("Updating user storage access with ID: {}", id);
 
-        // Находим существующую запись
         UserStorageAccess existingAccess = userStorageAccessRepository.findById(id)
                 .orElseThrow(() -> new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
 
-        // Проверяем expiration date
         if (dto.expiresAt() != null && dto.expiresAt().isBefore(LocalDateTime.now())) {
             throw new OperationNotAllowedException("Expiration date must be in the future");
         }
 
-        // Проверяем и обновляем связанные сущности
         updateRelatedEntities(existingAccess, dto);
 
-        // Обновляем остальные поля
         existingAccess.setAccessLevel(dto.accessLevel());
         existingAccess.setExpiresAt(dto.expiresAt());
         existingAccess.setIsActive(dto.isActive());
