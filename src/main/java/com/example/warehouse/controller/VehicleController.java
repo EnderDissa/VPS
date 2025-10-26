@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/vehicles")
 @Tag(name = "Vehicles")
+@ConditionalOnBean(VehicleService.class)
 public class VehicleController {
 
     private final VehicleService service;

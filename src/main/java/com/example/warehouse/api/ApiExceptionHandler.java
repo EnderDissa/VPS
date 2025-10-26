@@ -1,73 +1,78 @@
-// package com.example.warehouse.api;
+package com.example.warehouse.api;
 
-// import com.example.warehouse.exception.BusinessRuleException;
-// import com.example.warehouse.exception.ConflictException;
-// import com.example.warehouse.exception.NotFoundException;
-// import jakarta.persistence.EntityNotFoundException;
-// import jakarta.validation.ConstraintViolationException;
-// import org.springframework.http.HttpStatus;
-// import org.springframework.http.converter.HttpMessageNotReadableException;
-// import org.springframework.web.bind.MethodArgumentNotValidException;
-// import org.springframework.web.bind.MissingServletRequestParameterException;
-// import org.springframework.web.bind.annotation.ExceptionHandler;
-// import org.springframework.web.bind.annotation.ResponseStatus;
-// import org.springframework.web.bind.annotation.RestControllerAdvice;
-// import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.validation.FieldError;
 
-// import java.util.List;
+@RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class ApiExceptionHandler {
 
-// @RestControllerAdvice
-// public class ApiExceptionHandler {
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleInvalidJson(HttpMessageNotReadableException ex, HttpServletRequest req) {
+        HttpStatus s = HttpStatus.BAD_REQUEST;
+        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.INVALID_JSON, "Malformed JSON request", req.getRequestURI());
+        if (ex.getMostSpecificCause() != null) body.addDetail(ex.getMostSpecificCause().getMessage());
+        return ResponseEntity.status(s).body(body);
+    }
 
-//     @ResponseStatus(HttpStatus.BAD_REQUEST)
-//     @ExceptionHandler(MethodArgumentNotValidException.class)
-//     public ApiErrorResponse handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-//         var fields = ex.getBindingResult().getFieldErrors().stream()
-//                 .map(f -> new ApiErrorField(f.getField(), f.getDefaultMessage()))
-//                 .toList();
-//         return new ApiErrorResponse("VALIDATION_ERROR", "Validation failed", fields);
-//     }
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiError> handleMissingParam(MissingServletRequestParameterException ex, HttpServletRequest req) {
+        HttpStatus s = HttpStatus.BAD_REQUEST;
+        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.MISSING_REQUEST_PARAM, "Required request parameter is missing", req.getRequestURI());
+        body.addDetail("Parameter '" + ex.getParameterName() + "' of type '" + ex.getParameterType() + "' is required");
+        return ResponseEntity.status(s).body(body);
+    }
 
-//     @ResponseStatus(HttpStatus.BAD_REQUEST)
-//     @ExceptionHandler(ConstraintViolationException.class)
-//     public ApiErrorResponse handleConstraintViolation(ConstraintViolationException ex) {
-//         var fields = ex.getConstraintViolations().stream()
-//                 .map(v -> new ApiErrorField(v.getPropertyPath().toString(), v.getMessage()))
-//                 .toList();
-//         return new ApiErrorResponse("VALIDATION_ERROR", "Validation failed", fields);
-//     }
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
+        HttpStatus s = HttpStatus.BAD_REQUEST;
+        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.TYPE_MISMATCH, "Request parameter has wrong type", req.getRequestURI());
+        String required = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
+        body.addDetail("Parameter '" + ex.getName() + "' must be of type '" + required + "'");
+        return ResponseEntity.status(s).body(body);
+    }
 
-//     @ResponseStatus(HttpStatus.BAD_REQUEST)
-//     @ExceptionHandler({
-//             MethodArgumentTypeMismatchException.class,
-//             MissingServletRequestParameterException.class,
-//             HttpMessageNotReadableException.class
-//     })
-//     public ApiErrorResponse handleBadRequest(Exception ex) {
-//         return new ApiErrorResponse("BAD_REQUEST", ex.getMessage(), List.of());
-//     }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
+        HttpStatus s = HttpStatus.BAD_REQUEST;
+        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.VALIDATION_ERROR, "Validation failed", req.getRequestURI());
+        for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
+            body.addValidationError(fe.getField(), fe.getRejectedValue(), fe.getDefaultMessage());
+        }
+        return ResponseEntity.status(s).body(body);
+    }
 
-//     @ResponseStatus(HttpStatus.NOT_FOUND)
-//     @ExceptionHandler({ NotFoundException.class, EntityNotFoundException.class })
-//     public ApiErrorResponse handleNotFound(Exception ex) {
-//         return new ApiErrorResponse("NOT_FOUND", ex.getMessage(), List.of());
-//     }
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiError> handleNotFound(EntityNotFoundException ex, HttpServletRequest req) {
+        HttpStatus s = HttpStatus.NOT_FOUND;
+        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.NOT_FOUND, ex.getMessage() != null ? ex.getMessage() : "Entity not found", req.getRequestURI());
+        return ResponseEntity.status(s).body(body);
+    }
 
-//     @ResponseStatus(HttpStatus.CONFLICT)
-//     @ExceptionHandler(ConflictException.class)
-//     public ApiErrorResponse handleConflict(ConflictException ex) {
-//         return new ApiErrorResponse("CONFLICT", ex.getMessage(), List.of());
-//     }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest req) {
+        HttpStatus s = HttpStatus.CONFLICT;
+        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.DATA_INTEGRITY_VIOLATION, "Data integrity violation", req.getRequestURI());
+        if (ex.getMostSpecificCause() != null) body.addDetail(ex.getMostSpecificCause().getMessage());
+        return ResponseEntity.status(s).body(body);
+    }
 
-//     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-//     @ExceptionHandler(BusinessRuleException.class)
-//     public ApiErrorResponse handleBusiness(BusinessRuleException ex) {
-//         return new ApiErrorResponse("BUSINESS_RULE", ex.getMessage(), List.of());
-//     }
-
-//     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//     @ExceptionHandler(Exception.class)
-//     public ApiErrorResponse handleGeneric(Exception ex) {
-//         return new ApiErrorResponse("INTERNAL_ERROR", ex.getMessage(), List.of());
-//     }
-// }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleOther(Exception ex, HttpServletRequest req) {
+        HttpStatus s = HttpStatus.INTERNAL_SERVER_ERROR;
+        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.INTERNAL_ERROR, "Unexpected error", req.getRequestURI());
+        return ResponseEntity.status(s).body(body);
+    }
+}
