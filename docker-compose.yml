@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   db:
-    image: postgres:15-alpine
+    image: postgres:15
     container_name: warehouse_db
     environment:
       POSTGRES_DB: warehouse
@@ -26,12 +26,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5433/warehouse
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/warehouse
       SPRING_DATASOURCE_USERNAME: liquibase
       SPRING_DATASOURCE_PASSWORD: securepassword
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_LIQUIBASE_ENABLED: "true"
-      SPRING_LIQUIBASE_CHANGELOG: classpath:/db/changelog/db.changelog-master.yaml
+      SPRING_LIQUIBASE_CHANGELOG: classpath:./db.changelog-master.yaml
       SPRINGDOC_API_DOCS_PATH: /api/v3/api-docs
     depends_on:
       db:

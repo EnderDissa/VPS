@@ -1,7 +1,7 @@
 databaseChangeLog:
   - include:
-      file: changes/001-initial-schema.yaml
+      file: db/changelog/changes/001-initial-schema.yaml
       relativeToChangelogFile: true
   - include:
-      file: changes/002-insert-test-data.yaml
+      file: db/changelog/changes/002-insert-test-data.yaml
       relativeToChangelogFile: true
