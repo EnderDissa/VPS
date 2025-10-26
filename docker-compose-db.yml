@@ -5,7 +5,7 @@ services:
     image: postgres:15
     container_name: liquibase-postgres
     environment:
-      POSTGRES_DB: myapp
+      POSTGRES_DB: warehouse
       POSTGRES_USER: liquibase
       POSTGRES_PASSWORD: securepassword
     ports:
@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U liquibase -d myapp"]
+      test: ["CMD-SHELL", "pg_isready -U liquibase -d warehouse"]
       interval: 10s
       timeout: 5s
       retries: 5

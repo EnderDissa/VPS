@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: 1
-      author: myapp
+      author: warehouse
       changes:
         - createTable:
             tableName: users
