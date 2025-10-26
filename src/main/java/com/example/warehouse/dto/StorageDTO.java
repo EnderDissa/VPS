@@ -5,9 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 public record StorageDTO(
         Long id,
 
@@ -21,4 +18,15 @@ public record StorageDTO(
         Integer capacity,
 
         LocalDateTime createdAt
-) {}
+) {
+
+        public StorageDTO(Storage storage) {
+                this(
+                        storage != null ? storage.getId() : null,
+                        storage != null ? storage.getName() : null,
+                        storage != null ? storage.getAddress() : null,
+                        storage != null ? storage.getCapacity() : null,
+                        storage != null ? storage.getCreatedAt() : null
+                );
+        }
+}
