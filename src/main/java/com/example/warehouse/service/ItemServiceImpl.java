@@ -34,13 +34,13 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDTO create(ItemDTO dto) {
-        log.info("Creating new item: {}", dto.getName());
+        log.info("Creating new item: {}", dto.name());
 
         // Проверяем уникальность серийного номера
-        if (dto.getSerialNumber() != null && !dto.getSerialNumber().isEmpty()) {
-            if (itemRepository.existsBySerialNumber(dto.getSerialNumber())) {
+        if (dto.serialNumber() != null && !dto.serialNumber().isEmpty()) {
+            if (itemRepository.existsBySerialNumber(dto.serialNumber())) {
                 throw new DuplicateSerialNumberException(
-                        "Item with serial number '" + dto.getSerialNumber() + "' already exists");
+                        "Item with serial number '" + dto.serialNumber() + "' already exists");
             }
         }
 
@@ -75,20 +75,20 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + id));
 
         // Проверяем уникальность серийного номера (если он изменился)
-        if (dto.getSerialNumber() != null && !dto.getSerialNumber().isEmpty() &&
-                !dto.getSerialNumber().equals(existingItem.getSerialNumber())) {
-            if (itemRepository.existsBySerialNumber(dto.getSerialNumber())) {
+        if (dto.serialNumber() != null && !dto.serialNumber().isEmpty() &&
+                !dto.serialNumber().equals(existingItem.getSerialNumber())) {
+            if (itemRepository.existsBySerialNumber(dto.serialNumber())) {
                 throw new DuplicateSerialNumberException(
-                        "Item with serial number '" + dto.getSerialNumber() + "' already exists");
+                        "Item with serial number '" + dto.serialNumber() + "' already exists");
             }
         }
 
         // Обновляем поля
-        existingItem.setName(dto.getName());
-        existingItem.setType(dto.getType());
-        existingItem.setCondition(dto.getCondition());
-        existingItem.setSerialNumber(dto.getSerialNumber());
-        existingItem.setDescription(dto.getDescription());
+        existingItem.setName(dto.name());
+        existingItem.setType(dto.type());
+        existingItem.setCondition(dto.condition());
+        existingItem.setSerialNumber(dto.serialNumber());
+        existingItem.setDescription(dto.description());
 
         itemRepository.save(existingItem);
         log.info("Item with ID: {} updated successfully", id);

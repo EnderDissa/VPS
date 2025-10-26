@@ -11,37 +11,36 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-public class ItemDTO {
+public record ItemDTO(
+        Long id,
+
+        @NotBlank(message = "Name is required")
+        @Size(max = 255, message = "Name must not exceed 255 characters")
+        String name,
+
+        @NotNull(message = "Type is required")
+        ItemType type,
+
+        @NotNull(message = "Condition is required")
+        ItemCondition condition,
+
+        @Size(max = 100, message = "Serial number must not exceed 100 characters")
+        String serialNumber,
+
+        String description,
+
+        LocalDateTime createdAt
+) {
 
     public ItemDTO(Item item) {
-        if (item == null) return;
-        this.id = item.getId();
-        this.name = item.getName();
-        this.type = item.getType();
-        this.condition = item.getCondition();
-        this.serialNumber = item.getSerialNumber();
-        this.description = item.getDescription();
-        this.createdAt = item.getCreatedAt();
+        this(
+                item != null ? item.getId() : null,
+                item != null ? item.getName() : null,
+                item != null ? item.getType() : null,
+                item != null ? item.getCondition() : null,
+                item != null ? item.getSerialNumber() : null,
+                item != null ? item.getDescription() : null,
+                item != null ? item.getCreatedAt() : null
+        );
     }
-
-    private Long id;
-
-    @NotBlank(message = "Name is required")
-    @Size(max = 255, message = "Name must not exceed 255 characters")
-    private String name;
-
-    @NotNull(message = "Type is required")
-    private ItemType type;
-
-    @NotNull(message = "Condition is required")
-    private ItemCondition condition;
-
-    @Size(max = 100, message = "Serial number must not exceed 100 characters")
-    private String serialNumber;
-
-    private String description;
-
-    private LocalDateTime createdAt;
 }

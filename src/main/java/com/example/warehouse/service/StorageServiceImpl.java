@@ -34,12 +34,12 @@ public class StorageServiceImpl implements StorageService {
     @Override
     @Transactional
     public StorageDTO create(StorageDTO dto) {
-        log.info("Creating new storage: {}", dto.getName());
+        log.info("Creating new storage: {}", dto.name());
 
         // Проверяем уникальность имени (опционально)
-        if (storageRepository.existsByName(dto.getName())) {
-            log.warn("Storage with name '{}' already exists", dto.getName());
-             throw new DuplicateStorageException("Storage with name '" + dto.getName() + "' already exists");
+        if (storageRepository.existsByName(dto.name())) {
+            log.warn("Storage with name '{}' already exists", dto.name());
+             throw new DuplicateStorageException("Storage with name '" + dto.name() + "' already exists");
         }
 
         // Создаем entity
@@ -73,16 +73,16 @@ public class StorageServiceImpl implements StorageService {
                 .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + id));
 
         // Проверяем уникальность имени (если оно изменилось)
-        if (!existingStorage.getName().equals(dto.getName()) &&
-                storageRepository.existsByName(dto.getName())) {
-            log.warn("Storage with name '{}' already exists", dto.getName());
-             throw new DuplicateStorageException("Storage with name '" + dto.getName() + "' already exists");
+        if (!existingStorage.getName().equals(dto.name()) &&
+                storageRepository.existsByName(dto.name())) {
+            log.warn("Storage with name '{}' already exists", dto.name());
+             throw new DuplicateStorageException("Storage with name '" + dto.name() + "' already exists");
         }
 
         // Обновляем поля
-        existingStorage.setName(dto.getName());
-        existingStorage.setAddress(dto.getAddress());
-        existingStorage.setCapacity(dto.getCapacity());
+        existingStorage.setName(dto.name());
+        existingStorage.setAddress(dto.address());
+        existingStorage.setCapacity(dto.capacity());
 
         storageRepository.save(existingStorage);
         log.info("Storage with ID: {} updated successfully", id);

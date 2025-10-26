@@ -29,11 +29,11 @@ public class UserServiceImpl implements UserService {
     
     @Override
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
-        log.info("Creating new user with email: {}", userRequestDTO.getEmail());
+        log.info("Creating new user with email: {}", userRequestDTO.email());
         
         // Проверяем уникальность email
-        if (existsByEmail(userRequestDTO.getEmail())) {
-            throw new UserAlreadyExistsException("User with email " + userRequestDTO.getEmail() + " already exists");
+        if (existsByEmail(userRequestDTO.email())) {
+            throw new UserAlreadyExistsException("User with email " + userRequestDTO.email() + " already exists");
         }
         
         // Создаем пользователя
@@ -106,9 +106,9 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + id));
         
         // Проверяем, не занят ли email другим пользователем
-        if (!existingUser.getEmail().equals(userRequestDTO.getEmail()) && 
-            existsByEmail(userRequestDTO.getEmail())) {
-            throw new UserAlreadyExistsException("Email " + userRequestDTO.getEmail() + " is already taken");
+        if (!existingUser.getEmail().equals(userRequestDTO.email()) &&
+            existsByEmail(userRequestDTO.email())) {
+            throw new UserAlreadyExistsException("Email " + userRequestDTO.email() + " is already taken");
         }
         
         // Обновляем данные

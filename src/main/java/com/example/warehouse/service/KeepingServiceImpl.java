@@ -36,21 +36,21 @@ public class KeepingServiceImpl implements KeepingService {
     @Override
     @Transactional
     public KeepingDTO create(KeepingDTO dto) {
-        log.info("Creating new keeping record - storageId: {}, itemId: {}", dto.getStorageId(), dto.getItemId());
+        log.info("Creating new keeping record - storageId: {}, itemId: {}", dto.storageId(), dto.itemId());
 
         // Проверяем существование storage
-        Storage storage = storageRepository.findById(dto.getStorageId())
-                .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.getStorageId()));
+        Storage storage = storageRepository.findById(dto.storageId())
+                .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.storageId()));
 
         // Проверяем существование item
-        Item item = itemRepository.findById(dto.getItemId())
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.getItemId()));
+        Item item = itemRepository.findById(dto.itemId())
+                .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
 
         // Проверяем уникальность комбинации storage + item
-        if (keepingRepository.existsByStorageIdAndItemId(dto.getStorageId(), dto.getItemId())) {
+        if (keepingRepository.existsByStorageIdAndItemId(dto.storageId(), dto.itemId())) {
             throw new DuplicateKeepingException(
-                    "Keeping record already exists for storage ID: " + dto.getStorageId() +
-                            " and item ID: " + dto.getItemId());
+                    "Keeping record already exists for storage ID: " + dto.storageId() +
+                            " and item ID: " + dto.itemId());
         }
 
         // Создаем entity
@@ -86,30 +86,30 @@ public class KeepingServiceImpl implements KeepingService {
                 .orElseThrow(() -> new KeepingNotFoundException("Keeping record not found with ID: " + id));
 
         // Проверяем, изменился ли storage
-        if (!existingKeeping.getStorage().getId().equals(dto.getStorageId())) {
-            Storage storage = storageRepository.findById(dto.getStorageId())
-                    .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.getStorageId()));
+        if (!existingKeeping.getStorage().getId().equals(dto.storageId())) {
+            Storage storage = storageRepository.findById(dto.storageId())
+                    .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.storageId()));
             existingKeeping.setStorage(storage);
         }
 
         // Проверяем, изменился ли item
-        if (!existingKeeping.getItem().getId().equals(dto.getItemId())) {
-            Item item = itemRepository.findById(dto.getItemId())
-                    .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.getItemId()));
+        if (!existingKeeping.getItem().getId().equals(dto.itemId())) {
+            Item item = itemRepository.findById(dto.itemId())
+                    .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
             existingKeeping.setItem(item);
 
             // Проверяем уникальность новой комбинации storage + item
             if (keepingRepository.existsByStorageIdAndItemIdAndIdNot(
-                    dto.getStorageId(), dto.getItemId(), id)) {
+                    dto.storageId(), dto.itemId(), id)) {
                 throw new DuplicateKeepingException(
-                        "Keeping record already exists for storage ID: " + dto.getStorageId() +
-                                " and item ID: " + dto.getItemId());
+                        "Keeping record already exists for storage ID: " + dto.storageId() +
+                                " and item ID: " + dto.itemId());
             }
         }
 
         // Обновляем остальные поля
-        existingKeeping.setQuantity(dto.getQuantity());
-        existingKeeping.setShelf(dto.getShelf());
+        existingKeeping.setQuantity(dto.quantity());
+        existingKeeping.setShelf(dto.shelf());
         //last update еще нужно
 
         keepingRepository.save(existingKeeping);

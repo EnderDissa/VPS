@@ -8,20 +8,17 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-@Data
-@AllArgsConstructor
-public class StorageDTO {
+public record StorageDTO(
+        Long id,
 
-    private Long id;
+        @NotBlank(message = "Name is required")
+        String name,
 
-    @NotBlank(message = "Name is required")
-    private String name;
+        @NotBlank(message = "Address is required")
+        String address,
 
-    @NotBlank(message = "Address is required")
-    private String address;
+        @PositiveOrZero(message = "Capacity must be positive or zero")
+        Integer capacity,
 
-    @PositiveOrZero(message = "Capacity must be positive or zero")
-    private Integer capacity;
-
-    private LocalDateTime createdAt;
-}
+        LocalDateTime createdAt
+) {}

@@ -43,29 +43,29 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
     @Transactional
     public UserStorageAccessDTO create(UserStorageAccessDTO dto) {
         log.info("Creating new user storage access - userId: {}, storageId: {}, accessLevel: {}",
-                dto.getUserId(), dto.getStorageId(), dto.getAccessLevel());
+                dto.userId(), dto.storageId(), dto.accessLevel());
 
         // Проверяем существование user
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.getUserId()));
+        User user = userRepository.findById(dto.userId())
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.userId()));
 
         // Проверяем существование storage
-        Storage storage = storageRepository.findById(dto.getStorageId())
-                .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.getStorageId()));
+        Storage storage = storageRepository.findById(dto.storageId())
+                .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.storageId()));
 
         // Проверяем существование grantedBy user
-        User grantedBy = userRepository.findById(dto.getGrantedById())
-                .orElseThrow(() -> new UserNotFoundException("Granted by user not found with ID: " + dto.getGrantedById()));
+        User grantedBy = userRepository.findById(dto.grantedById())
+                .orElseThrow(() -> new UserNotFoundException("Granted by user not found with ID: " + dto.grantedById()));
 
         // Проверяем уникальность комбинации user + storage
-        if (userStorageAccessRepository.existsByUserIdAndStorageId(dto.getUserId(), dto.getStorageId())) {
+        if (userStorageAccessRepository.existsByUserIdAndStorageId(dto.userId(), dto.storageId())) {
             throw new DuplicateUserStorageAccessException(
-                    "User storage access already exists for user ID: " + dto.getUserId() +
-                            " and storage ID: " + dto.getStorageId());
+                    "User storage access already exists for user ID: " + dto.userId() +
+                            " and storage ID: " + dto.storageId());
         }
 
         // Проверяем expiration date
-        if (dto.getExpiresAt() != null && dto.getExpiresAt().isBefore(LocalDateTime.now())) {
+        if (dto.expiresAt() != null && dto.expiresAt().isBefore(LocalDateTime.now())) {
             throw new OperationNotAllowedException("Expiration date must be in the future");
         }
 
@@ -104,7 +104,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
                 .orElseThrow(() -> new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
 
         // Проверяем expiration date
-        if (dto.getExpiresAt() != null && dto.getExpiresAt().isBefore(LocalDateTime.now())) {
+        if (dto.expiresAt() != null && dto.expiresAt().isBefore(LocalDateTime.now())) {
             throw new OperationNotAllowedException("Expiration date must be in the future");
         }
 
@@ -112,9 +112,9 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         updateRelatedEntities(existingAccess, dto);
 
         // Обновляем остальные поля
-        existingAccess.setAccessLevel(dto.getAccessLevel());
-        existingAccess.setExpiresAt(dto.getExpiresAt());
-        existingAccess.setIsActive(dto.getIsActive());
+        existingAccess.setAccessLevel(dto.accessLevel());
+        existingAccess.setExpiresAt(dto.expiresAt());
+        existingAccess.setIsActive(dto.isActive());
 
         userStorageAccessRepository.save(existingAccess);
         log.info("User storage access with ID: {} updated successfully", id);
@@ -190,39 +190,39 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
 
     private void updateRelatedEntities(UserStorageAccess access, UserStorageAccessDTO dto) {
         // Обновляем user если изменился
-        if (!access.getUser().getId().equals(dto.getUserId())) {
-            User user = userRepository.findById(dto.getUserId())
-                    .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.getUserId()));
+        if (!access.getUser().getId().equals(dto.userId())) {
+            User user = userRepository.findById(dto.userId())
+                    .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.userId()));
             access.setUser(user);
 
             // Проверяем уникальность новой комбинации user + storage
             if (userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
-                    dto.getUserId(), dto.getStorageId(), access.getId())) {
+                    dto.userId(), dto.storageId(), access.getId())) {
                 throw new DuplicateUserStorageAccessException(
-                        "User storage access already exists for user ID: " + dto.getUserId() +
-                                " and storage ID: " + dto.getStorageId());
+                        "User storage access already exists for user ID: " + dto.userId() +
+                                " and storage ID: " + dto.storageId());
             }
         }
 
         // Обновляем storage если изменился
-        if (!access.getStorage().getId().equals(dto.getStorageId())) {
-            Storage storage = storageRepository.findById(dto.getStorageId())
-                    .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.getStorageId()));
+        if (!access.getStorage().getId().equals(dto.storageId())) {
+            Storage storage = storageRepository.findById(dto.storageId())
+                    .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.storageId()));
             access.setStorage(storage);
 
             // Проверяем уникальность новой комбинации user + storage
             if (userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
-                    dto.getUserId(), dto.getStorageId(), access.getId())) {
+                    dto.userId(), dto.storageId(), access.getId())) {
                 throw new DuplicateUserStorageAccessException(
-                        "User storage access already exists for user ID: " + dto.getUserId() +
-                                " and storage ID: " + dto.getStorageId());
+                        "User storage access already exists for user ID: " + dto.userId() +
+                                " and storage ID: " + dto.storageId());
             }
         }
 
         // Обновляем grantedBy если изменился
-        if (!access.getGrantedBy().getId().equals(dto.getGrantedById())) {
-            User grantedBy = userRepository.findById(dto.getGrantedById())
-                    .orElseThrow(() -> new UserNotFoundException("Granted by user not found with ID: " + dto.getGrantedById()));
+        if (!access.getGrantedBy().getId().equals(dto.grantedById())) {
+            User grantedBy = userRepository.findById(dto.grantedById())
+                    .orElseThrow(() -> new UserNotFoundException("Granted by user not found with ID: " + dto.grantedById()));
             access.setGrantedBy(grantedBy);
         }
     }

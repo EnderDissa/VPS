@@ -1,41 +1,45 @@
 package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.Keeping;
-
-import java.time.LocalDateTime;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
 
-@Data
-public class KeepingDTO {
+import java.time.LocalDateTime;
 
-    public KeepingDTO(Keeping keeping) {
-        if (keeping == null) return;
-        this.id = keeping.getId();
-        this.storageId = keeping.getStorage() != null ? keeping.getStorage().getId() : null;
-        this.itemId = keeping.getItem() != null ? keeping.getItem().getId() : null;
-        this.quantity = keeping.getQuantity();
-        this.shelf = keeping.getShelf();
-        this.lastUpdated = keeping.getLastUpdated();
+public record KeepingDTO(
+        Long id,
+
+        @NotNull(message = "Storage ID is required")
+        Long storageId,
+
+        @NotNull(message = "Item ID is required")
+        Long itemId,
+
+        @NotNull(message = "Quantity is required")
+        @Positive(message = "Quantity must be positive")
+        Integer quantity,
+
+        @Size(max = 100, message = "Shelf must not exceed 100 characters")
+        String shelf,
+
+        LocalDateTime lastUpdated
+) {
+
+    public KeepingDTO {
+        if (quantity == null) {
+            quantity = 1;
+        }
     }
 
-    private Long id;
-
-    @NotNull(message = "Storage ID is required")
-    private Long storageId;
-
-    @NotNull(message = "Item ID is required")
-    private Long itemId;
-
-    @NotNull(message = "Quantity is required")
-    @Positive(message = "Quantity must be positive")
-    private Integer quantity = 1;
-
-    @Size(max = 100, message = "Shelf must not exceed 100 characters")
-    private String shelf;
-
-    private LocalDateTime lastUpdated;
+    public KeepingDTO(Keeping keeping) {
+        this(
+                keeping != null ? keeping.getId() : null,
+                keeping != null && keeping.getStorage() != null ? keeping.getStorage().getId() : null,
+                keeping != null && keeping.getItem() != null ? keeping.getItem().getId() : null,
+                keeping != null ? keeping.getQuantity() : 1,
+                keeping != null ? keeping.getShelf() : null,
+                keeping != null ? keeping.getLastUpdated() : null
+        );
+    }
 }

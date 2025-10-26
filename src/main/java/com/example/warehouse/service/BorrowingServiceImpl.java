@@ -51,11 +51,11 @@ public class BorrowingServiceImpl implements BorrowingService {
         log.debug("Creating new borrowing: {}", dto);
 
         // Validate and fetch related entities
-        Item item = itemRepository.findById(dto.getItemId())
-                .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + dto.getItemId()));
+        Item item = itemRepository.findById(dto.itemId())
+                .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + dto.itemId()));
 
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + dto.getUserId()));
+        User user = userRepository.findById(dto.userId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + dto.userId()));
 
         // Validate item condition
         if (item.getCondition() == ItemCondition.NEEDS_MAINTENANCE || item.getCondition() == ItemCondition.UNDER_REPAIR || item.getCondition() == ItemCondition.DECOMMISSIONED) {

@@ -38,15 +38,15 @@ public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
     @Override
     @Transactional
     public ItemMaintenanceDTO create(ItemMaintenanceDTO dto) {
-        log.info("Creating new item maintenance for item ID: {}", dto.getItemId());
+        log.info("Creating new item maintenance for item ID: {}", dto.itemId());
 
         // Проверяем существование item
-        Item item = itemRepository.findById(dto.getItemId())
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.getItemId()));
+        Item item = itemRepository.findById(dto.itemId())
+                .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
 
         // Проверяем существование technician
-        User technician = userRepository.findById(dto.getTechnicianId())
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.getTechnicianId()));
+        User technician = userRepository.findById(dto.technicianId())
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.technicianId()));
 
         // Создаем entity
         ItemMaintenance maintenance = itemMaintenanceMapper.toEntity(dto);
@@ -81,25 +81,25 @@ public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
                 .orElseThrow(() -> new ItemMaintenanceNotFoundException("Item maintenance not found with ID: " + id));
 
         // Проверяем item если он изменился
-        if (!existingMaintenance.getItem().getId().equals(dto.getItemId())) {
-            Item item = itemRepository.findById(dto.getItemId())
-                    .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.getItemId()));
+        if (!existingMaintenance.getItem().getId().equals(dto.itemId())) {
+            Item item = itemRepository.findById(dto.itemId())
+                    .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
             existingMaintenance.setItem(item);
         }
 
         // Проверяем technician если он изменился
-        if (!existingMaintenance.getTechnician().getId().equals(dto.getTechnicianId())) {
-            User technician = userRepository.findById(dto.getTechnicianId())
-                    .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.getTechnicianId()));
+        if (!existingMaintenance.getTechnician().getId().equals(dto.technicianId())) {
+            User technician = userRepository.findById(dto.technicianId())
+                    .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.technicianId()));
             existingMaintenance.setTechnician(technician);
         }
 
         // Обновляем остальные поля
-        existingMaintenance.setMaintenanceDate(dto.getMaintenanceDate());
-        existingMaintenance.setNextMaintenanceDate(dto.getNextMaintenanceDate());
-        existingMaintenance.setCost(dto.getCost());
-        existingMaintenance.setDescription(dto.getDescription());
-        existingMaintenance.setStatus(dto.getStatus());
+        existingMaintenance.setMaintenanceDate(dto.maintenanceDate());
+        existingMaintenance.setNextMaintenanceDate(dto.nextMaintenanceDate());
+        existingMaintenance.setCost(dto.cost());
+        existingMaintenance.setDescription(dto.description());
+        existingMaintenance.setStatus(dto.status());
 
         itemMaintenanceRepository.save(existingMaintenance);
         log.info("Item maintenance with ID: {} updated successfully", id);

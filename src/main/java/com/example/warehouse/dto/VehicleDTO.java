@@ -6,42 +6,47 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
 
-@Data
-public class VehicleDTO {
+public record VehicleDTO(
+        Long id,
 
-    public VehicleDTO(Vehicle vehicle) {
-        if (vehicle == null) return;
-        this.id = vehicle.getId();
-        this.brand = vehicle.getBrand();
-        this.model = vehicle.getModel();
-        this.licensePlate = vehicle.getLicensePlate();
-        this.year = vehicle.getYear();
-        this.capacity = vehicle.getCapacity();
-        this.status = vehicle.getStatus();
+        @NotBlank(message = "Brand is required")
+        @Size(max = 100, message = "Brand must not exceed 100 characters")
+        String brand,
+
+        @NotBlank(message = "Model is required")
+        @Size(max = 100, message = "Model must not exceed 100 characters")
+        String model,
+
+        @NotBlank(message = "License plate is required")
+        @Size(max = 20, message = "License plate must not exceed 20 characters")
+        String licensePlate,
+
+        @PositiveOrZero(message = "Year must be positive")
+        Integer year,
+
+        @PositiveOrZero(message = "Capacity must be positive or zero")
+        Integer capacity,
+
+        @NotNull(message = "Status is required")
+        VehicleStatus status
+) {
+
+    public VehicleDTO {
+        if (status == null) {
+            status = VehicleStatus.AVAILABLE;
+        }
     }
 
-    private Long id;
-
-    @NotBlank(message = "Brand is required")
-    @Size(max = 100, message = "Brand must not exceed 100 characters")
-    private String brand;
-
-    @NotBlank(message = "Model is required")
-    @Size(max = 100, message = "Model must not exceed 100 characters")
-    private String model;
-
-    @NotBlank(message = "License plate is required")
-    @Size(max = 20, message = "License plate must not exceed 20 characters")
-    private String licensePlate;
-
-    @PositiveOrZero(message = "Year must be positive")
-    private Integer year;
-
-    @PositiveOrZero(message = "Capacity must be positive or zero")
-    private Integer capacity;
-
-    @NotNull(message = "Status is required")
-    private VehicleStatus status = VehicleStatus.AVAILABLE;
+    public VehicleDTO(Vehicle vehicle) {
+        this(
+                vehicle != null ? vehicle.getId() : null,
+                vehicle != null ? vehicle.getBrand() : null,
+                vehicle != null ? vehicle.getModel() : null,
+                vehicle != null ? vehicle.getLicensePlate() : null,
+                vehicle != null ? vehicle.getYear() : null,
+                vehicle != null ? vehicle.getCapacity() : null,
+                vehicle != null ? vehicle.getStatus() : VehicleStatus.AVAILABLE
+        );
+    }
 }

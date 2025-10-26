@@ -1,31 +1,29 @@
 package com.example.warehouse.dto.UserDTO;
 
+import com.example.warehouse.entity.User;
 import com.example.warehouse.enumeration.RoleType;
 
 import java.time.LocalDateTime;
-import com.example.warehouse.entity.User;
 
-import lombok.Data;
-
-@Data
-public class UserResponseDTO {
-
-    private Long id;
-    private String firstName;
-    private String secondName;
-    private String lastName;
-    private RoleType role;
-    private String email;
-    private LocalDateTime createdAt;
+public record UserResponseDTO(
+        Long id,
+        String firstName,
+        String secondName,
+        String lastName,
+        RoleType role,
+        String email,
+        LocalDateTime createdAt
+) {
 
     public UserResponseDTO(User user) {
-        if (user == null) return;
-        this.id = user.getId();
-        this.firstName = user.getFirstName();
-        this.secondName = user.getSecondName();
-        this.lastName = user.getLastName();
-        this.role = user.getRole();
-        this.email = user.getEmail();
-        this.createdAt = user.getCreatedAt();
+        this(
+                user != null ? user.getId() : null,
+                user != null ? user.getFirstName() : null,
+                user != null ? user.getSecondName() : null,
+                user != null ? user.getLastName() : null,
+                user != null ? user.getRole() : null,
+                user != null ? user.getEmail() : null,
+                user != null ? user.getCreatedAt() : null
+        );
     }
 }

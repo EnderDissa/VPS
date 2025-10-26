@@ -2,53 +2,63 @@ package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.Borrowing;
 import com.example.warehouse.enumeration.BorrowStatus;
-
-import java.time.LocalDateTime;
-
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Data;
 
-@Data
-public class BorrowingDTO {
+import java.time.LocalDateTime;
 
-    public BorrowingDTO(Borrowing borrowing) {
-        if (borrowing == null) return;
-        this.id = borrowing.getId();
-        this.itemId = borrowing.getItem() != null ? borrowing.getItem().getId() : null;
-        this.userId = borrowing.getUser() != null ? borrowing.getUser().getId() : null;
-        this.quantity = borrowing.getQuantity();
-        this.borrowDate = borrowing.getBorrowDate();
-        this.expectedReturnDate = borrowing.getExpectedReturnDate();
-        this.actualReturnDate = borrowing.getActualReturnDate();
-        this.status = borrowing.getStatus();
-        this.purpose = borrowing.getPurpose();
+public record BorrowingDTO(
+        Long id,
+
+        @NotNull(message = "Item ID is required")
+        Long itemId,
+
+        @NotNull(message = "User ID is required")
+        Long userId,
+
+        @NotNull(message = "Quantity is required")
+        @Positive(message = "Quantity must be positive")
+        Integer quantity,
+
+        @NotNull(message = "Borrow date is required")
+        LocalDateTime borrowDate,
+
+        @NotNull(message = "Expected return date is required")
+        @Future(message = "Expected return date must be in the future")
+        LocalDateTime expectedReturnDate,
+
+        LocalDateTime actualReturnDate,
+
+        @NotNull(message = "Status is required")
+        BorrowStatus status,
+
+        String purpose
+) {
+
+    public BorrowingDTO {
+        if (quantity == null) {
+            quantity = 1;
+        }
+        if (borrowDate == null) {
+            borrowDate = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = BorrowStatus.ACTIVE;
+        }
     }
 
-    private Long id;
-
-    @NotNull(message = "Item ID is required")
-    private Long itemId;
-
-    @NotNull(message = "User ID is required")
-    private Long userId;
-
-    @NotNull(message = "Quantity is required")
-    @Positive(message = "Quantity must be positive")
-    private Integer quantity = 1;
-
-    @NotNull(message = "Borrow date is required")
-    private LocalDateTime borrowDate = LocalDateTime.now();
-
-    @NotNull(message = "Expected return date is required")
-    @Future(message = "Expected return date must be in the future")
-    private LocalDateTime expectedReturnDate;
-
-    private LocalDateTime actualReturnDate;
-
-    @NotNull(message = "Status is required")
-    private BorrowStatus status = BorrowStatus.ACTIVE;
-
-    private String purpose;
+    public BorrowingDTO(Borrowing borrowing) {
+        this(
+                borrowing != null ? borrowing.getId() : null,
+                borrowing != null && borrowing.getItem() != null ? borrowing.getItem().getId() : null,
+                borrowing != null && borrowing.getUser() != null ? borrowing.getUser().getId() : null,
+                borrowing != null ? borrowing.getQuantity() : 1,
+                borrowing != null ? borrowing.getBorrowDate() : LocalDateTime.now(),
+                borrowing != null ? borrowing.getExpectedReturnDate() : null,
+                borrowing != null ? borrowing.getActualReturnDate() : null,
+                borrowing != null ? borrowing.getStatus() : BorrowStatus.ACTIVE,
+                borrowing != null ? borrowing.getPurpose() : null
+        );
+    }
 }

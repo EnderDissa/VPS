@@ -6,42 +6,51 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
-import lombok.Data;
 
-@Data
-public class UserStorageAccessDTO {
+public record UserStorageAccessDTO(
+        Long id,
 
-    public UserStorageAccessDTO(UserStorageAccess access) {
-        if (access == null) return;
-        this.id = access.getId();
-        this.userId = access.getUser() != null ? access.getUser().getId() : null;
-        this.storageId = access.getStorage() != null ? access.getStorage().getId() : null;
-        this.accessLevel = access.getAccessLevel();
-        this.grantedById = access.getGrantedBy() != null ? access.getGrantedBy().getId() : null;
-        this.grantedAt = access.getGrantedAt();
-        this.expiresAt = access.getExpiresAt();
-        this.isActive = access.getIsActive();
+        @NotNull(message = "User ID is required")
+        Long userId,
+
+        @NotNull(message = "Storage ID is required")
+        Long storageId,
+
+        @NotNull(message = "Access level is required")
+        AccessLevel accessLevel,
+
+        @NotNull(message = "Granted by user ID is required")
+        Long grantedById,
+
+        LocalDateTime grantedAt,
+
+        @Future(message = "Expiration date must be in the future")
+        LocalDateTime expiresAt,
+
+        @NotNull(message = "Active status is required")
+        Boolean isActive
+) {
+
+    public UserStorageAccessDTO {
+
+        if (accessLevel == null) {
+            accessLevel = AccessLevel.BASIC;
+        }
+        if (isActive == null) {
+            isActive = true;
+        }
     }
 
-    private Long id;
-
-    @NotNull(message = "User ID is required")
-    private Long userId;
-
-    @NotNull(message = "Storage ID is required")
-    private Long storageId;
-
-    @NotNull(message = "Access level is required")
-    private AccessLevel accessLevel = AccessLevel.BASIC;
-
-    @NotNull(message = "Granted by user ID is required")
-    private Long grantedById;
-
-    private LocalDateTime grantedAt;
-
-    @Future(message = "Expiration date must be in the future")
-    private LocalDateTime expiresAt;
-
-    @NotNull(message = "Active status is required")
-    private Boolean isActive = true;
+    public UserStorageAccessDTO(UserStorageAccess access) {
+        this(
+                access != null ? access.getId() : null,
+                access != null && access.getUser() != null ? access.getUser().getId() : null,
+                access != null && access.getStorage() != null ? access.getStorage().getId() : null,
+                access != null ? access.getAccessLevel() : AccessLevel.BASIC,
+                access != null && access.getGrantedBy() != null ? access.getGrantedBy().getId() : null,
+                access != null ? access.getGrantedAt() : null,
+                access != null ? access.getExpiresAt() : null,
+                access != null ? access.getIsActive() : true
+        );
+    }
 }

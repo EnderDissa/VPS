@@ -29,11 +29,11 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     @Transactional
     public VehicleDTO create(VehicleDTO dto) {
-        log.info("Creating new vehicle with license plate: {}", dto.getLicensePlate());
+        log.info("Creating new vehicle with license plate: {}", dto.licensePlate());
 
         // Проверка уникальности номерного знака
-        if (vehicleRepository.existsByLicensePlate(dto.getLicensePlate())) {
-            throw new IllegalArgumentException("Vehicle with license plate '" + dto.getLicensePlate() + "' already exists");
+        if (vehicleRepository.existsByLicensePlate(dto.licensePlate())) {
+            throw new IllegalArgumentException("Vehicle with license plate '" + dto.licensePlate() + "' already exists");
         }
 
         Vehicle vehicle = vehicleMapper.toEntity(dto);
@@ -62,18 +62,18 @@ public class VehicleServiceImpl implements VehicleService {
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with ID: " + id));
 
         // Проверка уникальности номерного знака при обновлении
-        if (!existingVehicle.getLicensePlate().equals(dto.getLicensePlate()) &&
-                vehicleRepository.existsByLicensePlateAndIdNot(dto.getLicensePlate(), id)) {
-            throw new IllegalArgumentException("Vehicle with license plate '" + dto.getLicensePlate() + "' already exists");
+        if (!existingVehicle.getLicensePlate().equals(dto.licensePlate()) &&
+                vehicleRepository.existsByLicensePlateAndIdNot(dto.licensePlate(), id)) {
+            throw new IllegalArgumentException("Vehicle with license plate '" + dto.licensePlate() + "' already exists");
         }
 
         // Обновление полей
-        existingVehicle.setBrand(dto.getBrand());
-        existingVehicle.setModel(dto.getModel());
-        existingVehicle.setLicensePlate(dto.getLicensePlate());
-        existingVehicle.setYear(dto.getYear());
-        existingVehicle.setCapacity(dto.getCapacity());
-        existingVehicle.setStatus(dto.getStatus());
+        existingVehicle.setBrand(dto.brand());
+        existingVehicle.setModel(dto.model());
+        existingVehicle.setLicensePlate(dto.licensePlate());
+        existingVehicle.setYear(dto.year());
+        existingVehicle.setCapacity(dto.capacity());
+        existingVehicle.setStatus(dto.status());
 
         vehicleRepository.save(existingVehicle);
         log.info("Vehicle updated successfully with ID: {}", id);

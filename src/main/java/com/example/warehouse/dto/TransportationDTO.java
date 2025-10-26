@@ -2,55 +2,59 @@ package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.Transportation;
 import com.example.warehouse.enumeration.TransportStatus;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+public record TransportationDTO(
+        Long id,
 
-@Data
-public class TransportationDTO {
+        @NotNull(message = "Item ID is required")
+        Long itemId,
 
-    public TransportationDTO(Transportation transportation) {
-        if (transportation == null) return;
-        this.id = transportation.getId();
-        this.itemId = transportation.getItem() != null ? transportation.getItem().getId() : null;
-        this.vehicleId = transportation.getVehicle() != null ? transportation.getVehicle().getId() : null;
-        this.driverId = transportation.getDriver() != null ? transportation.getDriver().getId() : null;
-        this.fromStorageId = transportation.getFromStorage() != null ? transportation.getFromStorage().getId() : null;
-        this.toStorageId = transportation.getToStorage() != null ? transportation.getToStorage().getId() : null;
-        this.status = transportation.getStatus();
-        this.scheduledDeparture = transportation.getScheduledDeparture();
-        this.actualDeparture = transportation.getActualDeparture();
-        this.scheduledArrival = transportation.getScheduledArrival();
-        this.actualArrival = transportation.getActualArrival();
-        this.createdAt = transportation.getCreatedAt();
+        @NotNull(message = "Vehicle ID is required")
+        Long vehicleId,
+
+        @NotNull(message = "Driver ID is required")
+        Long driverId,
+
+        @NotNull(message = "From storage ID is required")
+        Long fromStorageId,
+
+        @NotNull(message = "To storage ID is required")
+        Long toStorageId,
+
+        @NotNull(message = "Status is required")
+        TransportStatus status,
+
+        LocalDateTime scheduledDeparture,
+        LocalDateTime actualDeparture,
+        LocalDateTime scheduledArrival,
+        LocalDateTime actualArrival,
+
+        LocalDateTime createdAt
+) {
+
+    public TransportationDTO {
+        if (status == null) {
+            status = TransportStatus.PLANNED;
+        }
     }
 
-    private Long id;
-
-    @NotNull(message = "Item ID is required")
-    private Long itemId;
-
-    @NotNull(message = "Vehicle ID is required")
-    private Long vehicleId;
-
-    @NotNull(message = "Driver ID is required")
-    private Long driverId;
-
-    @NotNull(message = "From storage ID is required")
-    private Long fromStorageId;
-
-    @NotNull(message = "To storage ID is required")
-    private Long toStorageId;
-
-    @NotNull(message = "Status is required")
-    private TransportStatus status = TransportStatus.PLANNED;
-
-    private LocalDateTime scheduledDeparture;
-    private LocalDateTime actualDeparture;
-    private LocalDateTime scheduledArrival;
-    private LocalDateTime actualArrival;
-
-    private LocalDateTime createdAt;
+    public TransportationDTO(Transportation transportation) {
+        this(
+                transportation != null ? transportation.getId() : null,
+                transportation != null && transportation.getItem() != null ? transportation.getItem().getId() : null,
+                transportation != null && transportation.getVehicle() != null ? transportation.getVehicle().getId() : null,
+                transportation != null && transportation.getDriver() != null ? transportation.getDriver().getId() : null,
+                transportation != null && transportation.getFromStorage() != null ? transportation.getFromStorage().getId() : null,
+                transportation != null && transportation.getToStorage() != null ? transportation.getToStorage().getId() : null,
+                transportation != null ? transportation.getStatus() : TransportStatus.PLANNED,
+                transportation != null ? transportation.getScheduledDeparture() : null,
+                transportation != null ? transportation.getActualDeparture() : null,
+                transportation != null ? transportation.getScheduledArrival() : null,
+                transportation != null ? transportation.getActualArrival() : null,
+                transportation != null ? transportation.getCreatedAt() : null
+        );
+    }
 }
