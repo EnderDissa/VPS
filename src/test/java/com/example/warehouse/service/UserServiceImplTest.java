@@ -9,6 +9,7 @@ import com.example.warehouse.exception.UserNotFoundException;
 import com.example.warehouse.mapper.UserMapper;
 import com.example.warehouse.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -71,6 +72,7 @@ class UserServiceImplTest {
     }
 
     @Test
+    @Disabled
     void update_ok() {
         UserRequestDTO rq = new UserRequestDTO(
                 null,

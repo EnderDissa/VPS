@@ -2,6 +2,7 @@ package com.example.warehouse.service;
 
 import com.example.warehouse.dto.KeepingDTO;
 import com.example.warehouse.entity.Keeping;
+import com.example.warehouse.exception.KeepingNotFoundException;
 import com.example.warehouse.mapper.KeepingMapper;
 import com.example.warehouse.repository.ItemRepository;
 import com.example.warehouse.repository.KeepingRepository;
@@ -44,6 +45,6 @@ class KeepingServiceImplTest {
     @Test
     void getById_notFound() {
         when(repository.findById(123L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> service.getById(123L)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.getById(123L)).isInstanceOf(KeepingNotFoundException.class);
     }
 }

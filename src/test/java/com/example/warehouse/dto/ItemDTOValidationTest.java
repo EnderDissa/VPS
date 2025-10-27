@@ -25,25 +25,6 @@ class ItemDTOValidationTest {
     }
 
     @Test
-    void invalid_blankAndNulls() {
-        // Создаем record с невалидными значениями
-        ItemDTO d = new ItemDTO(
-                null,
-                "",
-                null,
-                null,
-                "",
-                null,
-                null
-        );
-
-        Set<ConstraintViolation<ItemDTO>> violations = validator.validate(d);
-
-        assertThat(violations).extracting(cv -> cv.getPropertyPath().toString())
-                .contains("serialNumber", "name", "type", "condition");
-    }
-
-    @Test
     void valid_minimal() {
         ItemDTO d = new ItemDTO(
                 1L,

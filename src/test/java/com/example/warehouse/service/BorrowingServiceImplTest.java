@@ -14,6 +14,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import jakarta.persistence.EntityNotFoundException;
+
 class BorrowingServiceImplTest {
 
     private BorrowingRepository borrowingRepository;
@@ -44,6 +46,6 @@ class BorrowingServiceImplTest {
     @Test
     void getById_notFound() {
         when(borrowingRepository.findById(404L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> service.getById(404L)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.getById(404L)).isInstanceOf(EntityNotFoundException.class);
     }
 }

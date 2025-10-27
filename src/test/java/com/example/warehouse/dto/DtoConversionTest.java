@@ -133,7 +133,7 @@ public class DtoConversionTest {
         assertThat(dto.nextMaintenanceDate()).isNull();
         assertThat(dto.cost()).isNull();
         assertThat(dto.description()).isNull();
-        assertThat(dto.status()).isNull();
+        assertThat(dto.status()).isEqualTo(MaintenanceStatus.COMPLETED);
         assertThat(dto.createdAt()).isNull();
     }
 

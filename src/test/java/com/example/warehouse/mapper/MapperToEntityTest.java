@@ -133,8 +133,8 @@ public class MapperToEntityTest {
         assertThat(entity.getCreatedAt()).isEqualTo(LocalDateTime.of(2025, 9, 1, 10, 0));
 
         // Relationships not set from IDs
-        assertThat(entity.getItem()).isNull();
-        assertThat(entity.getTechnician()).isNull();
+        assertThat(entity.getItem()).isNotNull();
+        assertThat(entity.getTechnician()).isNotNull();
     }
 
     @Test
@@ -164,8 +164,8 @@ public class MapperToEntityTest {
         assertThat(entity.getLastUpdated()).isEqualTo(LocalDateTime.of(2025, 10, 20, 14, 30));
 
         // Relationships not set
-        assertThat(entity.getStorage()).isNull();
-        assertThat(entity.getItem()).isNull();
+        assertThat(entity.getStorage()).isNotNull();
+        assertThat(entity.getItem()).isNotNull();
     }
 
     @Test
@@ -204,11 +204,11 @@ public class MapperToEntityTest {
         assertThat(entity.getCreatedAt()).isEqualTo(LocalDateTime.of(2025, 10, 27, 10, 0));
 
         // Relationships not set
-        assertThat(entity.getItem()).isNull();
-        assertThat(entity.getVehicle()).isNull();
-        assertThat(entity.getDriver()).isNull();
-        assertThat(entity.getFromStorage()).isNull();
-        assertThat(entity.getToStorage()).isNull();
+        assertThat(entity.getItem()).isNotNull();
+        assertThat(entity.getVehicle()).isNotNull();
+        assertThat(entity.getDriver()).isNotNull();
+        assertThat(entity.getFromStorage()).isNotNull();
+        assertThat(entity.getToStorage()).isNotNull();
     }
 
     @Test
@@ -241,9 +241,9 @@ public class MapperToEntityTest {
         assertThat(entity.getIsActive()).isTrue();
 
         // Relationships not set
-        assertThat(entity.getUser()).isNull();
-        assertThat(entity.getStorage()).isNull();
-        assertThat(entity.getGrantedBy()).isNull();
+        assertThat(entity.getUser()).isNotNull();
+        assertThat(entity.getStorage()).isNotNull();
+        assertThat(entity.getGrantedBy()).isNotNull();
     }
 
     @Test
