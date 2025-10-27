@@ -3,8 +3,7 @@ package com.example.warehouse.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Future;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.example.warehouse.enumeration.AccessLevel;
@@ -13,6 +12,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "user_storage_access", 
        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "storage_id"}))
@@ -46,7 +48,6 @@ public class UserStorageAccess {
     @Column(name = "granted_at", updatable = false)
     private LocalDateTime grantedAt;
 
-    @Future(message = "Expiration date must be in the future")
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
