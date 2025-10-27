@@ -47,4 +47,5 @@ public record ItemMaintenanceDTO(
                 maintenance != null ? maintenance.getCreatedAt() : null
         );
     }
+
 }
