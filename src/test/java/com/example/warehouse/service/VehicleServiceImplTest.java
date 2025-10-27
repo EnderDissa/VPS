@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
-@Transactional
+
 @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class VehicleServiceImplIntegrationTest {
 
@@ -107,7 +107,7 @@ class VehicleServiceImplIntegrationTest {
                 null,
                 "Scania",
                 "R500",
-                "ABC123", // Дублирующий номерной знак
+                "ABC123",
                 2022,
                 24000,
                 VehicleStatus.AVAILABLE
@@ -127,7 +127,7 @@ class VehicleServiceImplIntegrationTest {
                 "GHI789",
                 2022,
                 20000,
-                null // Статус не указан
+                null
         );
 
         VehicleDTO result = vehicleService.create(vehicleWithoutStatus);
@@ -331,7 +331,7 @@ class VehicleServiceImplIntegrationTest {
 
         assertNotNull(result);
         assertEquals(3, result.getContent().size());
-        assertTrue(result.getTotalElements() >= 7); // 2 из setUp + 5 новых
+        assertTrue(result.getTotalElements() >= 7);
     }
 
     @Test

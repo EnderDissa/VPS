@@ -9,8 +9,6 @@ import static org.assertj.core.api.Assertions.*;
 
 public class DtoConversionTest {
 
-    // ===== BorrowingDTO =====
-
     @Test
     void shouldMapBorrowingEntityToBorrowingDTO() {
         Borrowing borrowing = new Borrowing();
@@ -55,7 +53,6 @@ public class DtoConversionTest {
         assertThat(dto.purpose()).isNull();
     }
 
-    // ===== ItemDTO =====
 
     @Test
     void shouldMapItemEntityToItemDTO() {
@@ -91,7 +88,6 @@ public class DtoConversionTest {
         assertThat(dto.createdAt()).isNull();
     }
 
-    // ===== ItemMaintenanceDTO =====
 
     @Test
     void shouldMapItemMaintenanceEntityToDTO() {
@@ -137,7 +133,6 @@ public class DtoConversionTest {
         assertThat(dto.createdAt()).isNull();
     }
 
-    // ===== KeepingDTO =====
 
     @Test
     void shouldMapKeepingEntityToDTO() {
@@ -173,8 +168,6 @@ public class DtoConversionTest {
         assertThat(dto.shelf()).isNull();
         assertThat(dto.lastUpdated()).isNull();
     }
-
-    // ===== TransportationDTO =====
 
     @Test
     void shouldMapTransportationEntityToDTO() {
@@ -243,7 +236,6 @@ public class DtoConversionTest {
         assertThat(dto.createdAt()).isNull();
     }
 
-    // ===== UserStorageAccessDTO =====
 
     @Test
     void shouldMapUserStorageAccessEntityToDTO() {
@@ -309,7 +301,6 @@ public class DtoConversionTest {
         assertThat(dto.isActive()).isTrue();
     }
 
-    // ===== VehicleDTO =====
 
     @Test
     void shouldMapVehicleEntityToDTO() {

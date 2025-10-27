@@ -2,12 +2,15 @@ package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.Borrowing;
 import com.example.warehouse.enumeration.BorrowStatus;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDateTime;
 
+@JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record BorrowingDTO(
         Long id,
 

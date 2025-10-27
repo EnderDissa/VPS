@@ -2,11 +2,13 @@ package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.Vehicle;
 import com.example.warehouse.enumeration.VehicleStatus;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-
+@JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record VehicleDTO(
         Long id,
 

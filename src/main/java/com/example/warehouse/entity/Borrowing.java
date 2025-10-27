@@ -9,11 +9,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 @Entity
 @Table(name = "borrowings")
 public class Borrowing {

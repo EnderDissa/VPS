@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
-@Transactional
+
 @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class BorrowingServiceImplIntegrationTest {
 
@@ -424,7 +424,7 @@ class BorrowingServiceImplIntegrationTest {
 
         assertNotNull(result);
         assertEquals(3, result.getContent().size());
-        assertTrue(result.getTotalElements() >= 7); // 2 from setup + 5 new
+        assertTrue(result.getTotalElements() >= 7);
     }
 
     @Test

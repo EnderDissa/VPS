@@ -33,7 +33,6 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class TransportationServiceImpl implements TransportationService {
 
@@ -45,7 +44,6 @@ public class TransportationServiceImpl implements TransportationService {
     private final TransportationMapper transportationMapper;
 
     @Override
-    @Transactional
     public TransportationDTO create(TransportationDTO dto) {
         log.info("Creating new transportation for item ID: {} from storage {} to storage {}",
                 dto.itemId(), dto.fromStorageId(), dto.toStorageId());
@@ -87,7 +85,6 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public TransportationDTO getById(Long id) {
         log.debug("Fetching transportation by ID: {}", id);
 
@@ -98,7 +95,6 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
     @Override
-    @Transactional
     public void update(Long id, TransportationDTO dto) {
         log.info("Updating transportation with ID: {}", id);
 
@@ -131,7 +127,6 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
     @Override
-    @Transactional
     public void delete(Long id) {
         log.info("Deleting transportation with ID: {}", id);
 
@@ -148,7 +143,6 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<TransportationDTO> findPage(int page, int size, TransportStatus status, Long itemId,
                                             Long fromStorageId, Long toStorageId) {
         log.debug("Fetching transportations page - page: {}, size: {}, status: {}, itemId: {}, fromStorageId: {}, toStorageId: {}",
@@ -240,7 +234,6 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
 
-    @Transactional
     public TransportationDTO startTransportation(Long id) {
         log.info("Starting transportation with ID: {}", id);
 
@@ -261,7 +254,6 @@ public class TransportationServiceImpl implements TransportationService {
         return transportationMapper.toDTO(updatedTransportation);
     }
 
-    @Transactional
     public TransportationDTO completeTransportation(Long id) {
         log.info("Completing transportation with ID: {}", id);
 
@@ -282,7 +274,6 @@ public class TransportationServiceImpl implements TransportationService {
         return transportationMapper.toDTO(updatedTransportation);
     }
 
-    @Transactional
     public TransportationDTO cancelTransportation(Long id) {
         log.info("Canceling transportation with ID: {}", id);
 
@@ -302,7 +293,6 @@ public class TransportationServiceImpl implements TransportationService {
         return transportationMapper.toDTO(updatedTransportation);
     }
 
-    @Transactional(readOnly = true)
     public Page<TransportationDTO> findOverdueTransportations(int page, int size) {
         log.debug("Fetching overdue transportations - page: {}, size: {}", page, size);
 
@@ -314,7 +304,6 @@ public class TransportationServiceImpl implements TransportationService {
         return overdueTransportations.map(transportationMapper::toDTO);
     }
 
-    @Transactional(readOnly = true)
     public long countByStatus(TransportStatus status) {
         log.debug("Counting transportations with status: {}", status);
         return transportationRepository.countByStatus(status);

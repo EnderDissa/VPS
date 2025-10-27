@@ -64,18 +64,18 @@ class TransportationServiceImplTest {
     @BeforeEach
     void setUp() {
         transportationDTO = new TransportationDTO(
-                null,  // id can be null for a new transportation
-                1L, // itemId
-                1L, // vehicleId
-                1L, // driverId
-                1L, // fromStorageId
-                1L, // toStorageId
-                TransportStatus.PLANNED, // Status
-                LocalDateTime.now().plusDays(1), // scheduledDeparture
-                null, // actualDeparture
-                LocalDateTime.now().plusDays(2), // scheduledArrival
-                null, // actualArrival
-                LocalDateTime.now() // createdAt
+                null,
+                1L,
+                1L,
+                1L,
+                1L,
+                1L,
+                TransportStatus.PLANNED,
+                LocalDateTime.now().plusDays(1),
+                null,
+                LocalDateTime.now().plusDays(2),
+                null,
+                LocalDateTime.now()
         );
 
         transportation = new Transportation();

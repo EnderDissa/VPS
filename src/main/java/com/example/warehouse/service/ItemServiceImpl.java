@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
@@ -32,11 +31,10 @@ public class ItemServiceImpl implements ItemService {
     private final ItemMapper itemMapper;
 
     @Override
-    @Transactional
+    
     public ItemDTO create(ItemDTO dto) {
         log.info("Creating new item: {}", dto.name());
 
-        // Проверяем уникальность серийного номера
         if (dto.serialNumber() != null && !dto.serialNumber().isEmpty()) {
             if (itemRepository.existsBySerialNumber(dto.serialNumber())) {
                 throw new DuplicateSerialNumberException(
@@ -44,10 +42,8 @@ public class ItemServiceImpl implements ItemService {
             }
         }
 
-        // Создаем entity
         Item item = itemMapper.toEntity(dto);
-
-        // Сохраняем
+        item.setId(null);
         Item savedItem = itemRepository.save(item);
         log.info("Item created successfully with ID: {}", savedItem.getId());
 
@@ -55,7 +51,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ItemDTO getById(Long id) {
         log.debug("Fetching item by ID: {}", id);
 
@@ -66,15 +61,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
+    
     public void update(Long id, ItemDTO dto) {
         log.info("Updating item with ID: {}", id);
 
-        // Находим существующий item
         Item existingItem = itemRepository.findById(id)
                 .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + id));
 
-        // Проверяем уникальность серийного номера (если он изменился)
         if (dto.serialNumber() != null && !dto.serialNumber().isEmpty() &&
                 !dto.serialNumber().equals(existingItem.getSerialNumber())) {
             if (itemRepository.existsBySerialNumber(dto.serialNumber())) {
@@ -83,7 +76,6 @@ public class ItemServiceImpl implements ItemService {
             }
         }
 
-        // Обновляем поля
         existingItem.setName(dto.name());
         existingItem.setType(dto.type());
         existingItem.setCondition(dto.condition());
@@ -95,7 +87,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
+    
     public void delete(Long id) {
         log.info("Deleting item with ID: {}", id);
 
@@ -108,43 +100,38 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ItemDTO> findPage(int page, int size, ItemType type, ItemCondition condition) {
         log.debug("Fetching items page - page: {}, size: {}, type: {}, condition: {}",
                 page, size, type, condition);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        List<Item> itemsPage;
+        Page<Item> itemsPage;
 
         if (type != null && condition != null) {
             itemsPage = itemRepository.findByTypeAndCondition(type, condition, pageable);
         } else if (type != null) {
-            itemsPage = itemRepository.findByType(type, pageable);  // Исправлено
+            itemsPage = itemRepository.findByType(type, pageable);
         } else if (condition != null) {
-            itemsPage = itemRepository.findByCondition(condition, pageable);  // Исправлено
+            itemsPage = itemRepository.findByCondition(condition, pageable);
         } else {
-            itemsPage = (List<Item>) itemRepository.findAll(pageable);  // Исправлено
+            itemsPage = itemRepository.findAll(pageable);
         }
 
         Page<Item> resPage = (Page<Item>) itemsPage;
 
-        return resPage.map(itemMapper::toDTO);  // Исправлено
+        return resPage.map(itemMapper::toDTO);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemDTO> findAvailable(LocalDateTime from, LocalDateTime to, Long storageId,
                                        ItemType type, ItemCondition condition, Long cursor, int limit) {
         log.debug("Finding available items - from: {}, to: {}, storageId: {}, type: {}, condition: {}, cursor: {}, limit: {}",
                 from, to, storageId, type, condition, cursor, limit);
 
-        // Базовый запрос для доступных items
-        // В реальном приложении здесь была бы сложная логика с проверкой бронирований и занятости
-        List<Item> availableItems;
+        Page<Item> availableItems;
 
         if (cursor != null) {
-            // Пагинация с курсором (для бесконечной прокрутки)
             if (type != null && condition != null) {
                 availableItems = itemRepository.findByIdGreaterThanAndTypeAndCondition(
                         cursor, type, condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
@@ -159,7 +146,6 @@ public class ItemServiceImpl implements ItemService {
                         cursor, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
             }
         } else {
-            // Первая загрузка
             if (type != null && condition != null) {
                 availableItems = itemRepository.findByTypeAndCondition(
                         type, condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
@@ -171,7 +157,7 @@ public class ItemServiceImpl implements ItemService {
                         condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
             } else {
                 availableItems = itemRepository.findAll(
-                        PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id"))).getContent();
+                        PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
             }
         }
 

@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
-@Transactional
+
 @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ItemMaintenanceServiceImplIntegrationTest {
 
@@ -411,7 +411,7 @@ class ItemMaintenanceServiceImplIntegrationTest {
 
         assertNotNull(result);
         assertEquals(3, result.getContent().size());
-        assertTrue(result.getTotalElements() >= 6); // 1 from setUp + 5 new
+        assertTrue(result.getTotalElements() >= 6);
     }
 
     @Test

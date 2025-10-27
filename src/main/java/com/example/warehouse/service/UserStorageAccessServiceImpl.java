@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@Transactional
+
 @RequiredArgsConstructor
 public class UserStorageAccessServiceImpl implements UserStorageAccessService {
 
@@ -41,7 +41,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
     private final UserStorageAccessMapper userStorageAccessMapper;
 
     @Override
-    @Transactional
+    
     public UserStorageAccessDTO create(UserStorageAccessDTO dto) {
         log.info("Creating new user storage access - userId: {}, storageId: {}, accessLevel: {}",
                 dto.userId(), dto.storageId(), dto.accessLevel());
@@ -78,7 +78,6 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserStorageAccessDTO getById(Long id) {
         log.debug("Fetching user storage access by ID: {}", id);
 
@@ -89,7 +88,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
     }
 
     @Override
-    @Transactional
+    
     public void update(Long id, UserStorageAccessDTO dto) {
         log.info("Updating user storage access with ID: {}", id);
 
@@ -111,19 +110,17 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
             log.info("User storage access with ID: {} updated successfully", id);
 
         } catch (DataIntegrityViolationException e) {
-            // Проверяем, связано ли исключение с нарушением уникальности
             if (e.getMessage() != null && e.getMessage().contains("uk_user_storage_access")) {
                 throw new DuplicateUserStorageAccessException(
                         "User storage access already exists for user ID: " + dto.userId() +
                                 " and storage ID: " + dto.storageId());
             }
-            // Если это другое нарушение целостности, пробрасываем оригинальное исключение
             throw e;
         }
     }
 
     @Override
-    @Transactional
+    
     public void delete(Long id) {
         log.info("Deleting user storage access with ID: {}", id);
 
@@ -136,7 +133,6 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<UserStorageAccessDTO> findPage(int page, int size, Long userId, Long storageId,
                                                AccessLevel accessLevel, Boolean active) {
         log.debug("Fetching user storage access page - page: {}, size: {}, userId: {}, storageId: {}, accessLevel: {}, active: {}",
@@ -188,16 +184,12 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         return accessPage.map(userStorageAccessMapper::toDTO);
     }
 
-    // Вспомогательные методы
-
     private void updateRelatedEntities(UserStorageAccess access, UserStorageAccessDTO dto) {
-        // Обновляем user если изменился
         if (!access.getUser().getId().equals(dto.userId())) {
             User user = userRepository.findById(dto.userId())
                     .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.userId()));
             access.setUser(user);
 
-            // Проверяем уникальность новой комбинации user + storage
             if (userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
                     dto.userId(), dto.storageId(), access.getId())) {
                 throw new DuplicateUserStorageAccessException(
@@ -206,13 +198,11 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
             }
         }
 
-        // Обновляем storage если изменился
         if (!access.getStorage().getId().equals(dto.storageId())) {
             Storage storage = storageRepository.findById(dto.storageId())
                     .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.storageId()));
             access.setStorage(storage);
 
-            // Проверяем уникальность новой комбинации user + storage
             if (userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
                     dto.userId(), dto.storageId(), access.getId())) {
                 throw new DuplicateUserStorageAccessException(
@@ -221,7 +211,6 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
             }
         }
 
-        // Обновляем grantedBy если изменился
         if (!access.getGrantedBy().getId().equals(dto.grantedById())) {
             User grantedBy = userRepository.findById(dto.grantedById())
                     .orElseThrow(() -> new UserNotFoundException("Granted by user not found with ID: " + dto.grantedById()));
@@ -229,9 +218,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         }
     }
 
-    // Дополнительные методы
 
-    @Transactional(readOnly = true)
     public UserStorageAccessDTO findByUserAndStorage(Long userId, Long storageId) {
         log.debug("Finding user storage access by userId: {} and storageId: {}", userId, storageId);
 
@@ -242,7 +229,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         return userStorageAccessMapper.toDTO(access);
     }
 
-    @Transactional(readOnly = true)
+
     public boolean hasAccess(Long userId, Long storageId, AccessLevel requiredLevel) {
         log.debug("Checking access for userId: {}, storageId: {}, requiredLevel: {}", userId, storageId, requiredLevel);
 
@@ -253,16 +240,14 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
             return false;
         }
 
-        // Проверяем expiration date
         if (access.getExpiresAt() != null && access.getExpiresAt().isBefore(LocalDateTime.now())) {
             return false;
         }
 
-        // Проверяем уровень доступа
         return isAccessLevelSufficient(access.getAccessLevel(), requiredLevel);
     }
 
-    @Transactional
+
     public UserStorageAccessDTO deactivate(Long id) {
         log.info("Deactivating user storage access with ID: {}", id);
 
@@ -276,7 +261,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         return userStorageAccessMapper.toDTO(updatedAccess);
     }
 
-    @Transactional
+
     public UserStorageAccessDTO activate(Long id) {
         log.info("Activating user storage access with ID: {}", id);
 
@@ -290,7 +275,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         return userStorageAccessMapper.toDTO(updatedAccess);
     }
 
-    @Transactional(readOnly = true)
+
     public List<UserStorageAccessDTO> findByUser(Long userId) {
         log.debug("Finding all user storage accesses for userId: {}", userId);
 
@@ -301,7 +286,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
+
     public List<UserStorageAccessDTO> findByStorage(Long storageId) {
         log.debug("Finding all user storage accesses for storageId: {}", storageId);
 
@@ -312,7 +297,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
+
     public List<UserStorageAccessDTO> findExpiredAccesses() {
         log.debug("Finding all expired user storage accesses");
 
@@ -323,7 +308,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+
     public void deactivateExpiredAccesses() {
         log.info("Deactivating expired user storage accesses");
 
@@ -341,17 +326,14 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
     }
 
     private boolean isAccessLevelSufficient(AccessLevel userLevel, AccessLevel requiredLevel) {
-        // BASIC < MANAGER < ADMIN
         return userLevel.ordinal() >= requiredLevel.ordinal();
     }
 
-    @Transactional(readOnly = true)
     public long countActiveAccessesByUser(Long userId) {
         log.debug("Counting active accesses for userId: {}", userId);
         return userStorageAccessRepository.countByUserIdAndIsActive(userId, true);
     }
 
-    @Transactional(readOnly = true)
     public long countActiveAccessesByStorage(Long storageId) {
         log.debug("Counting active accesses for storageId: {}", storageId);
         return userStorageAccessRepository.countByStorageIdAndIsActive(storageId, true);

@@ -37,14 +37,13 @@ public class MapperToEntityTest {
     @Autowired
     private StorageMapper storageMapper;
 
-    // ===== BorrowingMapper =====
 
     @Test
     void shouldMapBorrowingDTOToEntity() {
         BorrowingDTO dto = new BorrowingDTO(
                 1L,
-                10L, // itemId
-                20L, // userId
+                10L,
+                20L,
                 3,
                 LocalDateTime.of(2025, 10, 1, 10, 0),
                 LocalDateTime.of(2025, 11, 1, 10, 0),
@@ -64,7 +63,6 @@ public class MapperToEntityTest {
         assertThat(entity.getStatus()).isEqualTo(BorrowStatus.RETURNED);
         assertThat(entity.getPurpose()).isEqualTo("Project X");
 
-        // Note: item and user are NOT set from itemId/userId in current mapper
         assertThat(entity.getItem()).isNull();
         assertThat(entity.getUser()).isNull();
     }
@@ -74,7 +72,6 @@ public class MapperToEntityTest {
         assertThat(borrowingMapper.toEntity(null)).isNull();
     }
 
-    // ===== ItemMapper =====
 
     @Test
     void shouldMapItemDTOToEntity() {
@@ -105,14 +102,12 @@ public class MapperToEntityTest {
         assertThat(itemMapper.toEntity(null)).isNull();
     }
 
-    // ===== ItemMaintenanceMapper =====
-
     @Test
     void shouldMapItemMaintenanceDTOToEntity() {
         ItemMaintenanceDTO dto = new ItemMaintenanceDTO(
                 100L,
-                200L, // itemId
-                300L, // technicianId
+                200L,
+                300L,
                 LocalDateTime.of(2025, 9, 1, 9, 0),
                 LocalDateTime.of(2026, 9, 1, 9, 0),
                 BigDecimal.valueOf(150.50),
@@ -132,7 +127,6 @@ public class MapperToEntityTest {
         assertThat(entity.getStatus()).isEqualTo(MaintenanceStatus.COMPLETED);
         assertThat(entity.getCreatedAt()).isEqualTo(LocalDateTime.of(2025, 9, 1, 10, 0));
 
-        // Relationships not set from IDs
         assertThat(entity.getItem()).isNotNull();
         assertThat(entity.getTechnician()).isNotNull();
     }
@@ -142,14 +136,13 @@ public class MapperToEntityTest {
         assertThat(itemMaintenanceMapper.toEntity(null)).isNull();
     }
 
-    // ===== KeepingMapper =====
 
     @Test
     void shouldMapKeepingDTOToEntity() {
         KeepingDTO dto = new KeepingDTO(
                 77L,
-                88L, // storageId
-                99L, // itemId
+                88L,
+                99L,
                 50,
                 "A3-B2",
                 LocalDateTime.of(2025, 10, 20, 14, 30)
@@ -163,7 +156,6 @@ public class MapperToEntityTest {
         assertThat(entity.getShelf()).isEqualTo("A3-B2");
         assertThat(entity.getLastUpdated()).isEqualTo(LocalDateTime.of(2025, 10, 20, 14, 30));
 
-        // Relationships not set
         assertThat(entity.getStorage()).isNotNull();
         assertThat(entity.getItem()).isNotNull();
     }
@@ -173,17 +165,16 @@ public class MapperToEntityTest {
         assertThat(keepingMapper.toEntity(null)).isNull();
     }
 
-    // ===== TransportationMapper =====
 
     @Test
     void shouldMapTransportationDTOToEntity() {
         TransportationDTO dto = new TransportationDTO(
                 500L,
-                501L, // itemId
-                502L, // vehicleId
-                503L, // driverId
-                504L, // fromStorageId
-                505L, // toStorageId
+                501L,
+                502L,
+                503L,
+                504L,
+                505L,
                 TransportStatus.IN_TRANSIT,
                 LocalDateTime.of(2025, 11, 1, 8, 0),
                 LocalDateTime.of(2025, 11, 1, 8, 15),
@@ -203,7 +194,6 @@ public class MapperToEntityTest {
         assertThat(entity.getActualArrival()).isEqualTo(LocalDateTime.of(2025, 11, 1, 11, 45));
         assertThat(entity.getCreatedAt()).isEqualTo(LocalDateTime.of(2025, 10, 27, 10, 0));
 
-        // Relationships not set
         assertThat(entity.getItem()).isNotNull();
         assertThat(entity.getVehicle()).isNotNull();
         assertThat(entity.getDriver()).isNotNull();
@@ -215,8 +205,6 @@ public class MapperToEntityTest {
     void shouldReturnNullWhenTransportationDTOIsNull() {
         assertThat(transportationMapper.toEntity(null)).isNull();
     }
-
-    // ===== UserStorageAccessMapper =====
 
     @Test
     void shouldMapUserStorageAccessDTOToEntity() {
@@ -240,7 +228,6 @@ public class MapperToEntityTest {
         assertThat(entity.getExpiresAt()).isEqualTo(LocalDateTime.of(2026, 1, 1, 0, 0));
         assertThat(entity.getIsActive()).isTrue();
 
-        // Relationships not set
         assertThat(entity.getUser()).isNotNull();
         assertThat(entity.getStorage()).isNotNull();
         assertThat(entity.getGrantedBy()).isNotNull();
@@ -250,8 +237,6 @@ public class MapperToEntityTest {
     void shouldReturnNullWhenUserStorageAccessDTOIsNull() {
         assertThat(userStorageAccessMapper.toEntity(null)).isNull();
     }
-
-    // ===== VehicleMapper =====
 
     @Test
     void shouldMapVehicleDTOToEntity() {
@@ -281,8 +266,6 @@ public class MapperToEntityTest {
     void shouldReturnNullWhenVehicleDTOIsNull() {
         assertThat(vehicleMapper.toEntity(null)).isNull();
     }
-
-    // ===== StorageMapper =====
 
     @Test
     void shouldMapStorageDTOToEntity() {

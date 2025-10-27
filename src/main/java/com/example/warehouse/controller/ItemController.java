@@ -28,11 +28,12 @@ import java.util.List;
 @Tag(name = "Items")
 public class ItemController {
 
-    private final ItemService service;
-
     public ItemController(ItemService service) {
         this.service = service;
     }
+
+    private final ItemService service;
+
 
     @PostMapping
     @Operation(summary = "Create item")

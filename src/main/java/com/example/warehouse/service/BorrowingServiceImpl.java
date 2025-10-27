@@ -29,7 +29,6 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class BorrowingServiceImpl implements BorrowingService {
 
     private final BorrowingRepository borrowingRepository;
@@ -38,7 +37,6 @@ public class BorrowingServiceImpl implements BorrowingService {
     private final BorrowingMapper borrowingMapper;
 
     @Override
-    @Transactional(readOnly = true)
     public BorrowingDTO getById(Long id) {
         log.debug("Getting borrowing by id: {}", id);
         Borrowing borrowing = borrowingRepository.findById(id)
@@ -66,6 +64,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
 
         Borrowing borrowing = borrowingMapper.toEntity(dto);
+        borrowing.setId(null);
         borrowing.setItem(item);
         borrowing.setUser(user);
         borrowing.setStatus(BorrowStatus.ACTIVE);
@@ -141,7 +140,7 @@ public class BorrowingServiceImpl implements BorrowingService {
 
         if (borrowing.getActualReturnDate().isAfter(borrowing.getExpectedReturnDate())) {
             log.warn("Borrowing {} was returned late", id);
-            // Here we could add late fee logic or notifications
+
         }
 
         Borrowing returnedBorrowing = borrowingRepository.save(borrowing);
@@ -168,7 +167,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    
     public Page<BorrowingDTO> findPage(int page, int size, BorrowStatus status, Long userId, Long itemId,
                                        LocalDateTime from, LocalDateTime to) {
         log.debug("Finding borrowings with filters - page: {}, size: {}, status: {}, userId: {}, itemId: {}, from: {}, to: {}",
@@ -203,7 +202,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    
     public Page<BorrowingDTO> findOverdue(int page, int size) {
         log.debug("Finding overdue borrowings - page: {}, size: {}", page, size);
 
@@ -225,9 +224,8 @@ public class BorrowingServiceImpl implements BorrowingService {
         return overdueBorrowings.map(borrowingMapper::toDTO);
     }
 
-    // Additional helper method for automatic status updates
-    @Scheduled(cron = "0 0 6 * * ?") // Run daily at 6 AM
-    @Transactional
+    @Scheduled(cron = "0 0 6 * * ?")
+    
     public void updateOverdueBorrowings() {
         log.debug("Running scheduled task to update overdue borrowings");
         LocalDateTime now = LocalDateTime.now();

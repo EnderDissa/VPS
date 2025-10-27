@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
-@Transactional
+
 @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class UserStorageAccessServiceImplIntegrationTest {
 

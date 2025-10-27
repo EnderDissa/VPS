@@ -3,6 +3,8 @@ package com.example.warehouse.dto;
 import com.example.warehouse.entity.ItemMaintenance;
 import com.example.warehouse.enumeration.BorrowStatus;
 import com.example.warehouse.enumeration.MaintenanceStatus;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
@@ -10,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Data;
 
+@JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record ItemMaintenanceDTO(
         Long id,
 

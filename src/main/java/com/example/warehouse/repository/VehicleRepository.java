@@ -20,7 +20,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     boolean existsByLicensePlate(String licensePlate);
     boolean existsByLicensePlateAndIdNot(String licensePlate, Long id);
 
-    // Заменяем @Query на встроенные методы
     Page<Vehicle> findByBrandContainingIgnoreCase(String brand, Pageable pageable);
     Page<Vehicle> findByModelContainingIgnoreCase(String model, Pageable pageable);
     Page<Vehicle> findByStatusAndBrandContainingIgnoreCase(VehicleStatus status, String brand, Pageable pageable);

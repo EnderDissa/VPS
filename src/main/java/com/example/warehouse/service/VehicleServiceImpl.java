@@ -20,18 +20,15 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
 
     @Override
-    @Transactional
     public VehicleDTO create(VehicleDTO dto) {
         log.info("Creating new vehicle with license plate: {}", dto.licensePlate());
 
-        // Проверка уникальности номерного знака
         if (vehicleRepository.existsByLicensePlate(dto.licensePlate())) {
             throw new IllegalArgumentException("Vehicle with license plate '" + dto.licensePlate() + "' already exists");
         }
@@ -54,20 +51,17 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Transactional
     public void update(Long id, VehicleDTO dto) {
         log.info("Updating vehicle with ID: {}", id);
 
         Vehicle existingVehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with ID: " + id));
 
-        // Проверка уникальности номерного знака при обновлении
         if (!existingVehicle.getLicensePlate().equals(dto.licensePlate()) &&
                 vehicleRepository.existsByLicensePlateAndIdNot(dto.licensePlate(), id)) {
             throw new IllegalArgumentException("Vehicle with license plate '" + dto.licensePlate() + "' already exists");
         }
 
-        // Обновление полей
         existingVehicle.setBrand(dto.brand());
         existingVehicle.setModel(dto.model());
         existingVehicle.setLicensePlate(dto.licensePlate());
@@ -80,7 +74,6 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Transactional
     public void delete(Long id) {
         log.info("Deleting vehicle with ID: {}", id);
 
@@ -123,8 +116,6 @@ public class VehicleServiceImpl implements VehicleService {
 
         return vehicles.map(vehicleMapper::toDTO);
     }
-
-    // Дополнительные методы для удобства
 
     public List<VehicleDTO> findByStatus(VehicleStatus status) {
         List<Vehicle> vehicles = vehicleRepository.findByStatus(status, Pageable.unpaged()).getContent();

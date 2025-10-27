@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class StorageServiceImpl implements StorageService {
 
@@ -32,7 +31,7 @@ public class StorageServiceImpl implements StorageService {
     private final StorageMapper storageMapper;
 
     @Override
-    @Transactional
+    
     public StorageDTO create(StorageDTO dto) {
         log.info("Creating new storage: {}", dto.name());
 
@@ -50,7 +49,6 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public StorageDTO getById(Long id) {
         log.debug("Fetching storage by ID: {}", id);
 
@@ -61,7 +59,7 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    @Transactional
+    
     public void update(Long id, StorageDTO dto) {
         log.info("Updating storage with ID: {}", id);
 
@@ -83,7 +81,7 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    @Transactional
+    
     public void delete(Long id) {
         log.info("Deleting storage with ID: {}", id);
 
@@ -101,7 +99,6 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<StorageDTO> findPage(int page, int size, String nameLike) {
         log.debug("Fetching storages page - page: {}, size: {}, nameLike: {}", page, size, nameLike);
 

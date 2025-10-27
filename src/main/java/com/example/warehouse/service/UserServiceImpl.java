@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -30,13 +29,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
         log.info("Creating new user with email: {}", userRequestDTO.email());
-        
-        // Проверяем уникальность email
+
         if (existsByEmail(userRequestDTO.email())) {
             throw new UserAlreadyExistsException("User with email " + userRequestDTO.email() + " already exists");
         }
-        
-        // Создаем пользователя
+
         User user = userMapper.toEntity(userRequestDTO);
         user.setCreatedAt(LocalDateTime.now());
         
@@ -47,7 +44,6 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    @Transactional(readOnly = true)
     public UserResponseDTO getUserById(Long id) {
         log.debug("Fetching user by ID: {}", id);
         
@@ -56,43 +52,39 @@ public class UserServiceImpl implements UserService {
         
         return userMapper.toResponseDTO(user);
     }
-    
+
     @Override
-    @Transactional(readOnly = true)
     public UserResponseDTO getUserByEmail(String email) {
         log.debug("Fetching user by email: {}", email);
-        
+
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
-        
+
         return userMapper.toResponseDTO(user);
     }
-    
+
     @Override
-    @Transactional(readOnly = true)
     public List<UserResponseDTO> getAllUsers() {
         log.debug("Fetching all users");
-        
+
         return userRepository.findAll().stream()
             .map(userMapper::toResponseDTO)
             .collect(Collectors.toList());
     }
-    
+
     @Override
-    @Transactional(readOnly = true)
     public List<UserResponseDTO> getUsersByRole(RoleType role) {
         log.debug("Fetching users by role: {}", role);
-        
+
         return userRepository.findByRole(role).stream()
             .map(userMapper::toResponseDTO)
             .collect(Collectors.toList());
     }
-    
+
     @Override
-    @Transactional(readOnly = true)
     public List<UserResponseDTO> searchUsersByLastName(String lastName) {
         log.debug("Searching users by last name: {}", lastName);
-        
+
         return userRepository.findByLastNameContainingIgnoreCase(lastName).stream()
             .map(userMapper::toResponseDTO)
             .collect(Collectors.toList());
@@ -104,14 +96,12 @@ public class UserServiceImpl implements UserService {
         
         User existingUser = userRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + id));
-        
-        // Проверяем, не занят ли email другим пользователем
+
         if (!existingUser.getEmail().equals(userRequestDTO.email()) &&
             existsByEmail(userRequestDTO.email())) {
             throw new UserAlreadyExistsException("Email " + userRequestDTO.email() + " is already taken");
         }
-        
-        // Обновляем данные
+
         userMapper.updateUserFromDTO(userRequestDTO, existingUser);
         
         User updatedUser = userRepository.save(existingUser);
@@ -133,14 +123,10 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    @Transactional(readOnly = true)
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
-    
-    // Дополнительные методы
-    
-    @Transactional(readOnly = true)
+
     public List<UserResponseDTO> getUsersCreatedBetween(LocalDateTime start, LocalDateTime end) {
         log.debug("Fetching users created between {} and {}", start, end);
         
@@ -148,8 +134,7 @@ public class UserServiceImpl implements UserService {
             .map(userMapper::toResponseDTO)
             .collect(Collectors.toList());
     }
-    
-    @Transactional(readOnly = true)
+
     public long countUsersByRole(RoleType role) {
         log.debug("Counting users with role: {}", role);
         

@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.validation.FieldError;
 
+import java.util.Arrays;
+
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiExceptionHandler {
@@ -72,7 +74,8 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleOther(Exception ex, HttpServletRequest req) {
         HttpStatus s = HttpStatus.INTERNAL_SERVER_ERROR;
-        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.INTERNAL_ERROR, "Unexpected error", req.getRequestURI());
+        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.INTERNAL_ERROR, ex.getMessage(), req.getRequestURI());
+        ex.printStackTrace();
         return ResponseEntity.status(s).body(body);
     }
 }

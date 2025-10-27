@@ -65,7 +65,6 @@ public interface TransportationRepository extends JpaRepository<Transportation, 
 
     long countByStatus(TransportStatus status);
 
-    // ДОБАВЛЕННЫЙ МЕТОД
     long countByVehicleIdAndStatusIn(Long vehicleId, List<TransportStatus> statuses);
 
     List<Transportation> findByDriverIdAndStatusIn(Long driverId, List<TransportStatus> statuses);

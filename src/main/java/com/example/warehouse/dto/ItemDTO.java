@@ -3,6 +3,8 @@ package com.example.warehouse.dto;
 import com.example.warehouse.entity.Item;
 import com.example.warehouse.enumeration.ItemCondition;
 import com.example.warehouse.enumeration.ItemType;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -11,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record ItemDTO(
         Long id,
 
