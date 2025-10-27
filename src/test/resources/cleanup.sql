@@ -1,0 +1,1 @@
+TRUNCATE TABLE borrowings, items, users RESTART IDENTITY CASCADE;

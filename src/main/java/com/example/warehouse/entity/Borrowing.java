@@ -5,13 +5,15 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "borrowings")
 public class Borrowing {
@@ -40,7 +42,6 @@ public class Borrowing {
     private LocalDateTime borrowDate = LocalDateTime.now();
 
     @NotNull(message = "Expected return date is required")
-    @Future(message = "Expected return date must be in the future")
     @Column(name = "expected_return_date", nullable = false)
     private LocalDateTime expectedReturnDate;
 
