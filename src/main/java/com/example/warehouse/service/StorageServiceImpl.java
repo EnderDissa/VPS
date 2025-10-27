@@ -36,16 +36,13 @@ public class StorageServiceImpl implements StorageService {
     public StorageDTO create(StorageDTO dto) {
         log.info("Creating new storage: {}", dto.name());
 
-        // Проверяем уникальность имени (опционально)
         if (storageRepository.existsByName(dto.name())) {
             log.warn("Storage with name '{}' already exists", dto.name());
-             throw new DuplicateStorageException("Storage with name '" + dto.name() + "' already exists");
+            throw new DuplicateStorageException("Storage with name '" + dto.name() + "' already exists");
         }
 
-        // Создаем entity
         Storage storage = storageMapper.toEntity(dto);
 
-        // Сохраняем
         Storage savedStorage = storageRepository.save(storage);
         log.info("Storage created successfully with ID: {}", savedStorage.getId());
 
@@ -68,18 +65,15 @@ public class StorageServiceImpl implements StorageService {
     public void update(Long id, StorageDTO dto) {
         log.info("Updating storage with ID: {}", id);
 
-        // Находим существующий storage
         Storage existingStorage = storageRepository.findById(id)
                 .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + id));
 
-        // Проверяем уникальность имени (если оно изменилось)
         if (!existingStorage.getName().equals(dto.name()) &&
                 storageRepository.existsByName(dto.name())) {
             log.warn("Storage with name '{}' already exists", dto.name());
-             throw new DuplicateStorageException("Storage with name '" + dto.name() + "' already exists");
+            throw new DuplicateStorageException("Storage with name '" + dto.name() + "' already exists");
         }
 
-        // Обновляем поля
         existingStorage.setName(dto.name());
         existingStorage.setAddress(dto.address());
         existingStorage.setCapacity(dto.capacity());
@@ -96,7 +90,6 @@ public class StorageServiceImpl implements StorageService {
         Storage storage = storageRepository.findById(id)
                 .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + id));
 
-        // Проверяем, есть ли связанные записи в keeping
         long keepingCount = keepingRepository.countByStorageId(id);
         if (keepingCount > 0) {
             throw new StorageNotEmptyException(
@@ -124,77 +117,4 @@ public class StorageServiceImpl implements StorageService {
 
         return storagesPage.map(storageMapper::toDTO);
     }
-
-//    // Дополнительные методы
-//
-//    @Transactional(readOnly = true)
-//    public StorageDTO getByName(String name) {
-//        log.debug("Fetching storage by name: {}", name);
-//
-//        Storage storage = storageRepository.findByName(name)
-//                .orElseThrow(() -> new StorageNotFoundException("Storage not found with name: " + name));
-//
-//        return storageMapper.toDTO(storage);
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public List<StorageDTO> findAll() {
-//        log.debug("Fetching all storages");
-//
-//        List<Storage> storages = storageRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
-//
-//        return storages.stream()
-//                .map(storageMapper::toDTO)
-//                .collect(Collectors.toList());
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public List<StorageDTO> findByCapacityGreaterThanEqual(Integer minCapacity) {
-//        log.debug("Fetching storages with capacity >= {}", minCapacity);
-//
-//        List<Storage> storages = storageRepository.findByCapacityGreaterThanEqual(minCapacity);
-//
-//        return storages.stream()
-//                .map(storageMapper::toDTO)
-//                .collect(Collectors.toList());
-//    }
-
-//    @Transactional(readOnly = true)
-//    public long count() {
-//        log.debug("Counting all storages");
-//        return storageRepository.count();
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public boolean existsByName(String name) {
-//        return storageRepository.existsByName(name);
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public Integer getTotalCapacity() {
-//        log.debug("Calculating total capacity of all storages");
-//
-//        Integer totalCapacity = storageRepository.getTotalCapacity();
-//        return totalCapacity != null ? totalCapacity : 0;
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public Integer getUsedCapacity(Long storageId) {
-//        log.debug("Calculating used capacity for storage ID: {}", storageId);
-//
-//        // Получаем общее количество товаров на складе
-//        Integer totalQuantity = keepingRepository.getTotalQuantityInStorage(storageId);
-//        return totalQuantity != null ? totalQuantity : 0;
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public Integer getAvailableCapacity(Long storageId) {
-//        log.debug("Calculating available capacity for storage ID: {}", storageId);
-//
-//        Storage storage = storageRepository.findById(storageId)
-//                .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + storageId));
-//
-//        Integer usedCapacity = getUsedCapacity(storageId);
-//        return storage.getCapacity() - usedCapacity;
-//    }
 }
