@@ -99,7 +99,27 @@ public class VehicleServiceImpl implements VehicleService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("brand").and(Sort.by("model")));
 
-        Page<Vehicle> vehicles = vehicleRepository.findByFilters(status, brand, model, pageable);
+        Page<Vehicle> vehicles;
+
+        if (status != null && brand != null && model != null) {
+            vehicles = vehicleRepository.findByStatusAndBrandContainingIgnoreCaseAndModelContainingIgnoreCase(
+                    status, brand, model, pageable);
+        } else if (status != null && brand != null) {
+            vehicles = vehicleRepository.findByStatusAndBrandContainingIgnoreCase(status, brand, pageable);
+        } else if (status != null && model != null) {
+            vehicles = vehicleRepository.findByStatusAndModelContainingIgnoreCase(status, model, pageable);
+        } else if (brand != null && model != null) {
+            vehicles = vehicleRepository.findByBrandContainingIgnoreCaseAndModelContainingIgnoreCase(
+                    brand, model, pageable);
+        } else if (status != null) {
+            vehicles = vehicleRepository.findByStatus(status, pageable);
+        } else if (brand != null) {
+            vehicles = vehicleRepository.findByBrandContainingIgnoreCase(brand, pageable);
+        } else if (model != null) {
+            vehicles = vehicleRepository.findByModelContainingIgnoreCase(model, pageable);
+        } else {
+            vehicles = vehicleRepository.findAll(pageable);
+        }
 
         return vehicles.map(vehicleMapper::toDTO);
     }

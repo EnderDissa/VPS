@@ -17,6 +17,7 @@ import com.example.warehouse.repository.StorageRepository;
 import com.example.warehouse.service.interfaces.UserStorageAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -92,21 +93,33 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
     public void update(Long id, UserStorageAccessDTO dto) {
         log.info("Updating user storage access with ID: {}", id);
 
-        UserStorageAccess existingAccess = userStorageAccessRepository.findById(id)
-                .orElseThrow(() -> new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
+        try {
+            UserStorageAccess existingAccess = userStorageAccessRepository.findById(id)
+                    .orElseThrow(() -> new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
 
-        if (dto.expiresAt() != null && dto.expiresAt().isBefore(LocalDateTime.now())) {
-            throw new OperationNotAllowedException("Expiration date must be in the future");
+            if (dto.expiresAt() != null && dto.expiresAt().isBefore(LocalDateTime.now())) {
+                throw new OperationNotAllowedException("Expiration date must be in the future");
+            }
+
+            updateRelatedEntities(existingAccess, dto);
+
+            existingAccess.setAccessLevel(dto.accessLevel());
+            existingAccess.setExpiresAt(dto.expiresAt());
+            existingAccess.setIsActive(dto.isActive());
+
+            userStorageAccessRepository.save(existingAccess);
+            log.info("User storage access with ID: {} updated successfully", id);
+
+        } catch (DataIntegrityViolationException e) {
+            // Проверяем, связано ли исключение с нарушением уникальности
+            if (e.getMessage() != null && e.getMessage().contains("uk_user_storage_access")) {
+                throw new DuplicateUserStorageAccessException(
+                        "User storage access already exists for user ID: " + dto.userId() +
+                                " and storage ID: " + dto.storageId());
+            }
+            // Если это другое нарушение целостности, пробрасываем оригинальное исключение
+            throw e;
         }
-
-        updateRelatedEntities(existingAccess, dto);
-
-        existingAccess.setAccessLevel(dto.accessLevel());
-        existingAccess.setExpiresAt(dto.expiresAt());
-        existingAccess.setIsActive(dto.isActive());
-
-        userStorageAccessRepository.save(existingAccess);
-        log.info("User storage access with ID: {} updated successfully", id);
     }
 
     @Override

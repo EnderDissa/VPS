@@ -1,6 +1,7 @@
 package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.ItemMaintenance;
+import com.example.warehouse.enumeration.BorrowStatus;
 import com.example.warehouse.enumeration.MaintenanceStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -33,6 +34,11 @@ public record ItemMaintenanceDTO(
 
         LocalDateTime createdAt
 ) {
+    public ItemMaintenanceDTO {
+        if (status == null) {
+            status = MaintenanceStatus.COMPLETED;
+        }
+    }
 
     public ItemMaintenanceDTO(ItemMaintenance maintenance) {
         this(
