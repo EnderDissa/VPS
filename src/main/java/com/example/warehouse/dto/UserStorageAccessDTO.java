@@ -4,7 +4,6 @@ import com.example.warehouse.entity.UserStorageAccess;
 import com.example.warehouse.enumeration.AccessLevel;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDateTime;
 
 public record UserStorageAccessDTO(
@@ -30,9 +29,7 @@ public record UserStorageAccessDTO(
         @NotNull(message = "Active status is required")
         Boolean isActive
 ) {
-
     public UserStorageAccessDTO {
-
         if (accessLevel == null) {
             accessLevel = AccessLevel.BASIC;
         }
