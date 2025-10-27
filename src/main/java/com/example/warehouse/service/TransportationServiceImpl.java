@@ -50,7 +50,6 @@ public class TransportationServiceImpl implements TransportationService {
         log.info("Creating new transportation for item ID: {} from storage {} to storage {}",
                 dto.itemId(), dto.fromStorageId(), dto.toStorageId());
 
-        // Проверяем существование связанных сущностей
         Item item = itemRepository.findById(dto.itemId())
                 .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
 
@@ -66,25 +65,21 @@ public class TransportationServiceImpl implements TransportationService {
         Storage toStorage = storageRepository.findById(dto.toStorageId())
                 .orElseThrow(() -> new StorageNotFoundException("To storage not found with ID: " + dto.toStorageId()));
 
-        // Проверяем, что from и to storage разные
         if (dto.fromStorageId().equals(dto.toStorageId())) {
             throw new OperationNotAllowedException("From and to storage cannot be the same");
         }
 
-        // Проверяем доступность водителя и транспортного средства
         checkDriverAvailability(dto.driverId(), dto.scheduledDeparture(), dto.scheduledArrival());
         checkVehicleAvailability(dto.vehicleId(), dto.scheduledDeparture(), dto.scheduledArrival());
 
-        // Создаем entity
         Transportation transportation = transportationMapper.toEntity(dto);
         transportation.setItem(item);
         transportation.setVehicle(vehicle);
         transportation.setDriver(driver);
         transportation.setFromStorage(fromStorage);
         transportation.setToStorage(toStorage);
-        transportation.setStatus(TransportStatus.PLANNED); // Новые перевозки создаются как PLANNED
+        transportation.setStatus(TransportStatus.PLANNED);
 
-        // Сохраняем
         Transportation savedTransportation = transportationRepository.save(transportation);
         log.info("Transportation created successfully with ID: {}", savedTransportation.getId());
 
@@ -107,31 +102,25 @@ public class TransportationServiceImpl implements TransportationService {
     public void update(Long id, TransportationDTO dto) {
         log.info("Updating transportation with ID: {}", id);
 
-        // Находим существующую перевозку
         Transportation existingTransportation = transportationRepository.findById(id)
                 .orElseThrow(() -> new TransportationNotFoundException("Transportation not found with ID: " + id));
 
-        // Проверяем, что перевозка не в финальном статусе
         if (isFinalStatus(existingTransportation.getStatus())) {
             throw new OperationNotAllowedException(
                     "Cannot update transportation with status: " + existingTransportation.getStatus());
         }
 
-        // Проверяем и обновляем связанные сущности
         updateRelatedEntities(existingTransportation, dto);
 
-        // Обновляем остальные поля
         existingTransportation.setStatus(dto.status());
         existingTransportation.setScheduledDeparture(dto.scheduledDeparture());
         existingTransportation.setScheduledArrival(dto.scheduledArrival());
 
-        // Если статус изменился на IN_PROGRESS, устанавливаем actualDeparture
         if (dto.status() == TransportStatus.IN_TRANSIT &&
                 existingTransportation.getActualDeparture() == null) {
             existingTransportation.setActualDeparture(LocalDateTime.now());
         }
 
-        // Если статус изменился на DELIVERED, устанавливаем actualArrival
         if (dto.status() == TransportStatus.DELIVERED &&
                 existingTransportation.getActualArrival() == null) {
             existingTransportation.setActualArrival(LocalDateTime.now());
@@ -149,7 +138,6 @@ public class TransportationServiceImpl implements TransportationService {
         Transportation transportation = transportationRepository.findById(id)
                 .orElseThrow(() -> new TransportationNotFoundException("Transportation not found with ID: " + id));
 
-        // Проверяем, что перевозка не в финальном статусе
         if (isFinalStatus(transportation.getStatus())) {
             throw new OperationNotAllowedException(
                     "Cannot delete transportation with status: " + transportation.getStatus());
@@ -196,38 +184,32 @@ public class TransportationServiceImpl implements TransportationService {
         return transportationsPage.map(transportationMapper::toDTO);
     }
 
-    // Вспомогательные методы
 
     private void updateRelatedEntities(Transportation transportation, TransportationDTO dto) {
-        // Обновляем item если изменился
         if (!transportation.getItem().getId().equals(dto.itemId())) {
             Item item = itemRepository.findById(dto.itemId())
                     .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
             transportation.setItem(item);
         }
 
-        // Обновляем vehicle если изменился
         if (!transportation.getVehicle().getId().equals(dto.vehicleId())) {
             Vehicle vehicle = vehicleRepository.findById(dto.vehicleId())
                     .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found with ID: " + dto.vehicleId()));
             transportation.setVehicle(vehicle);
         }
 
-        // Обновляем driver если изменился
         if (!transportation.getDriver().getId().equals(dto.driverId())) {
             User driver = userRepository.findById(dto.driverId())
                     .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.driverId()));
             transportation.setDriver(driver);
         }
 
-        // Обновляем fromStorage если изменился
         if (!transportation.getFromStorage().getId().equals(dto.fromStorageId())) {
             Storage fromStorage = storageRepository.findById(dto.fromStorageId())
                     .orElseThrow(() -> new StorageNotFoundException("From storage not found with ID: " + dto.fromStorageId()));
             transportation.setFromStorage(fromStorage);
         }
 
-        // Обновляем toStorage если изменился
         if (!transportation.getToStorage().getId().equals(dto.toStorageId())) {
             Storage toStorage = storageRepository.findById(dto.toStorageId())
                     .orElseThrow(() -> new StorageNotFoundException("To storage not found with ID: " + dto.toStorageId()));
@@ -257,7 +239,6 @@ public class TransportationServiceImpl implements TransportationService {
         return status == TransportStatus.DELIVERED || status == TransportStatus.CANCELLED;
     }
 
-    // Дополнительные методы
 
     @Transactional
     public TransportationDTO startTransportation(Long id) {
