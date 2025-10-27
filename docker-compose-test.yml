@@ -25,7 +25,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/warehouse
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5433/warehouse
       SPRING_DATASOURCE_USERNAME: liquibase
       SPRING_DATASOURCE_PASSWORD: securepassword
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
