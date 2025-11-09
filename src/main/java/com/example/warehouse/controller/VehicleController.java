@@ -1,7 +1,9 @@
 package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.VehicleDTO;
+import com.example.warehouse.entity.Vehicle;
 import com.example.warehouse.enumeration.VehicleStatus;
+import com.example.warehouse.mapper.VehicleMapper;
 import com.example.warehouse.service.interfaces.VehicleService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,28 +28,31 @@ import java.util.List;
 public class VehicleController {
 
     private final VehicleService service;
+    private final VehicleMapper mapper;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public VehicleController(VehicleService service) {
+    public VehicleController(VehicleService service, VehicleMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
     @PostMapping
     @Operation(summary = "Create vehicle")
     public ResponseEntity<VehicleDTO> create(@Valid @RequestBody VehicleDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
+        Vehicle vehicle = service.create(mapper.toEntity(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDTO(vehicle));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get vehicle by id")
     public VehicleDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+        return mapper.toDTO(service.getById(id));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update vehicle by id")
     public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody VehicleDTO dto) {
-        service.update(id, dto);
+        service.update(id, mapper.toEntity(dto));
         return ResponseEntity.noContent().build();
     }
 
@@ -67,7 +72,7 @@ public class VehicleController {
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) String model
     ) {
-        var result = service.findPage(page, size, status, brand, model);
+        var result = service.findPage(page, size, status, brand, model).map(mapper::toDTO);
         var headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(result.getTotalElements()));
         return new ResponseEntity<>(result.getContent(), headers, HttpStatus.OK);

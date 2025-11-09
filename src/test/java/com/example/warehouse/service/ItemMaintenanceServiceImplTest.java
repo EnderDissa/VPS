@@ -67,8 +67,10 @@ class ItemMaintenanceServiceImplIntegrationTest {
 
     private User testTechnician;
     private User testTechnician2;
+    private User nonExistentTechnician;
     private Item testItem;
     private Item testItem2;
+    private Item nonExistentItem;
     private ItemMaintenance testMaintenance;
 
     @BeforeEach
@@ -91,6 +93,15 @@ class ItemMaintenanceServiceImplIntegrationTest {
                 .build();
         testTechnician2 = userRepository.save(testTechnician2);
 
+        nonExistentTechnician = User.builder()
+                .id(999L)
+                .firstName("Jane")
+                .lastName("Technician")
+                .email("tech2@example.com")
+                .role(RoleType.MANAGER)
+                .createdAt(LocalDateTime.now())
+                .build();
+
         testItem = Item.builder()
                 .name("Test Laptop")
                 .description("High-performance laptop")
@@ -111,6 +122,16 @@ class ItemMaintenanceServiceImplIntegrationTest {
                 .build();
         testItem2 = itemRepository.save(testItem2);
 
+        nonExistentItem = Item.builder()
+                .id(999L)
+                .name("Test Monitor")
+                .description("4K Monitor")
+                .type(ItemType.ELECTRONICS)
+                .condition(ItemCondition.NEEDS_MAINTENANCE)
+                .serialNumber("SN-MONITOR-001")
+                .createdAt(LocalDateTime.now())
+                .build();
+
         testMaintenance = new ItemMaintenance();
         testMaintenance.setItem(testItem);
         testMaintenance.setTechnician(testTechnician);
@@ -124,10 +145,10 @@ class ItemMaintenanceServiceImplIntegrationTest {
 
     @Test
     void create_ShouldCreateItemMaintenance_WhenValidData() {
-        ItemMaintenanceDTO newMaintenanceDTO = new ItemMaintenanceDTO(
+        ItemMaintenance newMaintenance = new ItemMaintenance(
                 null,
-                testItem2.getId(),
-                testTechnician2.getId(),
+                testItem2,
+                testTechnician2,
                 LocalDateTime.now().minusHours(2),
                 LocalDateTime.now().plusMonths(3),
                 new BigDecimal("75.25"),
@@ -136,29 +157,28 @@ class ItemMaintenanceServiceImplIntegrationTest {
                 null
         );
 
-        ItemMaintenanceDTO result = itemMaintenanceService.create(newMaintenanceDTO);
+        ItemMaintenance result = itemMaintenanceService.create(newMaintenance);
 
         assertNotNull(result);
-        assertNotNull(result.id());
-        assertEquals(testItem2.getId(), result.itemId());
-        assertEquals(testTechnician2.getId(), result.technicianId());
-        assertEquals(new BigDecimal("75.25"), result.cost());
-        assertEquals("Display calibration", result.description());
-        assertEquals(MaintenanceStatus.COMPLETED, result.status());
-        assertNotNull(result.createdAt());
+        assertNotNull(result.getId());
+        assertEquals(testItem2.getId(), result.getItem().getId());
+        assertEquals(testTechnician2.getId(), result.getTechnician().getId());
+        assertEquals(new BigDecimal("75.25"), result.getCost());
+        assertEquals("Display calibration", result.getDescription());
+        assertEquals(MaintenanceStatus.COMPLETED, result.getStatus());
+        assertNotNull(result.getCreatedAt());
 
-        ItemMaintenance savedMaintenance = itemMaintenanceRepository.findById(result.id()).orElseThrow();
+        ItemMaintenance savedMaintenance = itemMaintenanceRepository.findById(result.getId()).orElseThrow();
         assertEquals(testItem2.getId(), savedMaintenance.getItem().getId());
         assertEquals(testTechnician2.getId(), savedMaintenance.getTechnician().getId());
     }
 
     @Test
     void create_ShouldThrowException_WhenItemNotFound() {
-        Long nonExistentItemId = 999L;
-        ItemMaintenanceDTO maintenanceDTO = new ItemMaintenanceDTO(
+        ItemMaintenance maintenance = new ItemMaintenance(
                 null,
-                nonExistentItemId,
-                testTechnician.getId(),
+                nonExistentItem,
+                testTechnician,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMonths(6),
                 new BigDecimal("100.00"),
@@ -168,16 +188,15 @@ class ItemMaintenanceServiceImplIntegrationTest {
         );
 
         assertThrows(ItemNotFoundException.class,
-                () -> itemMaintenanceService.create(maintenanceDTO));
+                () -> itemMaintenanceService.create(maintenance));
     }
 
     @Test
     void create_ShouldThrowException_WhenTechnicianNotFound() {
-        Long nonExistentTechnicianId = 999L;
-        ItemMaintenanceDTO maintenanceDTO = new ItemMaintenanceDTO(
+        ItemMaintenance maintenance = new ItemMaintenance(
                 null,
-                testItem.getId(),
-                nonExistentTechnicianId,
+                testItem,
+                nonExistentTechnician,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMonths(6),
                 new BigDecimal("100.00"),
@@ -187,38 +206,35 @@ class ItemMaintenanceServiceImplIntegrationTest {
         );
 
         assertThrows(UserNotFoundException.class,
-                () -> itemMaintenanceService.create(maintenanceDTO));
+                () -> itemMaintenanceService.create(maintenance));
     }
 
     @Test
     void create_ShouldSetDefaultStatus_WhenStatusNotProvided() {
-        ItemMaintenanceDTO maintenanceWithoutStatus = new ItemMaintenanceDTO(
-                null,
-                testItem2.getId(),
-                testTechnician.getId(),
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMonths(6),
-                new BigDecimal("50.00"),
-                "Maintenance without status",
-                null,
-                null
-        );
+        ItemMaintenance maintenanceWithoutStatus = ItemMaintenance.builder()
+                .item(testItem2)
+                .technician(testTechnician)
+                .maintenanceDate(LocalDateTime.now())
+                .nextMaintenanceDate(LocalDateTime.now().plusMonths(6))
+                .cost(new BigDecimal("50.00"))
+                .description("Maintenance without status")
+                .build();
 
-        ItemMaintenanceDTO result = itemMaintenanceService.create(maintenanceWithoutStatus);
+        ItemMaintenance result = itemMaintenanceService.create(maintenanceWithoutStatus);
 
-        assertEquals(MaintenanceStatus.COMPLETED, result.status());
+        assertEquals(MaintenanceStatus.COMPLETED, result.getStatus());
     }
 
     @Test
     void getById_ShouldReturnItemMaintenance_WhenExists() {
-        ItemMaintenanceDTO result = itemMaintenanceService.getById(testMaintenance.getId());
+        ItemMaintenance result = itemMaintenanceService.getById(testMaintenance.getId());
 
         assertNotNull(result);
-        assertEquals(testMaintenance.getId(), result.id());
-        assertEquals(testItem.getId(), result.itemId());
-        assertEquals(testTechnician.getId(), result.technicianId());
-        assertEquals(new BigDecimal("150.50"), result.cost());
-        assertEquals(MaintenanceStatus.COMPLETED, result.status());
+        assertEquals(testMaintenance.getId(), result.getId());
+        assertEquals(testItem.getId(), result.getItem().getId());
+        assertEquals(testTechnician.getId(), result.getTechnician().getId());
+        assertEquals(new BigDecimal("150.50"), result.getCost());
+        assertEquals(MaintenanceStatus.COMPLETED, result.getStatus());
     }
 
     @Test
@@ -231,10 +247,10 @@ class ItemMaintenanceServiceImplIntegrationTest {
 
     @Test
     void update_ShouldUpdateItemMaintenance_WhenValidData() {
-        ItemMaintenanceDTO updateDTO = new ItemMaintenanceDTO(
+        ItemMaintenance update = new ItemMaintenance(
                 testMaintenance.getId(),
-                testItem.getId(),
-                testTechnician2.getId(),
+                testItem,
+                testTechnician2,
                 LocalDateTime.now().minusDays(2),
                 LocalDateTime.now().plusMonths(12),
                 new BigDecimal("200.00"),
@@ -243,7 +259,7 @@ class ItemMaintenanceServiceImplIntegrationTest {
                 testMaintenance.getCreatedAt()
         );
 
-        itemMaintenanceService.update(testMaintenance.getId(), updateDTO);
+        itemMaintenanceService.update(testMaintenance.getId(), update);
 
         ItemMaintenance updatedMaintenance = itemMaintenanceRepository.findById(testMaintenance.getId()).orElseThrow();
         assertEquals(testTechnician2.getId(), updatedMaintenance.getTechnician().getId());
@@ -254,10 +270,10 @@ class ItemMaintenanceServiceImplIntegrationTest {
 
     @Test
     void update_ShouldUpdateItem_WhenItemChanged() {
-        ItemMaintenanceDTO updateDTO = new ItemMaintenanceDTO(
+        ItemMaintenance update = new ItemMaintenance(
                 testMaintenance.getId(),
-                testItem2.getId(),
-                testTechnician.getId(),
+                testItem2,
+                testTechnician,
                 testMaintenance.getMaintenanceDate(),
                 testMaintenance.getNextMaintenanceDate(),
                 testMaintenance.getCost(),
@@ -266,7 +282,7 @@ class ItemMaintenanceServiceImplIntegrationTest {
                 testMaintenance.getCreatedAt()
         );
 
-        itemMaintenanceService.update(testMaintenance.getId(), updateDTO);
+        itemMaintenanceService.update(testMaintenance.getId(), update);
 
         ItemMaintenance updatedMaintenance = itemMaintenanceRepository.findById(testMaintenance.getId()).orElseThrow();
         assertEquals(testItem2.getId(), updatedMaintenance.getItem().getId());
@@ -275,10 +291,10 @@ class ItemMaintenanceServiceImplIntegrationTest {
     @Test
     void update_ShouldThrowException_WhenItemMaintenanceNotFound() {
         Long nonExistentId = 999L;
-        ItemMaintenanceDTO updateDTO = new ItemMaintenanceDTO(
+        ItemMaintenance update = new ItemMaintenance(
                 nonExistentId,
-                testItem.getId(),
-                testTechnician.getId(),
+                testItem,
+                testTechnician,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMonths(6),
                 new BigDecimal("100.00"),
@@ -288,16 +304,15 @@ class ItemMaintenanceServiceImplIntegrationTest {
         );
 
         assertThrows(ItemMaintenanceNotFoundException.class,
-                () -> itemMaintenanceService.update(nonExistentId, updateDTO));
+                () -> itemMaintenanceService.update(nonExistentId, update));
     }
 
     @Test
     void update_ShouldThrowException_WhenNewItemNotFound() {
-        Long nonExistentItemId = 999L;
-        ItemMaintenanceDTO updateDTO = new ItemMaintenanceDTO(
+        ItemMaintenance update = new ItemMaintenance(
                 testMaintenance.getId(),
-                nonExistentItemId,
-                testTechnician.getId(),
+                nonExistentItem,
+                testTechnician,
                 testMaintenance.getMaintenanceDate(),
                 testMaintenance.getNextMaintenanceDate(),
                 testMaintenance.getCost(),
@@ -307,16 +322,15 @@ class ItemMaintenanceServiceImplIntegrationTest {
         );
 
         assertThrows(ItemNotFoundException.class,
-                () -> itemMaintenanceService.update(testMaintenance.getId(), updateDTO));
+                () -> itemMaintenanceService.update(testMaintenance.getId(), update));
     }
 
     @Test
     void update_ShouldThrowException_WhenNewTechnicianNotFound() {
-        Long nonExistentTechnicianId = 999L;
-        ItemMaintenanceDTO updateDTO = new ItemMaintenanceDTO(
+        ItemMaintenance update = new ItemMaintenance(
                 testMaintenance.getId(),
-                testItem.getId(),
-                nonExistentTechnicianId,
+                testItem,
+                nonExistentTechnician,
                 testMaintenance.getMaintenanceDate(),
                 testMaintenance.getNextMaintenanceDate(),
                 testMaintenance.getCost(),
@@ -326,7 +340,7 @@ class ItemMaintenanceServiceImplIntegrationTest {
         );
 
         assertThrows(UserNotFoundException.class,
-                () -> itemMaintenanceService.update(testMaintenance.getId(), updateDTO));
+                () -> itemMaintenanceService.update(testMaintenance.getId(), update));
     }
 
     @Test
@@ -348,38 +362,38 @@ class ItemMaintenanceServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithItemIdFilter() {
-        Page<ItemMaintenanceDTO> result = itemMaintenanceService.findPage(0, 10, testItem.getId(), null);
+        Page<ItemMaintenance> result = itemMaintenanceService.findPage(0, 10, testItem.getId(), null);
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
-        assertEquals(testItem.getId(), result.getContent().get(0).itemId());
+        assertEquals(testItem.getId(), result.getContent().get(0).getItem().getId());
     }
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithStatusFilter() {
-        Page<ItemMaintenanceDTO> result = itemMaintenanceService.findPage(0, 10, null, MaintenanceStatus.COMPLETED);
+        Page<ItemMaintenance> result = itemMaintenanceService.findPage(0, 10, null, MaintenanceStatus.COMPLETED);
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
-        assertEquals(MaintenanceStatus.COMPLETED, result.getContent().get(0).status());
+        assertEquals(MaintenanceStatus.COMPLETED, result.getContent().get(0).getStatus());
     }
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithBothFilters() {
-        Page<ItemMaintenanceDTO> result = itemMaintenanceService.findPage(
+        Page<ItemMaintenance> result = itemMaintenanceService.findPage(
                 0, 10, testItem.getId(), MaintenanceStatus.COMPLETED);
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
 
-        ItemMaintenanceDTO maintenance = result.getContent().get(0);
-        assertEquals(testItem.getId(), maintenance.itemId());
-        assertEquals(MaintenanceStatus.COMPLETED, maintenance.status());
+        ItemMaintenance maintenance = result.getContent().get(0);
+        assertEquals(testItem.getId(), maintenance.getItem().getId());
+        assertEquals(MaintenanceStatus.COMPLETED, maintenance.getStatus());
     }
 
     @Test
     void findPage_ShouldReturnAll_WhenNoFilters() {
-        Page<ItemMaintenanceDTO> result = itemMaintenanceService.findPage(0, 10, null, null);
+        Page<ItemMaintenance> result = itemMaintenanceService.findPage(0, 10, null, null);
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
@@ -387,7 +401,7 @@ class ItemMaintenanceServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnEmpty_WhenNoMatches() {
-        Page<ItemMaintenanceDTO> result = itemMaintenanceService.findPage(0, 10, 999L, MaintenanceStatus.CANCELLED);
+        Page<ItemMaintenance> result = itemMaintenanceService.findPage(0, 10, 999L, MaintenanceStatus.CANCELLED);
 
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
@@ -407,7 +421,7 @@ class ItemMaintenanceServiceImplIntegrationTest {
             itemMaintenanceRepository.save(maintenance);
         }
 
-        Page<ItemMaintenanceDTO> result = itemMaintenanceService.findPage(0, 3, null, null);
+        Page<ItemMaintenance> result = itemMaintenanceService.findPage(0, 3, null, null);
 
         assertNotNull(result);
         assertEquals(3, result.getContent().size());
@@ -416,11 +430,11 @@ class ItemMaintenanceServiceImplIntegrationTest {
 
     @Test
     void findByTechnician_ShouldReturnTechnicianMaintenance() {
-        Page<ItemMaintenanceDTO> result = itemMaintenanceService.findByTechnician(testTechnician.getId(), 0, 10);
+        Page<ItemMaintenance> result = itemMaintenanceService.findByTechnician(testTechnician.getId(), 0, 10);
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
-        assertEquals(testTechnician.getId(), result.getContent().get(0).technicianId());
+        assertEquals(testTechnician.getId(), result.getContent().get(0).getTechnician().getId());
     }
 
     @Test
@@ -448,10 +462,10 @@ class ItemMaintenanceServiceImplIntegrationTest {
 
     @Test
     void create_ShouldHandleZeroCost() {
-        ItemMaintenanceDTO maintenanceWithZeroCost = new ItemMaintenanceDTO(
+        ItemMaintenance maintenanceWithZeroCost = new ItemMaintenance(
                 null,
-                testItem2.getId(),
-                testTechnician.getId(),
+                testItem2,
+                testTechnician,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMonths(6),
                 BigDecimal.ZERO,
@@ -460,18 +474,18 @@ class ItemMaintenanceServiceImplIntegrationTest {
                 null
         );
 
-        ItemMaintenanceDTO result = itemMaintenanceService.create(maintenanceWithZeroCost);
+        ItemMaintenance result = itemMaintenanceService.create(maintenanceWithZeroCost);
 
         assertNotNull(result);
-        assertEquals(BigDecimal.ZERO, result.cost());
+        assertEquals(BigDecimal.ZERO, result.getCost());
     }
 
     @Test
     void create_ShouldHandleNullNextMaintenanceDate() {
-        ItemMaintenanceDTO maintenanceWithoutNextDate = new ItemMaintenanceDTO(
+        ItemMaintenance maintenanceWithoutNextDate = new ItemMaintenance(
                 null,
-                testItem2.getId(),
-                testTechnician.getId(),
+                testItem2,
+                testTechnician,
                 LocalDateTime.now(),
                 null,
                 new BigDecimal("50.00"),
@@ -480,9 +494,9 @@ class ItemMaintenanceServiceImplIntegrationTest {
                 null
         );
 
-        ItemMaintenanceDTO result = itemMaintenanceService.create(maintenanceWithoutNextDate);
+        ItemMaintenance result = itemMaintenanceService.create(maintenanceWithoutNextDate);
 
         assertNotNull(result);
-        assertNull(result.nextMaintenanceDate());
+        assertNull(result.getNextMaintenanceDate());
     }
 }

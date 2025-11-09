@@ -36,6 +36,7 @@ public class UserStorageAccess {
     @NotNull(message = "Access level is required")
     @Enumerated(EnumType.STRING)
     @Column(name = "access_level", nullable = false)
+    @Builder.Default
     private AccessLevel accessLevel = AccessLevel.BASIC;
 
     @NotNull(message = "Granted by user is required")
@@ -52,5 +53,6 @@ public class UserStorageAccess {
 
     @NotNull(message = "Active status is required")
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private Boolean isActive = true;
 }

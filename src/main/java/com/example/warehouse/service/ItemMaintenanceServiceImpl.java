@@ -30,66 +30,58 @@ import java.util.Optional;
 public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
 
     private final ItemMaintenanceRepository itemMaintenanceRepository;
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
-    private final ItemMaintenanceMapper itemMaintenanceMapper;
+    private final ItemServiceImpl itemService;
+    private final UserServiceImpl userService;
 
     @Override
     
-    public ItemMaintenanceDTO create(ItemMaintenanceDTO dto) {
-        log.info("Creating new item maintenance for item ID: {}", dto.itemId());
+    public ItemMaintenance create(ItemMaintenance maintenance) {
+        log.info("Creating new item maintenance for item ID: {}", maintenance.getItem().getId());
 
-        Item item = itemRepository.findById(dto.itemId())
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
+        Item item = itemService.getById(maintenance.getItem().getId());
 
-        User technician = userRepository.findById(dto.technicianId())
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.technicianId()));
+        User technician = userService.getUserById(maintenance.getTechnician().getId());
 
-        ItemMaintenance maintenance = itemMaintenanceMapper.toEntity(dto);
         maintenance.setItem(item);
         maintenance.setTechnician(technician);
 
         ItemMaintenance savedMaintenance = itemMaintenanceRepository.save(maintenance);
         log.info("Item maintenance created successfully with ID: {}", savedMaintenance.getId());
 
-        return itemMaintenanceMapper.toDTO(savedMaintenance);
+        return savedMaintenance;
     }
 
     @Override
-    public ItemMaintenanceDTO getById(Long id) {
+    public ItemMaintenance getById(Long id) {
         log.debug("Fetching item maintenance by ID: {}", id);
 
-        ItemMaintenance maintenance = itemMaintenanceRepository.findById(id)
+        return itemMaintenanceRepository.findById(id)
                 .orElseThrow(() -> new ItemMaintenanceNotFoundException("Item maintenance not found with ID: " + id));
-
-        return itemMaintenanceMapper.toDTO(maintenance);
     }
 
     @Override
     
-    public void update(Long id, ItemMaintenanceDTO dto) {
+    public void update(Long id, ItemMaintenance maintenance) {
         log.info("Updating item maintenance with ID: {}", id);
 
         ItemMaintenance existingMaintenance = itemMaintenanceRepository.findById(id)
                 .orElseThrow(() -> new ItemMaintenanceNotFoundException("Item maintenance not found with ID: " + id));
 
-        if (!existingMaintenance.getItem().getId().equals(dto.itemId())) {
-            Item item = itemRepository.findById(dto.itemId())
-                    .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
+        if (!existingMaintenance.getItem().getId().equals(maintenance.getItem().getId())) {
+            Item item = itemService.getById(maintenance.getItem().getId());
             existingMaintenance.setItem(item);
         }
 
-        if (!existingMaintenance.getTechnician().getId().equals(dto.technicianId())) {
-            User technician = userRepository.findById(dto.technicianId())
-                    .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.technicianId()));
+        if (!existingMaintenance.getTechnician().getId().equals(maintenance.getTechnician().getId())) {
+            User technician = userService.getUserById(maintenance.getTechnician().getId());
             existingMaintenance.setTechnician(technician);
         }
 
-        existingMaintenance.setMaintenanceDate(dto.maintenanceDate());
-        existingMaintenance.setNextMaintenanceDate(dto.nextMaintenanceDate());
-        existingMaintenance.setCost(dto.cost());
-        existingMaintenance.setDescription(dto.description());
-        existingMaintenance.setStatus(dto.status());
+        existingMaintenance.setMaintenanceDate(maintenance.getMaintenanceDate());
+        existingMaintenance.setNextMaintenanceDate(maintenance.getNextMaintenanceDate());
+        existingMaintenance.setCost(maintenance.getCost());
+        existingMaintenance.setDescription(maintenance.getDescription());
+        existingMaintenance.setStatus(maintenance.getStatus());
 
         itemMaintenanceRepository.save(existingMaintenance);
         log.info("Item maintenance with ID: {} updated successfully", id);
@@ -109,7 +101,7 @@ public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
     }
 
     @Override
-    public Page<ItemMaintenanceDTO> findPage(int page, int size, Long itemId, MaintenanceStatus status) {
+    public Page<ItemMaintenance> findPage(int page, int size, Long itemId, MaintenanceStatus status) {
         log.debug("Fetching item maintenance page - page: {}, size: {}, itemId: {}, status: {}",
                 page, size, itemId, status);
 
@@ -127,17 +119,16 @@ public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
             maintenancePage = itemMaintenanceRepository.findAll(pageable);
         }
 
-        return maintenancePage.map(itemMaintenanceMapper::toDTO);
+        return maintenancePage;
     }
 
 
-    public Page<ItemMaintenanceDTO> findByTechnician(Long technicianId, int page, int size) {
+    public Page<ItemMaintenance> findByTechnician(Long technicianId, int page, int size) {
         log.debug("Fetching item maintenance by technician ID: {}", technicianId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "maintenanceDate"));
-        Page<ItemMaintenance> maintenancePage = itemMaintenanceRepository.findByTechnicianId(technicianId, pageable);
 
-        return maintenancePage.map(itemMaintenanceMapper::toDTO);
+        return itemMaintenanceRepository.findByTechnicianId(technicianId, pageable);
     }
 
     public long countByStatus(MaintenanceStatus status) {

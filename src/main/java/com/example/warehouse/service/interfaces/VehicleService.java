@@ -1,13 +1,13 @@
 package com.example.warehouse.service.interfaces;
 
-import com.example.warehouse.dto.VehicleDTO;
+import com.example.warehouse.entity.Vehicle;
 import com.example.warehouse.enumeration.VehicleStatus;
 import org.springframework.data.domain.Page;
 
 public interface VehicleService {
-    VehicleDTO create(VehicleDTO dto);
-    VehicleDTO getById(Long id);
-    void update(Long id, VehicleDTO dto);
+    Vehicle create(Vehicle vehicle);
+    Vehicle getById(Long id);
+    void update(Long id, Vehicle Vehicle);
     void delete(Long id);
-    Page<VehicleDTO> findPage(int page, int size, VehicleStatus status, String brand, String model);
+    Page<Vehicle> findPage(int page, int size, VehicleStatus status, String brand, String model);
 }

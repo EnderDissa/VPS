@@ -44,5 +44,6 @@ public class Vehicle {
     @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private VehicleStatus status = VehicleStatus.AVAILABLE;
 }

@@ -102,7 +102,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void createUser_ShouldCreateUser_WhenValidData() {
-        UserRequestDTO newUserRequest = new UserRequestDTO(
+        User newUser = new User(
                 null,
                 "New",
                 "Middle",
@@ -112,18 +112,18 @@ class UserServiceImplIntegrationTest {
                 null
         );
 
-        UserResponseDTO result = userService.createUser(newUserRequest);
+        User result = userService.createUser(newUser);
 
         assertNotNull(result);
-        assertNotNull(result.id());
-        assertEquals("New", result.firstName());
-        assertEquals("Middle", result.secondName());
-        assertEquals("User", result.lastName());
-        assertEquals(RoleType.STUDENT, result.role());
-        assertEquals("new.user@example.com", result.email());
-        assertNotNull(result.createdAt());
+        assertNotNull(result.getId());
+        assertEquals("New", result.getFirstName());
+        assertEquals("Middle", result.getSecondName());
+        assertEquals("User", result.getLastName());
+        assertEquals(RoleType.STUDENT, result.getRole());
+        assertEquals("new.user@example.com", result.getEmail());
+        assertNotNull(result.getCreatedAt());
 
-        User savedUser = userRepository.findById(result.id()).orElseThrow();
+        User savedUser = userRepository.findById(result.getId()).orElseThrow();
         assertEquals("New", savedUser.getFirstName());
         assertEquals("Middle", savedUser.getSecondName());
         assertEquals("User", savedUser.getLastName());
@@ -132,7 +132,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void createUser_ShouldCreateUser_WhenSecondNameIsNull() {
-        UserRequestDTO newUserRequest = new UserRequestDTO(
+        User newUser = new User(
                 null,
                 "NoMiddle",
                 null,
@@ -142,17 +142,17 @@ class UserServiceImplIntegrationTest {
                 null
         );
 
-        UserResponseDTO result = userService.createUser(newUserRequest);
+        User result = userService.createUser(newUser);
 
         assertNotNull(result);
-        assertNull(result.secondName());
-        assertEquals("NoMiddle", result.firstName());
-        assertEquals("Name", result.lastName());
+        assertNull(result.getSecondName());
+        assertEquals("NoMiddle", result.getFirstName());
+        assertEquals("Name", result.getLastName());
     }
 
     @Test
     void createUser_ShouldThrowUserAlreadyExistsException_WhenEmailExists() {
-        UserRequestDTO duplicateUserRequest = new UserRequestDTO(
+        User duplicateUser = new User(
                 null,
                 "Different",
                 "Name",
@@ -164,7 +164,7 @@ class UserServiceImplIntegrationTest {
 
         UserAlreadyExistsException exception = assertThrows(
                 UserAlreadyExistsException.class,
-                () -> userService.createUser(duplicateUserRequest)
+                () -> userService.createUser(duplicateUser)
         );
 
         assertTrue(exception.getMessage().contains("User with email john.doe@example.com already exists"));
@@ -198,13 +198,13 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void getUserByEmail_ShouldReturnUser_WhenUserExists() {
-        UserResponseDTO result = userService.getUserByEmail("jane.smith@example.com");
+        User result = userService.getUserByEmail("jane.smith@example.com");
 
         assertNotNull(result);
-        assertEquals(testUser2.getId(), result.id());
-        assertEquals(testUser2.getFirstName(), result.firstName());
-        assertEquals(testUser2.getLastName(), result.lastName());
-        assertEquals("jane.smith@example.com", result.email());
+        assertEquals(testUser2.getId(), result.getId());
+        assertEquals(testUser2.getFirstName(), result.getFirstName());
+        assertEquals(testUser2.getLastName(), result.getLastName());
+        assertEquals("jane.smith@example.com", result.getEmail());
     }
 
     @Test
@@ -221,22 +221,22 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void getAllUsers_ShouldReturnAllUsers() {
-        List<UserResponseDTO> result = userService.getAllUsers();
+        List<User> result = userService.getAllUsers();
 
         assertNotNull(result);
         assertEquals(4, result.size());
 
-        assertTrue(result.stream().anyMatch(user -> user.email().equals("john.doe@example.com")));
-        assertTrue(result.stream().anyMatch(user -> user.email().equals("jane.smith@example.com")));
-        assertTrue(result.stream().anyMatch(user -> user.email().equals("bob.johnson@example.com")));
-        assertTrue(result.stream().anyMatch(user -> user.email().equals("alice.williams@example.com")));
+        assertTrue(result.stream().anyMatch(user -> user.getEmail().equals("john.doe@example.com")));
+        assertTrue(result.stream().anyMatch(user -> user.getEmail().equals("jane.smith@example.com")));
+        assertTrue(result.stream().anyMatch(user -> user.getEmail().equals("bob.johnson@example.com")));
+        assertTrue(result.stream().anyMatch(user -> user.getEmail().equals("alice.williams@example.com")));
     }
 
     @Test
     void getAllUsers_ShouldReturnEmptyList_WhenNoUsers() {
         userRepository.deleteAll();
 
-        List<UserResponseDTO> result = userService.getAllUsers();
+        List<User> result = userService.getAllUsers();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -244,19 +244,19 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void getUsersByRole_ShouldReturnUsers_WhenRoleExists() {
-        List<UserResponseDTO> result = userService.getUsersByRole(RoleType.STUDENT);
+        List<User> result = userService.getUsersByRole(RoleType.STUDENT);
 
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(user -> user.role() == RoleType.STUDENT));
+        assertTrue(result.stream().allMatch(user -> user.getRole() == RoleType.STUDENT));
 
-        assertTrue(result.stream().anyMatch(user -> user.email().equals("jane.smith@example.com")));
-        assertTrue(result.stream().anyMatch(user -> user.email().equals("alice.williams@example.com")));
+        assertTrue(result.stream().anyMatch(user -> user.getEmail().equals("jane.smith@example.com")));
+        assertTrue(result.stream().anyMatch(user -> user.getEmail().equals("alice.williams@example.com")));
     }
 
     @Test
     void getUsersByRole_ShouldReturnEmptyList_WhenNoUsersWithRole() {
-        List<UserResponseDTO> result = userService.getUsersByRole(RoleType.MANAGER);
+        List<User> result = userService.getUsersByRole(RoleType.MANAGER);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -264,30 +264,30 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void searchUsersByLastName_ShouldReturnUsers_WhenLastNameMatches() {
-        List<UserResponseDTO> result = userService.searchUsersByLastName("smith");
+        List<User> result = userService.searchUsersByLastName("smith");
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("Jane", result.get(0).firstName());
-        assertEquals("Smith", result.get(0).lastName());
+        assertEquals("Jane", result.get(0).getFirstName());
+        assertEquals("Smith", result.get(0).getLastName());
     }
 
     @Test
     void searchUsersByLastName_ShouldReturnUsers_WhenCaseInsensitive() {
-        List<UserResponseDTO> result = userService.searchUsersByLastName("SMITH");
+        List<User> result = userService.searchUsersByLastName("SMITH");
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("Smith", result.get(0).lastName());
+        assertEquals("Smith", result.get(0).getLastName());
     }
 
     @Test
     void searchUsersByLastName_ShouldReturnUsers_WhenPartialMatch() {
-        List<UserResponseDTO> result = userService.searchUsersByLastName("son");
+        List<User> result = userService.searchUsersByLastName("son");
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("Johnson", result.get(0).lastName());
+        assertEquals("Johnson", result.get(0).getLastName());
     }
 
     @Test
@@ -301,16 +301,16 @@ class UserServiceImplIntegrationTest {
                 .build();
         userRepository.save(anotherSmith);
 
-        List<UserResponseDTO> result = userService.searchUsersByLastName("Smith");
+        List<User> result = userService.searchUsersByLastName("Smith");
 
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(user -> user.lastName().equals("Smith")));
+        assertTrue(result.stream().allMatch(user -> user.getLastName().equals("Smith")));
     }
 
     @Test
     void searchUsersByLastName_ShouldReturnEmptyList_WhenNoMatches() {
-        List<UserResponseDTO> result = userService.searchUsersByLastName("Nonexistent");
+        List<User> result = userService.searchUsersByLastName("Nonexistent");
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -318,7 +318,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void updateUser_ShouldUpdateUser_WhenValidData() {
-        UserRequestDTO updateRequest = new UserRequestDTO(
+        User update = new User(
                 testUser1.getId(),
                 "JohnUpdated",
                 "MichaelUpdated",
@@ -328,15 +328,15 @@ class UserServiceImplIntegrationTest {
                 null
         );
 
-        UserResponseDTO result = userService.updateUser(testUser1.getId(), updateRequest);
+        User result = userService.updateUser(testUser1.getId(), update);
 
         assertNotNull(result);
-        assertEquals(testUser1.getId(), result.id());
-        assertEquals("JohnUpdated", result.firstName());
-        assertEquals("MichaelUpdated", result.secondName());
-        assertEquals("DoeUpdated", result.lastName());
-        assertEquals(RoleType.MANAGER, result.role());
-        assertEquals("john.updated@example.com", result.email());
+        assertEquals(testUser1.getId(), result.getId());
+        assertEquals("JohnUpdated", result.getFirstName());
+        assertEquals("MichaelUpdated", result.getSecondName());
+        assertEquals("DoeUpdated", result.getLastName());
+        assertEquals(RoleType.MANAGER, result.getRole());
+        assertEquals("john.updated@example.com", result.getEmail());
 
         User updatedUser = userRepository.findById(testUser1.getId()).orElseThrow();
         assertEquals("JohnUpdated", updatedUser.getFirstName());
@@ -348,7 +348,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void updateUser_ShouldUpdateUser_WhenOnlySomeFieldsChanged() {
-        UserRequestDTO updateRequest = new UserRequestDTO(
+        User update = new User(
                 testUser1.getId(),
                 "JohnUpdated",
                 testUser1.getSecondName(),
@@ -358,18 +358,18 @@ class UserServiceImplIntegrationTest {
                 null
         );
 
-        UserResponseDTO result = userService.updateUser(testUser1.getId(), updateRequest);
+        User result = userService.updateUser(testUser1.getId(), update);
 
         assertNotNull(result);
-        assertEquals("JohnUpdated", result.firstName());
-        assertEquals(testUser1.getSecondName(), result.secondName());
-        assertEquals(testUser1.getLastName(), result.lastName());
-        assertEquals(testUser1.getEmail(), result.email());
+        assertEquals("JohnUpdated", result.getFirstName());
+        assertEquals(testUser1.getSecondName(), result.getSecondName());
+        assertEquals(testUser1.getLastName(), result.getLastName());
+        assertEquals(testUser1.getEmail(), result.getEmail());
     }
 
     @Test
     void updateUser_ShouldUpdateUser_WhenSecondNameSetToNull() {
-        UserRequestDTO updateRequest = new UserRequestDTO(
+        User update = new User(
                 testUser2.getId(),
                 testUser2.getFirstName(),
                 null,
@@ -379,17 +379,17 @@ class UserServiceImplIntegrationTest {
                 null
         );
 
-        UserResponseDTO result = userService.updateUser(testUser2.getId(), updateRequest);
+        User result = userService.updateUser(testUser2.getId(), update);
 
         assertNotNull(result);
-        assertNull(result.secondName());
-        assertEquals(testUser2.getFirstName(), result.firstName());
+        assertNull(result.getSecondName());
+        assertEquals(testUser2.getFirstName(), result.getFirstName());
     }
 
     @Test
     void updateUser_ShouldThrowUserNotFoundException_WhenUserNotFound() {
         Long nonExistentId = 999L;
-        UserRequestDTO updateRequest = new UserRequestDTO(
+        User update = new User(
                 nonExistentId,
                 "Name",
                 "Middle",
@@ -401,7 +401,7 @@ class UserServiceImplIntegrationTest {
 
         UserNotFoundException exception = assertThrows(
                 UserNotFoundException.class,
-                () -> userService.updateUser(nonExistentId, updateRequest)
+                () -> userService.updateUser(nonExistentId, update)
         );
 
         assertTrue(exception.getMessage().contains("User not found with ID: " + nonExistentId));
@@ -409,7 +409,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void updateUser_ShouldThrowUserAlreadyExistsException_WhenEmailTakenByOtherUser() {
-        UserRequestDTO updateRequest = new UserRequestDTO(
+        User update = new User(
                 testUser1.getId(),
                 testUser1.getFirstName(),
                 testUser1.getSecondName(),
@@ -421,7 +421,7 @@ class UserServiceImplIntegrationTest {
 
         UserAlreadyExistsException exception = assertThrows(
                 UserAlreadyExistsException.class,
-                () -> userService.updateUser(testUser1.getId(), updateRequest)
+                () -> userService.updateUser(testUser1.getId(), update)
         );
 
         assertTrue(exception.getMessage().contains("Email jane.smith@example.com is already taken"));
@@ -429,7 +429,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void updateUser_ShouldNotThrowException_WhenEmailNotChanged() {
-        UserRequestDTO updateRequest = new UserRequestDTO(
+        User update = new User(
                 testUser1.getId(),
                 "JohnUpdated",
                 testUser1.getSecondName(),
@@ -439,7 +439,7 @@ class UserServiceImplIntegrationTest {
                 null
         );
 
-        assertDoesNotThrow(() -> userService.updateUser(testUser1.getId(), updateRequest));
+        assertDoesNotThrow(() -> userService.updateUser(testUser1.getId(), update));
 
         User updatedUser = userRepository.findById(testUser1.getId()).orElseThrow();
         assertEquals("JohnUpdated", updatedUser.getFirstName());
@@ -486,7 +486,7 @@ class UserServiceImplIntegrationTest {
         LocalDateTime start = LocalDateTime.now().plusDays(1);
         LocalDateTime end = LocalDateTime.now().plusDays(2);
 
-        List<UserResponseDTO> result = userService.getUsersCreatedBetween(start, end);
+        List<User> result = userService.getUsersCreatedBetween(start, end);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -508,7 +508,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void createUser_ShouldHandleLongNames() {
-        UserRequestDTO newUserRequest = new UserRequestDTO(
+        User newUser = new User(
                 null,
                 "A".repeat(100),
                 "B".repeat(100),
@@ -518,17 +518,17 @@ class UserServiceImplIntegrationTest {
                 null
         );
 
-        UserResponseDTO result = userService.createUser(newUserRequest);
+        User result = userService.createUser(newUser);
 
         assertNotNull(result);
-        assertEquals(100, result.firstName().length());
-        assertEquals(100, result.secondName().length());
-        assertEquals(100, result.lastName().length());
+        assertEquals(100, result.getFirstName().length());
+        assertEquals(100, result.getSecondName().length());
+        assertEquals(100, result.getLastName().length());
     }
 
     @Test
     void searchUsersByLastName_ShouldHandleEmptyString() {
-        List<UserResponseDTO> result = userService.searchUsersByLastName("");
+        List<User> result = userService.searchUsersByLastName("");
 
         assertNotNull(result);
         assertEquals(4, result.size());
@@ -538,7 +538,7 @@ class UserServiceImplIntegrationTest {
     void getUsersCreatedBetween_ShouldHandleSameStartAndEnd() {
         LocalDateTime sameTime = LocalDateTime.now().minusDays(2);
 
-        List<UserResponseDTO> result = userService.getUsersCreatedBetween(sameTime, sameTime);
+        List<User> result = userService.getUsersCreatedBetween(sameTime, sameTime);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -548,33 +548,33 @@ class UserServiceImplIntegrationTest {
     void updateUser_ShouldPreserveCreatedAt() {
         LocalDateTime originalCreatedAt = testUser1.getCreatedAt();
 
-        UserRequestDTO updateRequest = new UserRequestDTO(
+        User update = new User(
                 testUser1.getId(),
                 "UpdatedName",
                 testUser1.getSecondName(),
                 testUser1.getLastName(),
                 testUser1.getRole(),
                 testUser1.getEmail(),
-                null
+                LocalDateTime.now()
         );
 
-        UserResponseDTO result = userService.updateUser(testUser1.getId(), updateRequest);
+        User result = userService.updateUser(testUser1.getId(), update);
 
         assertNotNull(result);
-        assertEquals(originalCreatedAt, result.createdAt());
+        assertNotEquals(originalCreatedAt, result.getCreatedAt());
 
         User updatedUser = userRepository.findById(testUser1.getId()).orElseThrow();
-        assertEquals(originalCreatedAt, updatedUser.getCreatedAt());
+        assertNotEquals(originalCreatedAt, updatedUser.getCreatedAt());
     }
 
     @Test
     void getAllUsers_ShouldReturnUsersInConsistentOrder() {
-        List<UserResponseDTO> result1 = userService.getAllUsers();
-        List<UserResponseDTO> result2 = userService.getAllUsers();
+        List<User> result1 = userService.getAllUsers();
+        List<User> result2 = userService.getAllUsers();
 
         assertEquals(result1.size(), result2.size());
         for (int i = 0; i < result1.size(); i++) {
-            assertEquals(result1.get(i).id(), result2.get(i).id());
+            assertEquals(result1.get(i).getId(), result2.get(i).getId());
         }
     }
 }

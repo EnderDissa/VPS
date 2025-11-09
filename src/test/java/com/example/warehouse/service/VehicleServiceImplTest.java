@@ -12,14 +12,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
@@ -75,7 +71,7 @@ class VehicleServiceImplIntegrationTest {
 
     @Test
     void create_ShouldCreateVehicle_WhenValidData() {
-        VehicleDTO newVehicleDTO = new VehicleDTO(
+        Vehicle newVehicle = new Vehicle(
                 null,
                 "Mercedes",
                 "Actros",
@@ -85,25 +81,25 @@ class VehicleServiceImplIntegrationTest {
                 VehicleStatus.AVAILABLE
         );
 
-        VehicleDTO result = vehicleService.create(newVehicleDTO);
+        Vehicle result = vehicleService.create(newVehicle);
 
         assertNotNull(result);
-        assertNotNull(result.id());
-        assertEquals("Mercedes", result.brand());
-        assertEquals("Actros", result.model());
-        assertEquals("DEF456", result.licensePlate());
-        assertEquals(2023, result.year());
-        assertEquals(22000, result.capacity());
-        assertEquals(VehicleStatus.AVAILABLE, result.status());
+        assertNotNull(result.getId());
+        assertEquals("Mercedes", result.getBrand());
+        assertEquals("Actros", result.getModel());
+        assertEquals("DEF456", result.getLicensePlate());
+        assertEquals(2023, result.getYear());
+        assertEquals(22000, result.getCapacity());
+        assertEquals(VehicleStatus.AVAILABLE, result.getStatus());
 
-        Vehicle savedVehicle = vehicleRepository.findById(result.id()).orElseThrow();
+        Vehicle savedVehicle = vehicleRepository.findById(result.getId()).orElseThrow();
         assertEquals("Mercedes", savedVehicle.getBrand());
         assertEquals("DEF456", savedVehicle.getLicensePlate());
     }
 
     @Test
     void create_ShouldThrowException_WhenDuplicateLicensePlate() {
-        VehicleDTO duplicateVehicleDTO = new VehicleDTO(
+        Vehicle duplicateVehicle = new Vehicle(
                 null,
                 "Scania",
                 "R500",
@@ -114,36 +110,34 @@ class VehicleServiceImplIntegrationTest {
         );
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> vehicleService.create(duplicateVehicleDTO));
+                () -> vehicleService.create(duplicateVehicle));
         assertTrue(exception.getMessage().contains("already exists"));
     }
 
     @Test
     void create_ShouldSetDefaultStatus_WhenStatusNotProvided() {
-        VehicleDTO vehicleWithoutStatus = new VehicleDTO(
-                null,
-                "Iveco",
-                "Stralis",
-                "GHI789",
-                2022,
-                20000,
-                null
-        );
+        Vehicle vehicleWithoutStatus = Vehicle.builder()
+                .brand("Iveco")
+                .model("Stralis")
+                .licensePlate("GHI789")
+                .capacity(20000)
+                .year(2022)
+                .build();
 
-        VehicleDTO result = vehicleService.create(vehicleWithoutStatus);
+        Vehicle result = vehicleService.create(vehicleWithoutStatus);
 
-        assertEquals(VehicleStatus.AVAILABLE, result.status());
+        assertEquals(VehicleStatus.AVAILABLE, result.getStatus());
     }
 
     @Test
     void getById_ShouldReturnVehicle_WhenExists() {
-        VehicleDTO result = vehicleService.getById(testVehicle.getId());
+        Vehicle result = vehicleService.getById(testVehicle.getId());
 
         assertNotNull(result);
-        assertEquals(testVehicle.getId(), result.id());
-        assertEquals(testVehicle.getBrand(), result.brand());
-        assertEquals(testVehicle.getModel(), result.model());
-        assertEquals(testVehicle.getLicensePlate(), result.licensePlate());
+        assertEquals(testVehicle.getId(), result.getId());
+        assertEquals(testVehicle.getBrand(), result.getBrand());
+        assertEquals(testVehicle.getModel(), result.getModel());
+        assertEquals(testVehicle.getLicensePlate(), result.getLicensePlate());
     }
 
     @Test
@@ -157,7 +151,7 @@ class VehicleServiceImplIntegrationTest {
 
     @Test
     void update_ShouldUpdateVehicle_WhenValidData() {
-        VehicleDTO updateDTO = new VehicleDTO(
+        Vehicle update = new Vehicle(
                 testVehicle.getId(),
                 "Volvo",
                 "FH16 Electric",
@@ -167,7 +161,7 @@ class VehicleServiceImplIntegrationTest {
                 VehicleStatus.IN_USE
         );
 
-        vehicleService.update(testVehicle.getId(), updateDTO);
+        vehicleService.update(testVehicle.getId(), update);
 
         Vehicle updatedVehicle = vehicleRepository.findById(testVehicle.getId()).orElseThrow();
         assertEquals("FH16 Electric", updatedVehicle.getModel());
@@ -178,7 +172,7 @@ class VehicleServiceImplIntegrationTest {
 
     @Test
     void update_ShouldUpdateLicensePlate_WhenNewLicensePlateIsUnique() {
-        VehicleDTO updateDTO = new VehicleDTO(
+        Vehicle update = new Vehicle(
                 testVehicle.getId(),
                 "Volvo",
                 "FH16",
@@ -188,7 +182,7 @@ class VehicleServiceImplIntegrationTest {
                 VehicleStatus.AVAILABLE
         );
 
-        vehicleService.update(testVehicle.getId(), updateDTO);
+        vehicleService.update(testVehicle.getId(), update);
 
         Vehicle updatedVehicle = vehicleRepository.findById(testVehicle.getId()).orElseThrow();
         assertEquals("NEW123", updatedVehicle.getLicensePlate());
@@ -196,7 +190,7 @@ class VehicleServiceImplIntegrationTest {
 
     @Test
     void update_ShouldThrowException_WhenDuplicateLicensePlate() {
-        VehicleDTO updateDTO = new VehicleDTO(
+        Vehicle update = new Vehicle(
                 testVehicle.getId(),
                 "Volvo",
                 "FH16",
@@ -207,13 +201,13 @@ class VehicleServiceImplIntegrationTest {
         );
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> vehicleService.update(testVehicle.getId(), updateDTO));
+                () -> vehicleService.update(testVehicle.getId(), update));
         assertTrue(exception.getMessage().contains("already exists"));
     }
 
     @Test
     void update_ShouldNotThrowException_WhenLicensePlateNotChanged() {
-        VehicleDTO updateDTO = new VehicleDTO(
+        Vehicle update = new Vehicle(
                 testVehicle.getId(),
                 "Volvo",
                 "FH16 Updated",
@@ -223,7 +217,7 @@ class VehicleServiceImplIntegrationTest {
                 VehicleStatus.AVAILABLE
         );
 
-        assertDoesNotThrow(() -> vehicleService.update(testVehicle.getId(), updateDTO));
+        assertDoesNotThrow(() -> vehicleService.update(testVehicle.getId(), update));
 
         Vehicle updatedVehicle = vehicleRepository.findById(testVehicle.getId()).orElseThrow();
         assertEquals("FH16 Updated", updatedVehicle.getModel());
@@ -232,7 +226,7 @@ class VehicleServiceImplIntegrationTest {
     @Test
     void update_ShouldThrowException_WhenVehicleNotFound() {
         Long nonExistentId = 999L;
-        VehicleDTO updateDTO = new VehicleDTO(
+        Vehicle update = new Vehicle(
                 nonExistentId,
                 "Brand",
                 "Model",
@@ -243,7 +237,7 @@ class VehicleServiceImplIntegrationTest {
         );
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> vehicleService.update(nonExistentId, updateDTO));
+                () -> vehicleService.update(nonExistentId, update));
         assertTrue(exception.getMessage().contains("not found"));
     }
 
@@ -267,47 +261,47 @@ class VehicleServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithStatusFilter() {
-        Page<VehicleDTO> result = vehicleService.findPage(0, 10, VehicleStatus.AVAILABLE, null, null);
+        Page<Vehicle> result = vehicleService.findPage(0, 10, VehicleStatus.AVAILABLE, null, null);
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
-        assertEquals(VehicleStatus.AVAILABLE, result.getContent().get(0).status());
+        assertEquals(VehicleStatus.AVAILABLE, result.getContent().get(0).getStatus());
     }
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithBrandFilter() {
-        Page<VehicleDTO> result = vehicleService.findPage(0, 10, null, "Volvo", null);
+        Page<Vehicle> result = vehicleService.findPage(0, 10, null, "Volvo", null);
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
-        assertEquals("Volvo", result.getContent().get(0).brand());
+        assertEquals("Volvo", result.getContent().get(0).getBrand());
     }
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithModelFilter() {
-        Page<VehicleDTO> result = vehicleService.findPage(0, 10, null, null, "FH16");
+        Page<Vehicle> result = vehicleService.findPage(0, 10, null, null, "FH16");
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
-        assertEquals("FH16", result.getContent().get(0).model());
+        assertEquals("FH16", result.getContent().get(0).getModel());
     }
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithMultipleFilters() {
-        Page<VehicleDTO> result = vehicleService.findPage(0, 10, VehicleStatus.AVAILABLE, "Volvo", "FH16");
+        Page<Vehicle> result = vehicleService.findPage(0, 10, VehicleStatus.AVAILABLE, "Volvo", "FH16");
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
 
-        VehicleDTO vehicle = result.getContent().get(0);
-        assertEquals(VehicleStatus.AVAILABLE, vehicle.status());
-        assertEquals("Volvo", vehicle.brand());
-        assertEquals("FH16", vehicle.model());
+        Vehicle vehicle = result.getContent().get(0);
+        assertEquals(VehicleStatus.AVAILABLE, vehicle.getStatus());
+        assertEquals("Volvo", vehicle.getBrand());
+        assertEquals("FH16", vehicle.getModel());
     }
 
     @Test
     void findPage_ShouldReturnEmpty_WhenNoMatches() {
-        Page<VehicleDTO> result = vehicleService.findPage(0, 10, VehicleStatus.OUT_OF_SERVICE, null, null);
+        Page<Vehicle> result = vehicleService.findPage(0, 10, VehicleStatus.OUT_OF_SERVICE, null, null);
 
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
@@ -327,7 +321,7 @@ class VehicleServiceImplIntegrationTest {
             vehicleRepository.save(vehicle);
         }
 
-        Page<VehicleDTO> result = vehicleService.findPage(0, 3, null, null, null);
+        Page<Vehicle> result = vehicleService.findPage(0, 3, null, null, null);
 
         assertNotNull(result);
         assertEquals(3, result.getContent().size());
@@ -336,16 +330,16 @@ class VehicleServiceImplIntegrationTest {
 
     @Test
     void findByStatus_ShouldReturnVehiclesWithGivenStatus() {
-        List<VehicleDTO> result = vehicleService.findByStatus(VehicleStatus.AVAILABLE);
+        List<Vehicle> result = vehicleService.findByStatus(VehicleStatus.AVAILABLE);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertTrue(result.stream().allMatch(v -> v.status() == VehicleStatus.AVAILABLE));
+        assertTrue(result.stream().allMatch(v -> v.getStatus() == VehicleStatus.AVAILABLE));
     }
 
     @Test
     void findByStatus_ShouldReturnEmpty_WhenNoVehiclesWithStatus() {
-        List<VehicleDTO> result = vehicleService.findByStatus(VehicleStatus.OUT_OF_SERVICE);
+        List<Vehicle> result = vehicleService.findByStatus(VehicleStatus.OUT_OF_SERVICE);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -353,11 +347,11 @@ class VehicleServiceImplIntegrationTest {
 
     @Test
     void findByLicensePlate_ShouldReturnVehicle_WhenExists() {
-        VehicleDTO result = vehicleService.findByLicensePlate("ABC123");
+        Vehicle result = vehicleService.findByLicensePlate("ABC123");
 
         assertNotNull(result);
-        assertEquals("ABC123", result.licensePlate());
-        assertEquals("Volvo", result.brand());
+        assertEquals("ABC123", result.getLicensePlate());
+        assertEquals("Volvo", result.getBrand());
     }
 
     @Test
@@ -369,18 +363,18 @@ class VehicleServiceImplIntegrationTest {
 
     @Test
     void findAvailableVehicles_ShouldReturnOnlyAvailableVehicles() {
-        List<VehicleDTO> result = vehicleService.findAvailableVehicles();
+        List<Vehicle> result = vehicleService.findAvailableVehicles();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertTrue(result.stream().allMatch(v -> v.status() == VehicleStatus.AVAILABLE));
+        assertTrue(result.stream().allMatch(v -> v.getStatus() == VehicleStatus.AVAILABLE));
 
-        assertTrue(result.stream().noneMatch(v -> v.status() == VehicleStatus.IN_USE));
+        assertTrue(result.stream().noneMatch(v -> v.getStatus() == VehicleStatus.IN_USE));
     }
 
     @Test
     void create_ShouldHandleZeroValues_WhenYearAndCapacityAreZero() {
-        VehicleDTO vehicleWithZeroValues = new VehicleDTO(
+        Vehicle vehicleWithZeroValues = new Vehicle(
                 null,
                 "Tesla",
                 "Semi",
@@ -390,16 +384,16 @@ class VehicleServiceImplIntegrationTest {
                 VehicleStatus.AVAILABLE
         );
 
-        VehicleDTO result = vehicleService.create(vehicleWithZeroValues);
+        Vehicle result = vehicleService.create(vehicleWithZeroValues);
 
         assertNotNull(result);
-        assertEquals(0, result.year());
-        assertEquals(0, result.capacity());
+        assertEquals(0, result.getYear());
+        assertEquals(0, result.getCapacity());
     }
 
     @Test
     void update_ShouldHandleNullYearAndCapacity() {
-        VehicleDTO updateDTO = new VehicleDTO(
+        Vehicle update = new Vehicle(
                 testVehicle.getId(),
                 "Volvo",
                 "FH16",
@@ -409,7 +403,7 @@ class VehicleServiceImplIntegrationTest {
                 VehicleStatus.AVAILABLE
         );
 
-        vehicleService.update(testVehicle.getId(), updateDTO);
+        vehicleService.update(testVehicle.getId(), update);
 
         Vehicle updatedVehicle = vehicleRepository.findById(testVehicle.getId()).orElseThrow();
         assertNull(updatedVehicle.getYear());

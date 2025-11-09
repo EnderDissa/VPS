@@ -49,6 +49,7 @@ public class ItemMaintenance {
     @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private MaintenanceStatus status = MaintenanceStatus.COMPLETED;
 
     @CreationTimestamp

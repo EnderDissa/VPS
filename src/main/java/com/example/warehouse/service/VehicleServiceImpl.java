@@ -1,9 +1,7 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.dto.VehicleDTO;
 import com.example.warehouse.entity.Vehicle;
 import com.example.warehouse.enumeration.VehicleStatus;
-import com.example.warehouse.mapper.VehicleMapper;
 import com.example.warehouse.repository.VehicleRepository;
 import com.example.warehouse.service.interfaces.VehicleService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,51 +20,47 @@ import java.util.List;
 public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
-    private final VehicleMapper vehicleMapper;
 
     @Override
-    public VehicleDTO create(VehicleDTO dto) {
-        log.info("Creating new vehicle with license plate: {}", dto.licensePlate());
+    public Vehicle create(Vehicle vehicle) {
+        log.info("Creating new vehicle with license plate: {}", vehicle.getLicensePlate());
 
-        if (vehicleRepository.existsByLicensePlate(dto.licensePlate())) {
-            throw new IllegalArgumentException("Vehicle with license plate '" + dto.licensePlate() + "' already exists");
+        if (vehicleRepository.existsByLicensePlate(vehicle.getLicensePlate())) {
+            throw new IllegalArgumentException("Vehicle with license plate '" + vehicle.getLicensePlate() + "' already exists");
         }
 
-        Vehicle vehicle = vehicleMapper.toEntity(dto);
         Vehicle savedVehicle = vehicleRepository.save(vehicle);
 
         log.info("Vehicle created successfully with ID: {}", savedVehicle.getId());
-        return vehicleMapper.toDTO(savedVehicle);
+        return savedVehicle;
     }
 
     @Override
-    public VehicleDTO getById(Long id) {
+    public Vehicle getById(Long id) {
         log.info("Getting vehicle by ID: {}", id);
 
-        Vehicle vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with ID: " + id));
-
-        return vehicleMapper.toDTO(vehicle);
+        return (vehicleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with ID: " + id)));
     }
 
     @Override
-    public void update(Long id, VehicleDTO dto) {
+    public void update(Long id, Vehicle vehicle) {
         log.info("Updating vehicle with ID: {}", id);
 
         Vehicle existingVehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with ID: " + id));
 
-        if (!existingVehicle.getLicensePlate().equals(dto.licensePlate()) &&
-                vehicleRepository.existsByLicensePlateAndIdNot(dto.licensePlate(), id)) {
-            throw new IllegalArgumentException("Vehicle with license plate '" + dto.licensePlate() + "' already exists");
+        if (!existingVehicle.getLicensePlate().equals(vehicle.getLicensePlate()) &&
+                vehicleRepository.existsByLicensePlateAndIdNot(vehicle.getLicensePlate(), id)) {
+            throw new IllegalArgumentException("Vehicle with license plate '" + vehicle.getLicensePlate() + "' already exists");
         }
 
-        existingVehicle.setBrand(dto.brand());
-        existingVehicle.setModel(dto.model());
-        existingVehicle.setLicensePlate(dto.licensePlate());
-        existingVehicle.setYear(dto.year());
-        existingVehicle.setCapacity(dto.capacity());
-        existingVehicle.setStatus(dto.status());
+        existingVehicle.setBrand(vehicle.getBrand());
+        existingVehicle.setModel(vehicle.getModel());
+        existingVehicle.setLicensePlate(vehicle.getLicensePlate());
+        existingVehicle.setYear(vehicle.getYear());
+        existingVehicle.setCapacity(vehicle.getCapacity());
+        existingVehicle.setStatus(vehicle.getStatus());
 
         vehicleRepository.save(existingVehicle);
         log.info("Vehicle updated successfully with ID: {}", id);
@@ -86,7 +79,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Page<VehicleDTO> findPage(int page, int size, VehicleStatus status, String brand, String model) {
+    public Page<Vehicle> findPage(int page, int size, VehicleStatus status, String brand, String model) {
         log.info("Finding vehicles page - page: {}, size: {}, status: {}, brand: {}, model: {}",
                 page, size, status, brand, model);
 
@@ -114,23 +107,21 @@ public class VehicleServiceImpl implements VehicleService {
             vehicles = vehicleRepository.findAll(pageable);
         }
 
-        return vehicles.map(vehicleMapper::toDTO);
+        return vehicles;
     }
 
-    public List<VehicleDTO> findByStatus(VehicleStatus status) {
+    public List<Vehicle> findByStatus(VehicleStatus status) {
         List<Vehicle> vehicles = vehicleRepository.findByStatus(status, Pageable.unpaged()).getContent();
         return vehicles.stream()
-                .map(vehicleMapper::toDTO)
                 .toList();
     }
 
-    public VehicleDTO findByLicensePlate(String licensePlate) {
-        Vehicle vehicle = vehicleRepository.findByLicensePlate(licensePlate)
+    public Vehicle findByLicensePlate(String licensePlate) {
+        return vehicleRepository.findByLicensePlate(licensePlate)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle not found with license plate: " + licensePlate));
-        return vehicleMapper.toDTO(vehicle);
     }
 
-    public List<VehicleDTO> findAvailableVehicles() {
+    public List<Vehicle> findAvailableVehicles() {
         return findByStatus(VehicleStatus.AVAILABLE);
     }
 }

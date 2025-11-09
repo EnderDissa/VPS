@@ -9,13 +9,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface UserService {
-    UserResponseDTO createUser(UserRequestDTO userRequestDTO);
+    User createUser(User user);
     User getUserById(Long id);
-    UserResponseDTO getUserByEmail(String email);
-    List<UserResponseDTO> getAllUsers();
-    List<UserResponseDTO> getUsersByRole(RoleType role);
-    List<UserResponseDTO> searchUsersByLastName(String lastName);
-    UserResponseDTO updateUser(Long id, UserRequestDTO userRequestDTO);
+    User getUserByEmail(String email);
+    List<User> getAllUsers();
+    List<User> getUsersByRole(RoleType role);
+    List<User> searchUsersByLastName(String lastName);
+    User updateUser(Long id, User user);
     void deleteUser(Long id);
     boolean existsByEmail(String email);
 }

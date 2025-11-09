@@ -27,20 +27,19 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     
     @Override
-    public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
-        log.info("Creating new user with email: {}", userRequestDTO.email());
+    public User createUser(User user) {
+        log.info("Creating new user with email: {}", user.getEmail());
 
-        if (existsByEmail(userRequestDTO.email())) {
-            throw new UserAlreadyExistsException("User with email " + userRequestDTO.email() + " already exists");
+        if (existsByEmail(user.getEmail())) {
+            throw new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists");
         }
 
-        User user = userMapper.toEntity(userRequestDTO);
         user.setCreatedAt(LocalDateTime.now());
         
         User savedUser = userRepository.save(user);
         log.info("User created successfully with ID: {}", savedUser.getId());
         
-        return userMapper.toResponseDTO(savedUser);
+        return savedUser;
     }
     
     @Override
@@ -52,60 +51,50 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         log.debug("Fetching user by email: {}", email);
 
-        User user = userRepository.findByEmail(email)
+        return userRepository.findByEmail(email)
             .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
-
-        return userMapper.toResponseDTO(user);
     }
 
     @Override
-    public List<UserResponseDTO> getAllUsers() {
+    public List<User> getAllUsers() {
         log.debug("Fetching all users");
 
-        return userRepository.findAll().stream()
-            .map(userMapper::toResponseDTO)
-            .collect(Collectors.toList());
+        return userRepository.findAll();
     }
 
     @Override
-    public List<UserResponseDTO> getUsersByRole(RoleType role) {
+    public List<User> getUsersByRole(RoleType role) {
         log.debug("Fetching users by role: {}", role);
 
-        return userRepository.findByRole(role).stream()
-            .map(userMapper::toResponseDTO)
-            .collect(Collectors.toList());
+        return userRepository.findByRole(role);
     }
 
     @Override
-    public List<UserResponseDTO> searchUsersByLastName(String lastName) {
+    public List<User> searchUsersByLastName(String lastName) {
         log.debug("Searching users by last name: {}", lastName);
 
-        return userRepository.findByLastNameContainingIgnoreCase(lastName).stream()
-            .map(userMapper::toResponseDTO)
-            .collect(Collectors.toList());
+        return userRepository.findByLastNameContainingIgnoreCase(lastName);
     }
     
     @Override
-    public UserResponseDTO updateUser(Long id, UserRequestDTO userRequestDTO) {
+    public User updateUser(Long id, User user) {
         log.info("Updating user with ID: {}", id);
         
         User existingUser = userRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + id));
 
-        if (!existingUser.getEmail().equals(userRequestDTO.email()) &&
-            existsByEmail(userRequestDTO.email())) {
-            throw new UserAlreadyExistsException("Email " + userRequestDTO.email() + " is already taken");
+        if (!existingUser.getEmail().equals(user.getEmail()) &&
+            existsByEmail(user.getEmail())) {
+            throw new UserAlreadyExistsException("Email " + user.getEmail() + " is already taken");
         }
-
-        userMapper.updateUserFromDTO(userRequestDTO, existingUser);
         
-        User updatedUser = userRepository.save(existingUser);
+        User updatedUser = userRepository.save(user);
         log.info("User with ID: {} updated successfully", id);
         
-        return userMapper.toResponseDTO(updatedUser);
+        return updatedUser;
     }
     
     @Override
@@ -125,12 +114,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmail(email);
     }
 
-    public List<UserResponseDTO> getUsersCreatedBetween(LocalDateTime start, LocalDateTime end) {
+    public List<User> getUsersCreatedBetween(LocalDateTime start, LocalDateTime end) {
         log.debug("Fetching users created between {} and {}", start, end);
         
-        return userRepository.findUsersCreatedBetween(start, end).stream()
-            .map(userMapper::toResponseDTO)
-            .collect(Collectors.toList());
+        return userRepository.findUsersCreatedBetween(start, end);
     }
 
     public long countUsersByRole(RoleType role) {

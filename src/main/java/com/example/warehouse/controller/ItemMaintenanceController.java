@@ -1,7 +1,9 @@
 package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.ItemMaintenanceDTO;
+import com.example.warehouse.entity.ItemMaintenance;
 import com.example.warehouse.enumeration.MaintenanceStatus;
+import com.example.warehouse.mapper.ItemMaintenanceMapper;
 import com.example.warehouse.service.interfaces.ItemMaintenanceService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,28 +26,31 @@ import java.util.List;
 public class ItemMaintenanceController {
 
     private final ItemMaintenanceService service;
+    private final ItemMaintenanceMapper mapper;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public ItemMaintenanceController(ItemMaintenanceService service) {
+    public ItemMaintenanceController(ItemMaintenanceService service, ItemMaintenanceMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
     @PostMapping
     @Operation(summary = "Create maintenance record")
     public ResponseEntity<ItemMaintenanceDTO> create(@Valid @RequestBody ItemMaintenanceDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
+        ItemMaintenance itemMaintenance = service.create(mapper.toEntity(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDTO(itemMaintenance));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get maintenance by id")
     public ItemMaintenanceDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+        return mapper.toDTO(service.getById(id));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update maintenance by id")
     public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody ItemMaintenanceDTO dto) {
-        service.update(id, dto);
+        service.update(id, mapper.toEntity(dto));
         return ResponseEntity.noContent().build();
     }
 
@@ -66,7 +71,7 @@ public class ItemMaintenanceController {
             @RequestParam(required = false) Long itemId,
             @RequestParam(required = false) MaintenanceStatus status
     ) {
-        var result = service.findPage(page, size, itemId, status);
+        var result = service.findPage(page, size, itemId, status).map(mapper::toDTO);
         var headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(result.getTotalElements()));
         return new ResponseEntity<>(result.getContent(), headers, HttpStatus.OK);

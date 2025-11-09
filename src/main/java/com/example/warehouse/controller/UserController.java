@@ -2,6 +2,7 @@ package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.UserDTO.UserRequestDTO;
 import com.example.warehouse.dto.UserDTO.UserResponseDTO;
+import com.example.warehouse.entity.User;
 import com.example.warehouse.enumeration.RoleType;
 import com.example.warehouse.mapper.UserMapper;
 import com.example.warehouse.service.interfaces.UserService;
@@ -37,7 +38,8 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Create user")
     public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));
+        User user = service.createUser(mapper.toEntity(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponseDTO(user));
     }
 
     @GetMapping("/{id}")
@@ -49,7 +51,7 @@ public class UserController {
     @PutMapping("/{id}")
     @Operation(summary = "Update user by id")
     public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody UserRequestDTO dto) {
-        service.updateUser(id, dto);
+        service.updateUser(id, mapper.toEntity(dto));
         return ResponseEntity.noContent().build();
     }
 
