@@ -16,15 +16,23 @@ import java.util.Optional;
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
     Page<Vehicle> findByStatus(VehicleStatus status, Pageable pageable);
+
     Optional<Vehicle> findByLicensePlate(String licensePlate);
+
     boolean existsByLicensePlate(String licensePlate);
+
     boolean existsByLicensePlateAndIdNot(String licensePlate, Long id);
 
     Page<Vehicle> findByBrandContainingIgnoreCase(String brand, Pageable pageable);
+
     Page<Vehicle> findByModelContainingIgnoreCase(String model, Pageable pageable);
+
     Page<Vehicle> findByStatusAndBrandContainingIgnoreCase(VehicleStatus status, String brand, Pageable pageable);
+
     Page<Vehicle> findByStatusAndModelContainingIgnoreCase(VehicleStatus status, String model, Pageable pageable);
+
     Page<Vehicle> findByBrandContainingIgnoreCaseAndModelContainingIgnoreCase(String brand, String model, Pageable pageable);
+
     Page<Vehicle> findByStatusAndBrandContainingIgnoreCaseAndModelContainingIgnoreCase(
             VehicleStatus status, String brand, String model, Pageable pageable);
 }

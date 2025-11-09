@@ -18,8 +18,6 @@ public interface KeepingRepository extends JpaRepository<Keeping, Long> {
 
     boolean existsByStorageIdAndItemIdAndIdNot(Long storageId, Long itemId, Long id);
 
-    Optional<Keeping> findByStorageIdAndItemId(Long storageId, Long itemId);
-
     Page<Keeping> findByStorageId(Long storageId, Pageable pageable);
 
     Page<Keeping> findByItemId(Long itemId, Pageable pageable);
@@ -27,9 +25,4 @@ public interface KeepingRepository extends JpaRepository<Keeping, Long> {
     Page<Keeping> findByStorageIdAndItemId(Long storageId, Long itemId, Pageable pageable);
 
     long countByStorageId(Long storageId);
-
-    long countByItemId(Long itemId);
-
-    @Query("SELECT SUM(k.quantity) FROM Keeping k WHERE k.storage.id = :storageId")
-    Integer getTotalQuantityInStorage(@Param("storageId") Long storageId);
 }

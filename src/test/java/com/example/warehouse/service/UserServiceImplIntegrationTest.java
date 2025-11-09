@@ -172,16 +172,16 @@ class UserServiceImplIntegrationTest {
 
     @Test
     void getUserById_ShouldReturnUser_WhenUserExists() {
-        UserResponseDTO result = userService.getUserById(testUser1.getId());
+        User result = userService.getUserById(testUser1.getId());
 
         assertNotNull(result);
-        assertEquals(testUser1.getId(), result.id());
-        assertEquals(testUser1.getFirstName(), result.firstName());
-        assertEquals(testUser1.getSecondName(), result.secondName());
-        assertEquals(testUser1.getLastName(), result.lastName());
-        assertEquals(testUser1.getEmail(), result.email());
-        assertEquals(testUser1.getRole(), result.role());
-        assertEquals(testUser1.getCreatedAt(), result.createdAt());
+        assertEquals(testUser1.getId(), result.getId());
+        assertEquals(testUser1.getFirstName(), result.getFirstName());
+        assertEquals(testUser1.getSecondName(), result.getSecondName());
+        assertEquals(testUser1.getLastName(), result.getLastName());
+        assertEquals(testUser1.getEmail(), result.getEmail());
+        assertEquals(testUser1.getRole(), result.getRole());
+        assertEquals(testUser1.getCreatedAt(), result.getCreatedAt());
     }
 
     @Test

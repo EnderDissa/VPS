@@ -1,19 +1,20 @@
 package com.example.warehouse.service.interfaces;
 
 import com.example.warehouse.dto.BorrowingDTO;
+import com.example.warehouse.entity.Borrowing;
 import com.example.warehouse.enumeration.BorrowStatus;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 
 public interface BorrowingService {
-    BorrowingDTO create(BorrowingDTO dto);
-    BorrowingDTO getById(Long id);
+    Borrowing create(Borrowing entity);
+    Borrowing getById(Long id);
     void activate(Long id);
-    BorrowingDTO extend(Long id, LocalDateTime newDueAt);
-    BorrowingDTO returnBorrowing(Long id);
+    Borrowing extend(Long id, LocalDateTime newDueAt);
+    Borrowing returnBorrowing(Long id);
     void cancel(Long id);
-    Page<BorrowingDTO> findPage(int page, int size, BorrowStatus status, Long userId, Long itemId,
+    Page<Borrowing> findPage(int page, int size, BorrowStatus status, Long userId, Long itemId,
                                 LocalDateTime from, LocalDateTime to);
-    Page<BorrowingDTO> findOverdue(int page, int size);
+    Page<Borrowing> findOverdue(int page, int size);
 }

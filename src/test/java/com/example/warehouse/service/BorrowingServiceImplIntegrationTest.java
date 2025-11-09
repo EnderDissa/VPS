@@ -8,6 +8,8 @@ import com.example.warehouse.enumeration.BorrowStatus;
 import com.example.warehouse.enumeration.ItemCondition;
 import com.example.warehouse.enumeration.ItemType;
 import com.example.warehouse.enumeration.RoleType;
+import com.example.warehouse.exception.ItemNotFoundException;
+import com.example.warehouse.exception.UserNotFoundException;
 import com.example.warehouse.repository.BorrowingRepository;
 import com.example.warehouse.repository.ItemRepository;
 import com.example.warehouse.repository.UserRepository;
@@ -61,11 +63,16 @@ class BorrowingServiceImplIntegrationTest {
     private ItemRepository itemRepository;
 
     @Autowired
+    private ItemServiceImpl itemService;
+
+    @Autowired
     private UserRepository userRepository;
 
     private User testUser;
     private User testUser2;
+    private  User nonExistentUser;
     private Item testItem;
+    private Item nonExistentItem;
     private Item testItemUnavailable;
     private Borrowing testBorrowing;
     private Borrowing testOverdueBorrowing;
@@ -96,6 +103,16 @@ class BorrowingServiceImplIntegrationTest {
                 .build();
         testUser2 = userRepository.save(testUser2);
 
+        nonExistentUser = User.builder()
+                .id(999L)
+                .email("test2@example.com")
+                .firstName("Jane")
+                .secondName("Johnovic")
+                .lastName("Smith")
+                .role(RoleType.STUDENT)
+                .createdAt(LocalDateTime.now())
+                .build();
+
         testItem = Item.builder()
                 .name("Test Laptop")
                 .description("High-performance laptop")
@@ -105,7 +122,18 @@ class BorrowingServiceImplIntegrationTest {
                 .description("good")
                 .createdAt(LocalDateTime.now())
                 .build();
-        testItem = itemRepository.save(testItem);
+        testItem = itemService.create(testItem);
+
+        nonExistentItem = Item.builder()
+                .id(999L)
+                .name("Test Laptop")
+                .description("High-performance laptop")
+                .type(ItemType.ELECTRONICS)
+                .condition(ItemCondition.GOOD)
+                .serialNumber("1")
+                .description("good")
+                .createdAt(LocalDateTime.now())
+                .build();
 
         testItemUnavailable = Item.builder()
                 .name("Broken Monitor")
@@ -141,13 +169,13 @@ class BorrowingServiceImplIntegrationTest {
 
     @Test
     void getById_ShouldReturnBorrowing_WhenBorrowingExists() {
-        BorrowingDTO result = borrowingService.getById(testBorrowing.getId());
+        Borrowing result = borrowingService.getById(testBorrowing.getId());
 
         assertNotNull(result);
-        assertEquals(testBorrowing.getId(), result.id());
-        assertEquals(testBorrowing.getStatus(), result.status());
-        assertEquals(testUser.getId(), result.userId());
-        assertEquals(testItem.getId(), result.itemId());
+        assertEquals(testBorrowing.getId(), result.getId());
+        assertEquals(testBorrowing.getStatus(), result.getStatus());
+        assertEquals(testUser.getId(), result.getUser().getId());
+        assertEquals(testItem.getId(), result.getItem().getId());
     }
 
     @Test
@@ -159,10 +187,10 @@ class BorrowingServiceImplIntegrationTest {
 
     @Test
     void create_ShouldCreateBorrowing_WhenValidData() {
-        BorrowingDTO newBorrowingDTO = new BorrowingDTO(
+        Borrowing newBorrowing = new Borrowing(
                 null,
-                testItem.getId(),
-                testUser2.getId(),
+                testItem,
+                testUser2,
                 1,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(7),
@@ -171,25 +199,24 @@ class BorrowingServiceImplIntegrationTest {
                 "a"
         );
 
-        BorrowingDTO result = borrowingService.create(newBorrowingDTO);
+        Borrowing result = borrowingService.create(newBorrowing);
 
         assertNotNull(result);
-        assertNotNull(result.id());
-        assertEquals(BorrowStatus.ACTIVE, result.status());
-        assertEquals(testUser2.getId(), result.userId());
-        assertEquals(testItem.getId(), result.itemId());
+        assertNotNull(result.getId());
+        assertEquals(BorrowStatus.ACTIVE, result.getStatus());
+        assertEquals(testUser2.getId(), result.getUser().getId());
+        assertEquals(testItem.getId(), result.getItem().getId());
 
-        Borrowing savedBorrowing = borrowingRepository.findById(result.id()).orElseThrow();
+        Borrowing savedBorrowing = borrowingRepository.findById(result.getId()).orElseThrow();
         assertEquals(BorrowStatus.ACTIVE, savedBorrowing.getStatus());
     }
 
     @Test
     void create_ShouldThrowException_WhenItemNotFound() {
-        Long nonExistentItemId = 999L;
-        BorrowingDTO newBorrowingDTO = new BorrowingDTO(
+        Borrowing newBorrowing = new Borrowing(
                 null,
-                nonExistentItemId,
-                testUser.getId(),
+                nonExistentItem,
+                testUser,
                 1,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(7),
@@ -198,16 +225,15 @@ class BorrowingServiceImplIntegrationTest {
                 "a"
         );
 
-        assertThrows(EntityNotFoundException.class, () -> borrowingService.create(newBorrowingDTO));
+        assertThrows(ItemNotFoundException.class, () -> borrowingService.create(newBorrowing));
     }
 
     @Test
     void create_ShouldThrowException_WhenUserNotFound() {
-        Long nonExistentUserId = 999L;
-        BorrowingDTO newBorrowingDTO = new BorrowingDTO(
+        Borrowing newBorrowing = new Borrowing(
                 null,
-                testItem.getId(),
-                nonExistentUserId,
+                testItem,
+                nonExistentUser,
                 1,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(7),
@@ -216,15 +242,15 @@ class BorrowingServiceImplIntegrationTest {
                 "a"
         );
 
-        assertThrows(EntityNotFoundException.class, () -> borrowingService.create(newBorrowingDTO));
+        assertThrows(UserNotFoundException.class, () -> borrowingService.create(newBorrowing));
     }
 
     @Test
     void create_ShouldThrowException_WhenItemUnavailable() {
-        BorrowingDTO newBorrowingDTO = new BorrowingDTO(
+        Borrowing newBorrowing = new Borrowing(
                 null,
-                testItemUnavailable.getId(),
-                testUser.getId(),
+                testItemUnavailable,
+                testUser,
                 1,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(7),
@@ -234,7 +260,7 @@ class BorrowingServiceImplIntegrationTest {
         );
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> borrowingService.create(newBorrowingDTO));
+                () -> borrowingService.create(newBorrowing));
         assertTrue(exception.getMessage().contains("Cannot borrow item in condition"));
     }
 
@@ -263,10 +289,10 @@ class BorrowingServiceImplIntegrationTest {
             borrowingRepository.save(borrowing);
         }
 
-        BorrowingDTO newBorrowingDTO = new BorrowingDTO(
+        Borrowing newBorrowing = new Borrowing(
                 null,
-                testItem.getId(),
-                testUser.getId(),
+                testItem,
+                testUser,
                 1,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(7),
@@ -276,7 +302,7 @@ class BorrowingServiceImplIntegrationTest {
         );
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> borrowingService.create(newBorrowingDTO));
+                () -> borrowingService.create(newBorrowing));
         assertTrue(exception.getMessage().contains("maximum active borrowings limit"));
     }
 
@@ -291,12 +317,12 @@ class BorrowingServiceImplIntegrationTest {
     void extend_ShouldExtendBorrowing_WhenValidConditions() {
         LocalDateTime newDueDate = LocalDateTime.now().plusDays(10);
 
-        BorrowingDTO result = borrowingService.extend(testBorrowing.getId(), newDueDate);
+        Borrowing result = borrowingService.extend(testBorrowing.getId(), newDueDate);
 
-        assertEquals(newDueDate.withNano(0), result.expectedReturnDate().withNano(0));
+        assertEquals(newDueDate.withNano(0), result.getExpectedReturnDate().withNano(0));
 
         Borrowing updatedBorrowing = borrowingRepository.findById(testBorrowing.getId()).orElseThrow();
-        assertEquals(result.expectedReturnDate().withNano(0),
+        assertEquals(result.getExpectedReturnDate().withNano(0),
                 updatedBorrowing.getExpectedReturnDate().withNano(0));
     }
 
@@ -341,10 +367,10 @@ class BorrowingServiceImplIntegrationTest {
 
     @Test
     void returnBorrowing_ShouldReturnBorrowing_WhenActive() {
-        BorrowingDTO result = borrowingService.returnBorrowing(testBorrowing.getId());
+        Borrowing result = borrowingService.returnBorrowing(testBorrowing.getId());
 
-        assertEquals(BorrowStatus.RETURNED, result.status());
-        assertNotNull(result.actualReturnDate());
+        assertEquals(BorrowStatus.RETURNED, result.getStatus());
+        assertNotNull(result.getActualReturnDate());
 
         Borrowing updatedBorrowing = borrowingRepository.findById(testBorrowing.getId()).orElseThrow();
         assertEquals(BorrowStatus.RETURNED, updatedBorrowing.getStatus());
@@ -356,9 +382,9 @@ class BorrowingServiceImplIntegrationTest {
         testOverdueBorrowing.setStatus(BorrowStatus.OVERDUE);
         borrowingRepository.save(testOverdueBorrowing);
 
-        BorrowingDTO result = borrowingService.returnBorrowing(testOverdueBorrowing.getId());
+        Borrowing result = borrowingService.returnBorrowing(testOverdueBorrowing.getId());
 
-        assertEquals(BorrowStatus.RETURNED, result.status());
+        assertEquals(BorrowStatus.RETURNED, result.getStatus());
     }
 
     @Test
@@ -381,7 +407,7 @@ class BorrowingServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithAllFilters() {
-        Page<BorrowingDTO> result = borrowingService.findPage(
+        Page<Borrowing> result = borrowingService.findPage(
                 0, 10, BorrowStatus.ACTIVE, testUser.getId(), testItem.getId(),
                 LocalDateTime.now().minusDays(5), LocalDateTime.now().plusDays(5)
         );
@@ -390,16 +416,15 @@ class BorrowingServiceImplIntegrationTest {
         assertTrue(result.getTotalElements() > 0);
         assertEquals(1, result.getContent().size());
 
-        BorrowingDTO dto = result.getContent().get(0);
-        assertEquals(BorrowStatus.ACTIVE, dto.status());
-        System.out.println(dto);
-        assertEquals(testUser.getId(), dto.userId());
-        assertEquals(testItem.getId(), dto.itemId());
+        Borrowing dto = result.getContent().get(0);
+        assertEquals(BorrowStatus.ACTIVE, dto.getStatus());
+        assertEquals(testUser.getId(), dto.getUser().getId());
+        assertEquals(testItem.getId(), dto.getItem().getId());
     }
 
     @Test
     void findPage_ShouldReturnEmpty_WhenNoMatches() {
-        Page<BorrowingDTO> result = borrowingService.findPage(
+        Page<Borrowing> result = borrowingService.findPage(
                 0, 10, BorrowStatus.CANCELLED, null, null, null, null
         );
 
@@ -421,7 +446,7 @@ class BorrowingServiceImplIntegrationTest {
             borrowingRepository.save(borrowing);
         }
 
-        Page<BorrowingDTO> result = borrowingService.findPage(0, 3, null, null, null, null, null);
+        Page<Borrowing> result = borrowingService.findPage(0, 3, null, null, null, null, null);
 
         assertNotNull(result);
         assertEquals(3, result.getContent().size());
@@ -430,16 +455,16 @@ class BorrowingServiceImplIntegrationTest {
 
     @Test
     void findOverdue_ShouldReturnOverdueBorrowings() {
-        Page<BorrowingDTO> result = borrowingService.findOverdue(0, 10);
+        Page<Borrowing> result = borrowingService.findOverdue(0, 10);
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
 
-        List<BorrowingDTO> overdueBorrowings = result.getContent();
+        List<Borrowing> overdueBorrowings = result.getContent();
         assertFalse(overdueBorrowings.isEmpty());
 
         boolean foundOverdue = overdueBorrowings.stream()
-                .anyMatch(b -> b.id().equals(testOverdueBorrowing.getId()));
+                .anyMatch(b -> b.getId().equals(testOverdueBorrowing.getId()));
         assertTrue(foundOverdue);
     }
 
@@ -447,7 +472,7 @@ class BorrowingServiceImplIntegrationTest {
     void findOverdue_ShouldUpdateStatusToOverdue() {
         assertEquals(BorrowStatus.ACTIVE, testOverdueBorrowing.getStatus());
 
-        Page<BorrowingDTO> result = borrowingService.findOverdue(0, 10);
+        Page<Borrowing> result = borrowingService.findOverdue(0, 10);
 
         Borrowing updatedBorrowing = borrowingRepository.findById(testOverdueBorrowing.getId()).orElseThrow();
         assertEquals(BorrowStatus.OVERDUE, updatedBorrowing.getStatus());

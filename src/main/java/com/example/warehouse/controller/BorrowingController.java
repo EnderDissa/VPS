@@ -1,7 +1,9 @@
 package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.BorrowingDTO;
+import com.example.warehouse.entity.Borrowing;
 import com.example.warehouse.enumeration.BorrowStatus;
+import com.example.warehouse.mapper.BorrowingMapper;
 import com.example.warehouse.service.interfaces.BorrowingService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,22 +28,25 @@ import java.util.List;
 public class BorrowingController {
 
     private final BorrowingService service;
+    private final BorrowingMapper mapper;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public BorrowingController(BorrowingService service) {
+    public BorrowingController(BorrowingService service, BorrowingMapper borrowingMapper) {
         this.service = service;
+        this.mapper = borrowingMapper;
     }
 
     @PostMapping
     @Operation(summary = "Create borrowing")
     public ResponseEntity<BorrowingDTO> create(@Valid @RequestBody BorrowingDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
+        Borrowing borrowing = service.create(mapper.toEntity(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDTO(borrowing));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get borrowing by id")
     public BorrowingDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+        return mapper.toDTO(service.getById(id));
     }
 
     @PostMapping("/{id}/activate")
@@ -57,13 +62,13 @@ public class BorrowingController {
             @PathVariable Long id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime newDueAt
     ) {
-        return ResponseEntity.ok(service.extend(id, newDueAt));
+        return ResponseEntity.ok(mapper.toDTO(service.extend(id, newDueAt)));
     }
 
     @PutMapping("/{id}/return")
     @Operation(summary = "Return borrowing")
     public ResponseEntity<BorrowingDTO> returnBorrowing(@PathVariable Long id) {
-        return ResponseEntity.ok(service.returnBorrowing(id));
+        return ResponseEntity.ok(mapper.toDTO(service.returnBorrowing(id)));
     }
 
     @PutMapping("/{id}/cancel")
@@ -84,7 +89,7 @@ public class BorrowingController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
-        var result = service.findPage(page, size, status, userId, itemId, from, to);
+        var result = service.findPage(page, size, status, userId, itemId, from, to).map(mapper::toDTO);
         var headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(result.getTotalElements()));
         return new ResponseEntity<>(result.getContent(), headers, HttpStatus.OK);
@@ -96,7 +101,7 @@ public class BorrowingController {
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(50) int size
     ) {
-        var result = service.findOverdue(page, size);
+        var result = service.findOverdue(page, size).map(mapper::toDTO);
         var headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(result.getTotalElements()));
         return new ResponseEntity<>(result.getContent(), headers, HttpStatus.OK);

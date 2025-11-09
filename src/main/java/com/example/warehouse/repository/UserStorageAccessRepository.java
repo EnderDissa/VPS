@@ -63,10 +63,4 @@ public interface UserStorageAccessRepository extends JpaRepository<UserStorageAc
     long countByUserIdAndIsActive(Long userId, Boolean isActive);
 
     long countByStorageIdAndIsActive(Long storageId, Boolean isActive);
-
-    @Query("SELECT COUNT(usa) FROM UserStorageAccess usa WHERE usa.user.id = :userId AND usa.storage.id = :storageId AND usa.isActive = true " +
-            "AND (usa.expiresAt IS NULL OR usa.expiresAt > :now)")
-    long countActiveAccessForUserAndStorage(@Param("userId") Long userId,
-                                            @Param("storageId") Long storageId,
-                                            @Param("now") LocalDateTime now);
 }

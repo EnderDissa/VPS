@@ -3,6 +3,7 @@ package com.example.warehouse.controller;
 import com.example.warehouse.dto.UserDTO.UserRequestDTO;
 import com.example.warehouse.dto.UserDTO.UserResponseDTO;
 import com.example.warehouse.enumeration.RoleType;
+import com.example.warehouse.mapper.UserMapper;
 import com.example.warehouse.service.interfaces.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,10 +26,12 @@ import java.util.List;
 public class UserController {
 
     private final UserService service;
+    private final UserMapper mapper;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public UserController(UserService service) {
+    public UserController(UserService service, UserMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
     @PostMapping
@@ -40,7 +43,7 @@ public class UserController {
     @GetMapping("/{id}")
     @Operation(summary = "Get user by id")
     public UserResponseDTO getById(@PathVariable Long id) {
-        return service.getUserById(id);
+        return mapper.toResponseDTO(service.getUserById(id));
     }
 
     @PutMapping("/{id}")

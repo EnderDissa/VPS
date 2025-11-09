@@ -92,7 +92,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void create_ShouldCreateItem_WhenValidData() {
-        ItemDTO newItemDTO = new ItemDTO(
+        Item newItem = new Item(
                 null,
                 "New Tablet",
                 ItemType.ELECTRONICS,
@@ -102,23 +102,23 @@ class ItemServiceImplIntegrationTest {
                 null
         );
 
-        ItemDTO result = itemService.create(newItemDTO);
+        Item result = itemService.create(newItem);
 
         assertNotNull(result);
-        assertNotNull(result.id());
-        assertEquals("New Tablet", result.name());
-        assertEquals(ItemType.ELECTRONICS, result.type());
-        assertEquals(ItemCondition.NEW, result.condition());
-        assertEquals("SN999999", result.serialNumber());
-        assertEquals("Brand new tablet", result.description());
+        assertNotNull(result.getId());
+        assertEquals("New Tablet", result.getName());
+        assertEquals(ItemType.ELECTRONICS, result.getType());
+        assertEquals(ItemCondition.NEW, result.getCondition());
+        assertEquals("SN999999", result.getSerialNumber());
+        assertEquals("Brand new tablet", result.getDescription());
 
-        Item savedItem = itemRepository.findById(result.id()).orElseThrow();
+        Item savedItem = itemRepository.findById(result.getId()).orElseThrow();
         assertEquals("New Tablet", savedItem.getName());
     }
 
     @Test
     void create_ShouldCreateItem_WhenSerialNumberIsNull() {
-        ItemDTO newItemDTO = new ItemDTO(
+        Item newItem = new Item(
                 null,
                 "Item Without Serial",
                 ItemType.FURNITURE,
@@ -128,16 +128,16 @@ class ItemServiceImplIntegrationTest {
                 null
         );
 
-        ItemDTO result = itemService.create(newItemDTO);
+        Item result = itemService.create(newItem);
 
         assertNotNull(result);
-        assertNull(result.serialNumber());
-        assertEquals("Item Without Serial", result.name());
+        assertNull(result.getSerialNumber());
+        assertEquals("Item Without Serial", result.getName());
     }
 
     @Test
     void create_ShouldCreateItem_WhenSerialNumberIsEmpty() {
-        ItemDTO newItemDTO = new ItemDTO(
+        Item newItem = new Item(
                 null,
                 "Item With Empty Serial",
                 ItemType.FURNITURE,
@@ -147,15 +147,15 @@ class ItemServiceImplIntegrationTest {
                 null
         );
 
-        ItemDTO result = itemService.create(newItemDTO);
+        Item result = itemService.create(newItem);
 
         assertNotNull(result);
-        assertEquals("", result.serialNumber());
+        assertEquals("", result.getSerialNumber());
     }
 
     @Test
     void create_ShouldThrowDuplicateSerialNumberException_WhenSerialNumberExists() {
-        ItemDTO newItemDTO = new ItemDTO(
+        Item newItem = new Item(
                 null,
                 "Another Laptop",
                 ItemType.ELECTRONICS,
@@ -167,7 +167,7 @@ class ItemServiceImplIntegrationTest {
 
         DuplicateSerialNumberException exception = assertThrows(
                 DuplicateSerialNumberException.class,
-                () -> itemService.create(newItemDTO)
+                () -> itemService.create(newItem)
         );
 
         assertTrue(exception.getMessage().contains("Item with serial number 'SN123456' already exists"));
@@ -175,15 +175,15 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void getById_ShouldReturnItem_WhenItemExists() {
-        ItemDTO result = itemService.getById(testItem1.getId());
+        Item result = itemService.getById(testItem1.getId());
 
         assertNotNull(result);
-        assertEquals(testItem1.getId(), result.id());
-        assertEquals(testItem1.getName(), result.name());
-        assertEquals(testItem1.getType(), result.type());
-        assertEquals(testItem1.getCondition(), result.condition());
-        assertEquals(testItem1.getSerialNumber(), result.serialNumber());
-        assertEquals(testItem1.getDescription(), result.description());
+        assertEquals(testItem1.getId(), result.getId());
+        assertEquals(testItem1.getName(), result.getName());
+        assertEquals(testItem1.getType(), result.getType());
+        assertEquals(testItem1.getCondition(), result.getCondition());
+        assertEquals(testItem1.getSerialNumber(), result.getSerialNumber());
+        assertEquals(testItem1.getDescription(), result.getDescription());
     }
 
     @Test
@@ -200,7 +200,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void update_ShouldUpdateItem_WhenValidData() {
-        ItemDTO updateDTO = new ItemDTO(
+        Item update = new Item(
                 testItem1.getId(),
                 "Updated Laptop Name",
                 ItemType.ELECTRONICS,
@@ -210,7 +210,7 @@ class ItemServiceImplIntegrationTest {
                 null
         );
 
-        itemService.update(testItem1.getId(), updateDTO);
+        itemService.update(testItem1.getId(), update);
 
         Item updatedItem = itemRepository.findById(testItem1.getId()).orElseThrow();
         assertEquals("Updated Laptop Name", updatedItem.getName());
@@ -220,7 +220,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void update_ShouldUpdateItem_WhenSerialNumberChangedToUnique() {
-        ItemDTO updateDTO = new ItemDTO(
+        Item update = new Item(
                 testItem1.getId(),
                 testItem1.getName(),
                 testItem1.getType(),
@@ -230,7 +230,7 @@ class ItemServiceImplIntegrationTest {
                 null
         );
 
-        itemService.update(testItem1.getId(), updateDTO);
+        itemService.update(testItem1.getId(), update);
 
         Item updatedItem = itemRepository.findById(testItem1.getId()).orElseThrow();
         assertEquals("SN_NEW_UNIQUE", updatedItem.getSerialNumber());
@@ -238,7 +238,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void update_ShouldUpdateItem_WhenSerialNumberSetToNull() {
-        ItemDTO updateDTO = new ItemDTO(
+        Item update = new Item(
                 testItem1.getId(),
                 testItem1.getName(),
                 testItem1.getType(),
@@ -248,7 +248,7 @@ class ItemServiceImplIntegrationTest {
                 null
         );
 
-        itemService.update(testItem1.getId(), updateDTO);
+        itemService.update(testItem1.getId(), update);
 
         Item updatedItem = itemRepository.findById(testItem1.getId()).orElseThrow();
         assertNull(updatedItem.getSerialNumber());
@@ -257,7 +257,7 @@ class ItemServiceImplIntegrationTest {
     @Test
     void update_ShouldThrowItemNotFoundException_WhenItemNotFound() {
         Long nonExistentId = 999L;
-        ItemDTO updateDTO = new ItemDTO(
+        Item update = new Item(
                 nonExistentId,
                 "Non-existent Item",
                 ItemType.ELECTRONICS,
@@ -269,7 +269,7 @@ class ItemServiceImplIntegrationTest {
 
         ItemNotFoundException exception = assertThrows(
                 ItemNotFoundException.class,
-                () -> itemService.update(nonExistentId, updateDTO)
+                () -> itemService.update(nonExistentId, update)
         );
 
         assertTrue(exception.getMessage().contains("Item not found with ID: " + nonExistentId));
@@ -277,7 +277,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void update_ShouldThrowDuplicateSerialNumberException_WhenSerialNumberExistsOnOtherItem() {
-        ItemDTO updateDTO = new ItemDTO(
+        Item update = new Item(
                 testItem1.getId(),
                 testItem1.getName(),
                 testItem1.getType(),
@@ -289,7 +289,7 @@ class ItemServiceImplIntegrationTest {
 
         DuplicateSerialNumberException exception = assertThrows(
                 DuplicateSerialNumberException.class,
-                () -> itemService.update(testItem1.getId(), updateDTO)
+                () -> itemService.update(testItem1.getId(), update)
         );
 
         assertTrue(exception.getMessage().contains("Item with serial number 'SN789012' already exists"));
@@ -297,7 +297,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void update_ShouldNotCheckSerialNumber_WhenSerialNumberNotChanged() {
-        ItemDTO updateDTO = new ItemDTO(
+        Item update = new Item(
                 testItem1.getId(),
                 "Updated Name",
                 testItem1.getType(),
@@ -307,7 +307,7 @@ class ItemServiceImplIntegrationTest {
                 null
         );
 
-        assertDoesNotThrow(() -> itemService.update(testItem1.getId(), updateDTO));
+        assertDoesNotThrow(() -> itemService.update(testItem1.getId(), update));
 
         Item updatedItem = itemRepository.findById(testItem1.getId()).orElseThrow();
         assertEquals("Updated Name", updatedItem.getName());
@@ -337,7 +337,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnAllItems_WhenNoFilters() {
-        Page<ItemDTO> result = itemService.findPage(0, 10, null, null);
+        Page<Item> result = itemService.findPage(0, 10, null, null);
 
         assertNotNull(result);
         assertEquals(3, result.getTotalElements());
@@ -346,41 +346,41 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnFilteredByType_WhenTypeFilterApplied() {
-        Page<ItemDTO> result = itemService.findPage(0, 10, ItemType.ELECTRONICS, null);
+        Page<Item> result = itemService.findPage(0, 10, ItemType.ELECTRONICS, null);
 
         assertNotNull(result);
         assertEquals(2, result.getTotalElements());
 
-        List<ItemDTO> content = result.getContent();
-        assertTrue(content.stream().allMatch(item -> item.type() == ItemType.ELECTRONICS));
+        List<Item> content = result.getContent();
+        assertTrue(content.stream().allMatch(item -> item.getType() == ItemType.ELECTRONICS));
     }
 
     @Test
     void findPage_ShouldReturnFilteredByCondition_WhenConditionFilterApplied() {
-        Page<ItemDTO> result = itemService.findPage(0, 10, null, ItemCondition.NEW);
+        Page<Item> result = itemService.findPage(0, 10, null, ItemCondition.NEW);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
 
-        List<ItemDTO> content = result.getContent();
-        assertTrue(content.stream().allMatch(item -> item.condition() == ItemCondition.NEW));
+        List<Item> content = result.getContent();
+        assertTrue(content.stream().allMatch(item -> item.getCondition() == ItemCondition.NEW));
     }
 
     @Test
     void findPage_ShouldReturnFilteredByTypeAndCondition_WhenBothFiltersApplied() {
-        Page<ItemDTO> result = itemService.findPage(0, 10, ItemType.ELECTRONICS, ItemCondition.UNDER_REPAIR);
+        Page<Item> result = itemService.findPage(0, 10, ItemType.ELECTRONICS, ItemCondition.UNDER_REPAIR);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
 
-        ItemDTO item = result.getContent().get(0);
-        assertEquals(ItemType.ELECTRONICS, item.type());
-        assertEquals(ItemCondition.UNDER_REPAIR, item.condition());
+        Item item = result.getContent().get(0);
+        assertEquals(ItemType.ELECTRONICS, item.getType());
+        assertEquals(ItemCondition.UNDER_REPAIR, item.getCondition());
     }
 
     @Test
     void findPage_ShouldReturnEmptyPage_WhenNoMatchingFilters() {
-        Page<ItemDTO> result = itemService.findPage(0, 10, ItemType.FURNITURE, ItemCondition.UNDER_REPAIR);
+        Page<Item> result = itemService.findPage(0, 10, ItemType.FURNITURE, ItemCondition.UNDER_REPAIR);
 
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
@@ -389,7 +389,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnPagedResults_WhenPageSizeSmallerThanTotal() {
-        Page<ItemDTO> result = itemService.findPage(0, 2, null, null);
+        Page<Item> result = itemService.findPage(0, 2, null, null);
 
         assertNotNull(result);
         assertEquals(3, result.getTotalElements());
@@ -399,7 +399,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnSecondPage_WhenPageOneRequested() {
-        Page<ItemDTO> result = itemService.findPage(1, 2, null, null);
+        Page<Item> result = itemService.findPage(1, 2, null, null);
 
         assertNotNull(result);
         assertEquals(3, result.getTotalElements());
@@ -409,18 +409,18 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnSortedByCreatedAtDesc() {
-        Page<ItemDTO> result = itemService.findPage(0, 10, null, null);
+        Page<Item> result = itemService.findPage(0, 10, null, null);
 
-        List<ItemDTO> content = result.getContent();
+        List<Item> content = result.getContent();
 
-        assertEquals(testItem3.getId(), content.get(0).id());
-        assertEquals(testItem2.getId(), content.get(1).id());
-        assertEquals(testItem1.getId(), content.get(2).id());
+        assertEquals(testItem3.getId(), content.get(0).getId());
+        assertEquals(testItem2.getId(), content.get(1).getId());
+        assertEquals(testItem1.getId(), content.get(2).getId());
     }
 
     @Test
     void findAvailable_ShouldReturnAllItems_WhenNoFiltersAndNoCursor() {
-        List<ItemDTO> result = itemService.findAvailable(
+        List<Item> result = itemService.findAvailable(
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now().plusDays(10),
                 null, null, null, null, 10
@@ -432,7 +432,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void findAvailable_ShouldReturnLimitedItems_WhenLimitSpecified() {
-        List<ItemDTO> result = itemService.findAvailable(
+        List<Item> result = itemService.findAvailable(
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now().plusDays(10),
                 null, null, null, null, 2
@@ -446,19 +446,19 @@ class ItemServiceImplIntegrationTest {
     void findAvailable_ShouldReturnItemsWithCursor_WhenCursorSpecified() {
         Long cursorId = testItem1.getId();
 
-        List<ItemDTO> result = itemService.findAvailable(
+        List<Item> result = itemService.findAvailable(
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now().plusDays(10),
                 null, null, null, cursorId, 10
         );
 
         assertNotNull(result);
-        assertTrue(result.stream().allMatch(item -> item.id() > cursorId));
+        assertTrue(result.stream().allMatch(item -> item.getId() > cursorId));
     }
 
     @Test
     void findAvailable_ShouldReturnFilteredByType_WhenTypeFilterApplied() {
-        List<ItemDTO> result = itemService.findAvailable(
+        List<Item> result = itemService.findAvailable(
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now().plusDays(10),
                 null, ItemType.ELECTRONICS, null, null, 10
@@ -466,12 +466,12 @@ class ItemServiceImplIntegrationTest {
 
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(item -> item.type() == ItemType.ELECTRONICS));
+        assertTrue(result.stream().allMatch(item -> item.getType() == ItemType.ELECTRONICS));
     }
 
     @Test
     void findAvailable_ShouldReturnFilteredByCondition_WhenConditionFilterApplied() {
-        List<ItemDTO> result = itemService.findAvailable(
+        List<Item> result = itemService.findAvailable(
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now().plusDays(10),
                 null, null, ItemCondition.NEW, null, 10
@@ -479,12 +479,12 @@ class ItemServiceImplIntegrationTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(ItemCondition.NEW, result.get(0).condition());
+        assertEquals(ItemCondition.NEW, result.get(0).getCondition());
     }
 
     @Test
     void findAvailable_ShouldReturnFilteredByTypeAndCondition_WhenBothFiltersApplied() {
-        List<ItemDTO> result = itemService.findAvailable(
+        List<Item> result = itemService.findAvailable(
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now().plusDays(10),
                 null, ItemType.ELECTRONICS, ItemCondition.GOOD, null, 10
@@ -492,13 +492,13 @@ class ItemServiceImplIntegrationTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(ItemType.ELECTRONICS, result.get(0).type());
-        assertEquals(ItemCondition.GOOD, result.get(0).condition());
+        assertEquals(ItemType.ELECTRONICS, result.get(0).getType());
+        assertEquals(ItemCondition.GOOD, result.get(0).getCondition());
     }
 
     @Test
     void findAvailable_ShouldReturnEmptyList_WhenNoMatchingFilters() {
-        List<ItemDTO> result = itemService.findAvailable(
+        List<Item> result = itemService.findAvailable(
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now().plusDays(10),
                 null, ItemType.FURNITURE, ItemCondition.UNDER_REPAIR, null, 10
@@ -512,7 +512,7 @@ class ItemServiceImplIntegrationTest {
     void findAvailable_ShouldReturnItemsWithCursorAndTypeFilter() {
         Long cursorId = testItem1.getId();
 
-        List<ItemDTO> result = itemService.findAvailable(
+        List<Item> result = itemService.findAvailable(
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now().plusDays(10),
                 null, ItemType.ELECTRONICS, null, cursorId, 10
@@ -520,20 +520,20 @@ class ItemServiceImplIntegrationTest {
 
         assertNotNull(result);
         assertTrue(result.stream().allMatch(item ->
-                item.id() > cursorId && item.type() == ItemType.ELECTRONICS
+                item.getId() > cursorId && item.getType() == ItemType.ELECTRONICS
         ));
     }
 
     @Test
     void findAvailable_ShouldReturnSortedByIdAsc() {
-        List<ItemDTO> result = itemService.findAvailable(
+        List<Item> result = itemService.findAvailable(
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now().plusDays(10),
                 null, null, null, null, 10
         );
 
         for (int i = 0; i < result.size() - 1; i++) {
-            assertTrue(result.get(i).id() < result.get(i + 1).id());
+            assertTrue(result.get(i).getId() < result.get(i + 1).getId());
         }
     }
 
@@ -548,7 +548,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnEmptyPage_WhenPageOutOfRange() {
-        Page<ItemDTO> result = itemService.findPage(10, 10, null, null);
+        Page<Item> result = itemService.findPage(10, 10, null, null);
 
         assertNotNull(result);
         assertEquals(3, result.getTotalElements());

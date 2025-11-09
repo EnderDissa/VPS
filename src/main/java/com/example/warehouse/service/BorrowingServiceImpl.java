@@ -1,16 +1,13 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.dto.BorrowingDTO;
 import com.example.warehouse.entity.Borrowing;
 import com.example.warehouse.entity.Item;
 import com.example.warehouse.entity.User;
 import com.example.warehouse.enumeration.BorrowStatus;
 import com.example.warehouse.enumeration.ItemCondition;
-import com.example.warehouse.mapper.BorrowingMapper;
 import com.example.warehouse.repository.BorrowingRepository;
-import com.example.warehouse.repository.ItemRepository;
-import com.example.warehouse.repository.UserRepository;
 import com.example.warehouse.service.interfaces.BorrowingService;
+import com.example.warehouse.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,8 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,27 +27,23 @@ import java.util.List;
 public class BorrowingServiceImpl implements BorrowingService {
 
     private final BorrowingRepository borrowingRepository;
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
-    private final BorrowingMapper borrowingMapper;
+    private final ItemServiceImpl itemService;
+    private final UserService userService;
 
     @Override
-    public BorrowingDTO getById(Long id) {
+    public Borrowing getById(Long id) {
         log.debug("Getting borrowing by id: {}", id);
-        Borrowing borrowing = borrowingRepository.findById(id)
+        return borrowingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Borrowing not found with id: " + id));
-        return borrowingMapper.toDTO(borrowing);
     }
 
     @Override
-    public BorrowingDTO create(BorrowingDTO dto) {
-        log.debug("Creating new borrowing: {}", dto);
+    public Borrowing create(Borrowing entity) {
+        log.debug("Creating new borrowing: {}", entity);
 
-        Item item = itemRepository.findById(dto.itemId())
-                .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + dto.itemId()));
+        Item item = itemService.getById(entity.getItem().getId());
 
-        User user = userRepository.findById(dto.userId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + dto.userId()));
+        User user = userService.getUserById(entity.getUser().getId());
 
         if (item.getCondition() == ItemCondition.NEEDS_MAINTENANCE || item.getCondition() == ItemCondition.UNDER_REPAIR || item.getCondition() == ItemCondition.DECOMMISSIONED) {
             throw new IllegalStateException("Cannot borrow item in condition: " + item.getCondition());
@@ -63,16 +54,15 @@ public class BorrowingServiceImpl implements BorrowingService {
             throw new IllegalStateException("User has reached maximum active borrowings limit (5)");
         }
 
-        Borrowing borrowing = borrowingMapper.toEntity(dto);
-        borrowing.setId(null);
-        borrowing.setItem(item);
-        borrowing.setUser(user);
-        borrowing.setStatus(BorrowStatus.ACTIVE);
+        entity.setId(null);
+        entity.setItem(item);
+        entity.setUser(user);
+        entity.setStatus(BorrowStatus.ACTIVE);
 
-        Borrowing savedBorrowing = borrowingRepository.save(borrowing);
+        Borrowing savedBorrowing = borrowingRepository.save(entity);
         log.info("Borrowing created successfully with id: {}", savedBorrowing.getId());
 
-        return borrowingMapper.toDTO(savedBorrowing);
+        return savedBorrowing;
     }
 
     @Override
@@ -99,7 +89,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     @Override
-    public BorrowingDTO extend(Long id, LocalDateTime newDueAt) {
+    public Borrowing extend(Long id, LocalDateTime newDueAt) {
         log.debug("Extending borrowing with id: {} to new due date: {}", id, newDueAt);
 
         if (newDueAt.isBefore(LocalDateTime.now())) {
@@ -121,11 +111,11 @@ public class BorrowingServiceImpl implements BorrowingService {
         Borrowing updatedBorrowing = borrowingRepository.save(borrowing);
 
         log.info("Borrowing extended successfully with id: {}, new due date: {}", id, newDueAt);
-        return borrowingMapper.toDTO(updatedBorrowing);
+        return updatedBorrowing;
     }
 
     @Override
-    public BorrowingDTO returnBorrowing(Long id) {
+    public Borrowing returnBorrowing(Long id) {
         log.debug("Returning borrowing with id: {}", id);
 
         Borrowing borrowing = borrowingRepository.findById(id)
@@ -146,7 +136,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         Borrowing returnedBorrowing = borrowingRepository.save(borrowing);
         log.info("Borrowing returned successfully with id: {}", id);
 
-        return borrowingMapper.toDTO(returnedBorrowing);
+        return returnedBorrowing;
     }
 
     @Override
@@ -168,7 +158,7 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     @Override
     
-    public Page<BorrowingDTO> findPage(int page, int size, BorrowStatus status, Long userId, Long itemId,
+    public Page<Borrowing> findPage(int page, int size, BorrowStatus status, Long userId, Long itemId,
                                        LocalDateTime from, LocalDateTime to) {
         log.debug("Finding borrowings with filters - page: {}, size: {}, status: {}, userId: {}, itemId: {}, from: {}, to: {}",
                 page, size, status, userId, itemId, from, to);
@@ -197,13 +187,12 @@ public class BorrowingServiceImpl implements BorrowingService {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("borrowDate"), to));
         }
 
-        Page<Borrowing> borrowings = borrowingRepository.findAll(spec, pageable);
-        return borrowings.map(borrowingMapper::toDTO);
+        return borrowingRepository.findAll(spec, pageable);
     }
 
     @Override
     
-    public Page<BorrowingDTO> findOverdue(int page, int size) {
+    public Page<Borrowing> findOverdue(int page, int size) {
         log.debug("Finding overdue borrowings - page: {}, size: {}", page, size);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "expectedReturnDate"));
@@ -221,7 +210,7 @@ public class BorrowingServiceImpl implements BorrowingService {
             log.info("Updated {} borrowings to OVERDUE status", borrowingsToUpdate.size());
         }
 
-        return overdueBorrowings.map(borrowingMapper::toDTO);
+        return overdueBorrowings;
     }
 
     @Scheduled(cron = "0 0 6 * * ?")

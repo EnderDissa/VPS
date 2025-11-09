@@ -44,13 +44,11 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public UserResponseDTO getUserById(Long id) {
+    public User getUserById(Long id) {
         log.debug("Fetching user by ID: {}", id);
-        
-        User user = userRepository.findById(id)
+
+        return userRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + id));
-        
-        return userMapper.toResponseDTO(user);
     }
 
     @Override

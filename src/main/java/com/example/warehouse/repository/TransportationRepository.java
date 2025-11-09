@@ -37,18 +37,6 @@ public interface TransportationRepository extends JpaRepository<Transportation, 
     @Query("SELECT t FROM Transportation t WHERE t.status = 'IN_PROGRESS' AND t.scheduledArrival < :now")
     Page<Transportation> findOverdueTransportations(@Param("now") LocalDateTime now, Pageable pageable);
 
-    @Query("SELECT COUNT(t) FROM Transportation t WHERE t.driver.id = :driverId AND t.status IN ('PLANNED', 'IN_PROGRESS') " +
-            "AND ((t.scheduledDeparture BETWEEN :start AND :end) OR (t.scheduledArrival BETWEEN :start AND :end))")
-    long countDriverTransportationsInPeriod(@Param("driverId") Long driverId,
-                                            @Param("start") LocalDateTime start,
-                                            @Param("end") LocalDateTime end);
-
-    @Query("SELECT COUNT(t) FROM Transportation t WHERE t.vehicle.id = :vehicleId AND t.status IN ('PLANNED', 'IN_PROGRESS') " +
-            "AND ((t.scheduledDeparture BETWEEN :start AND :end) OR (t.scheduledArrival BETWEEN :start AND :end))")
-    long countVehicleTransportationsInPeriod(@Param("vehicleId") Long vehicleId,
-                                             @Param("start") LocalDateTime start,
-                                             @Param("end") LocalDateTime end);
-
     @Query("SELECT CASE WHEN COUNT(t) = 0 THEN true ELSE false END FROM Transportation t " +
             "WHERE t.driver.id = :driverId AND t.status IN ('PLANNED', 'IN_PROGRESS') " +
             "AND ((t.scheduledDeparture BETWEEN :start AND :end) OR (t.scheduledArrival BETWEEN :start AND :end))")
@@ -64,10 +52,4 @@ public interface TransportationRepository extends JpaRepository<Transportation, 
                                @Param("end") LocalDateTime end);
 
     long countByStatus(TransportStatus status);
-
-    long countByVehicleIdAndStatusIn(Long vehicleId, List<TransportStatus> statuses);
-
-    List<Transportation> findByDriverIdAndStatusIn(Long driverId, List<TransportStatus> statuses);
-
-    List<Transportation> findByVehicleIdAndStatusIn(Long vehicleId, List<TransportStatus> statuses);
 }

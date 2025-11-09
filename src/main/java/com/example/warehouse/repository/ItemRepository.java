@@ -18,8 +18,6 @@ import java.util.Optional;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    Optional<Item> findBySerialNumber(String serialNumber);
-
     boolean existsBySerialNumber(String serialNumber);
 
     Page<Item> findByType(ItemType type, Pageable pageable);

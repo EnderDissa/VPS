@@ -1,8 +1,10 @@
 package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.ItemDTO;
+import com.example.warehouse.entity.Item;
 import com.example.warehouse.enumeration.ItemCondition;
 import com.example.warehouse.enumeration.ItemType;
+import com.example.warehouse.mapper.ItemMapper;
 import com.example.warehouse.service.interfaces.ItemService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Validated
 @RestController
@@ -28,30 +31,32 @@ import java.util.List;
 @Tag(name = "Items")
 public class ItemController {
 
-    public ItemController(ItemService service) {
+    public ItemController(ItemService service, ItemMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
     private final ItemService service;
+    private final ItemMapper mapper;
 
 
     @PostMapping
     @Operation(summary = "Create item")
     public ResponseEntity<ItemDTO> create(@Valid @RequestBody ItemDTO dto) {
-        ItemDTO created = service.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        Item created = service.create(mapper.toEntity(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDTO(created));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get item by id")
     public ItemDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+        return mapper.toDTO(service.getById(id));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update item by id")
     public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody ItemDTO dto) {
-        service.update(id, dto);
+        service.update(id, mapper.toEntity(dto));
         return ResponseEntity.noContent().build();
     }
 
@@ -70,7 +75,7 @@ public class ItemController {
             @RequestParam(required = false) ItemType type,
             @RequestParam(required = false) ItemCondition condition
     ) {
-        var pageResult = service.findPage(page, size, type, condition);
+        var pageResult = service.findPage(page, size, type, condition).map(mapper::toDTO);
         var headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(pageResult.getTotalElements()));
         return new ResponseEntity<>(pageResult.getContent(), headers, HttpStatus.OK);
@@ -87,6 +92,9 @@ public class ItemController {
             @RequestParam(required = false) Long cursor,
             @RequestParam(defaultValue = "50") @Min(1) @Max(50) int limit
     ) {
-        return service.findAvailable(from, to, storageId, type, condition, cursor, limit);
+        List<Item> result = service.findAvailable(from, to, storageId, type, condition, cursor, limit);
+        return result.stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
     }
 }
