@@ -2,15 +2,17 @@ package com.example.warehouse.entity;
 
 import com.example.warehouse.enumeration.BorrowStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
+@Builder
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "borrowings")
 public class Borrowing {
     

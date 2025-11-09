@@ -10,8 +10,7 @@ import com.example.warehouse.enumeration.AccessLevel;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

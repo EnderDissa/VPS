@@ -2,6 +2,7 @@ package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.*;
 import com.example.warehouse.enumeration.*;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,21 +12,21 @@ public class DtoConversionTest {
 
     @Test
     void shouldMapBorrowingEntityToBorrowingDTO() {
-        Borrowing borrowing = new Borrowing();
-        borrowing.setId(1L);
         Item item = new Item();
         item.setId(10L);
-        borrowing.setItem(item);
         User user = new User();
         user.setId(20L);
-        borrowing.setUser(user);
-        borrowing.setQuantity(3);
-        borrowing.setBorrowDate(LocalDateTime.of(2025, 10, 1, 10, 0));
-        borrowing.setExpectedReturnDate(LocalDateTime.of(2025, 11, 1, 10, 0));
-        borrowing.setActualReturnDate(LocalDateTime.of(2025, 10, 15, 14, 0));
-        borrowing.setStatus(BorrowStatus.RETURNED);
-        borrowing.setPurpose("Project X");
-
+        Borrowing borrowing = Borrowing.builder()
+            .id(1L)
+            .item(item)
+            .user(user)
+            .quantity(3)
+            .borrowDate(LocalDateTime.of(2025, 10, 1, 10, 0))
+            .expectedReturnDate(LocalDateTime.of(2025, 11, 1, 10, 0))
+            .actualReturnDate(LocalDateTime.of(2025, 10, 15, 14, 0))
+            .status(BorrowStatus.RETURNED)
+            .purpose("Project X")
+            .build();
         BorrowingDTO dto = new BorrowingDTO(borrowing);
 
         assertThat(dto.id()).isEqualTo(1L);

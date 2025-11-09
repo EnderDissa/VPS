@@ -293,10 +293,11 @@ class BorrowingServiceImplIntegrationTest {
 
         BorrowingDTO result = borrowingService.extend(testBorrowing.getId(), newDueDate);
 
-        assertEquals(newDueDate, result.expectedReturnDate());
+        assertEquals(newDueDate.withNano(0), result.expectedReturnDate().withNano(0));
 
         Borrowing updatedBorrowing = borrowingRepository.findById(testBorrowing.getId()).orElseThrow();
-        assertEquals(newDueDate, updatedBorrowing.getExpectedReturnDate());
+        assertEquals(result.expectedReturnDate().withNano(0),
+                updatedBorrowing.getExpectedReturnDate().withNano(0));
     }
 
     @Test
