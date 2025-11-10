@@ -3,11 +3,9 @@ package com.example.warehouse.dto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class DtoJsonSmokeDynamicTest {

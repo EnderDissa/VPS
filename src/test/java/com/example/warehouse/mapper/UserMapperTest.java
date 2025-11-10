@@ -5,7 +5,6 @@ import com.example.warehouse.entity.User;
 import com.example.warehouse.enumeration.RoleType;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserMapperTest {

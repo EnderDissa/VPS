@@ -2,16 +2,12 @@ package com.example.warehouse.dto;
 
 import com.example.warehouse.enumeration.ItemCondition;
 import com.example.warehouse.enumeration.ItemType;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
 import java.time.LocalDateTime;
-import java.util.Set;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ItemDTOValidationTest {

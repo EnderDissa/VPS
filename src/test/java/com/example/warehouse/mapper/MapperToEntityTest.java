@@ -210,10 +210,10 @@ public class MapperToEntityTest {
     void shouldMapUserStorageAccessDTOToEntity() {
         UserStorageAccessDTO dto = new UserStorageAccessDTO(
                 600L,
-                601L, // userId
-                602L, // storageId
+                601L,
+                602L,
                 AccessLevel.ADMIN,
-                603L, // grantedById
+                603L,
                 LocalDateTime.of(2025, 1, 1, 0, 0),
                 LocalDateTime.of(2026, 1, 1, 0, 0),
                 true

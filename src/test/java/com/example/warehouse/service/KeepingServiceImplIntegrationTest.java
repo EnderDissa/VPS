@@ -1,6 +1,5 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.dto.KeepingDTO;
 import com.example.warehouse.entity.Keeping;
 import com.example.warehouse.entity.Storage;
 import com.example.warehouse.entity.Item;
@@ -22,19 +21,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.time.LocalDateTime;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
-@Transactional
 @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class KeepingServiceImplIntegrationTest {
 
@@ -134,7 +129,6 @@ class KeepingServiceImplIntegrationTest {
         testItem1 = itemRepository.save(testItem1);
         testItem2 = itemRepository.save(testItem2);
 
-        // Создаем тестовые записи хранения
         testKeeping1 = Keeping.builder()
                 .storage(testStorage1)
                 .item(testItem1)
@@ -155,7 +149,6 @@ class KeepingServiceImplIntegrationTest {
         testKeeping2 = keepingRepository.save(testKeeping2);
     }
 
-    // Тесты для метода create
     @Test
     void create_ShouldCreateKeeping_WhenValidData() {
         Keeping newKeeping = new Keeping(
@@ -274,7 +267,6 @@ class KeepingServiceImplIntegrationTest {
                 testStorage1.getId() + " and item ID: " + testItem1.getId()));
     }
 
-    // Тесты для метода getById
     @Test
     void getById_ShouldReturnKeeping_WhenKeepingExists() {
         Keeping result = keepingService.getById(testKeeping1.getId());

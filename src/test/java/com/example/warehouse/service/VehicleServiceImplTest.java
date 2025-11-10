@@ -1,6 +1,5 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.dto.VehicleDTO;
 import com.example.warehouse.entity.Vehicle;
 import com.example.warehouse.enumeration.VehicleStatus;
 import com.example.warehouse.repository.VehicleRepository;
@@ -20,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
-
 @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class VehicleServiceImplIntegrationTest {
 

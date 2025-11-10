@@ -3,12 +3,10 @@ package com.example.warehouse.mapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class AllMappersRoundtripDynamicTest {

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.Repository;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

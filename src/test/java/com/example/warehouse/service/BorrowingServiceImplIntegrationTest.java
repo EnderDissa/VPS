@@ -1,6 +1,5 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.dto.BorrowingDTO;
 import com.example.warehouse.entity.Borrowing;
 import com.example.warehouse.entity.Item;
 import com.example.warehouse.entity.User;
@@ -13,7 +12,6 @@ import com.example.warehouse.exception.UserNotFoundException;
 import com.example.warehouse.repository.BorrowingRepository;
 import com.example.warehouse.repository.ItemRepository;
 import com.example.warehouse.repository.UserRepository;
-import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,15 +21,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers

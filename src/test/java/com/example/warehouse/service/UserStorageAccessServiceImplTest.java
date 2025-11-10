@@ -1,6 +1,5 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.dto.UserStorageAccessDTO;
 import com.example.warehouse.entity.UserStorageAccess;
 import com.example.warehouse.entity.User;
 import com.example.warehouse.entity.Storage;
@@ -18,20 +17,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
-
 @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class UserStorageAccessServiceImplIntegrationTest {
 
