@@ -72,10 +72,6 @@ public class BorrowingServiceImpl implements BorrowingService {
         Borrowing borrowing = borrowingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Borrowing not found with id: " + id));
 
-        if (borrowing.getStatus() != BorrowStatus.ACTIVE) {
-            throw new IllegalStateException("Only pending borrowings can be activated");
-        }
-
         Item item = borrowing.getItem();
         if (item.getCondition() == ItemCondition.UNDER_REPAIR || item.getCondition() == ItemCondition.NEEDS_MAINTENANCE || item.getCondition() == ItemCondition.DECOMMISSIONED) {
             throw new IllegalStateException("Cannot activate borrowing - item is not available: " + item.getCondition());

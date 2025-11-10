@@ -19,7 +19,7 @@ import com.example.warehouse.repository.ItemRepository;
 import com.example.warehouse.repository.VehicleRepository;
 import com.example.warehouse.repository.UserRepository;
 import com.example.warehouse.repository.StorageRepository;
-import com.example.warehouse.service.interfaces.TransportationService;
+import com.example.warehouse.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,40 +37,33 @@ import java.time.LocalDateTime;
 public class TransportationServiceImpl implements TransportationService {
 
     private final TransportationRepository transportationRepository;
-    private final ItemRepository itemRepository;
-    private final VehicleRepository vehicleRepository;
-    private final UserRepository userRepository;
-    private final StorageRepository storageRepository;
-    private final TransportationMapper transportationMapper;
+    private final ItemService itemService;
+    private final VehicleService vehicleService;
+    private final UserService userService;
+    private final StorageService storageService;
 
     @Override
-    public TransportationDTO create(TransportationDTO dto) {
+    public Transportation create(Transportation transportation) {
         log.info("Creating new transportation for item ID: {} from storage {} to storage {}",
-                dto.itemId(), dto.fromStorageId(), dto.toStorageId());
+                transportation.getItem().getId(), transportation.getFromStorage().getId(), transportation.getToStorage().getId());
 
-        Item item = itemRepository.findById(dto.itemId())
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
+        Item item = itemService.getById(transportation.getItem().getId());
 
-        Vehicle vehicle = vehicleRepository.findById(dto.vehicleId())
-                .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found with ID: " + dto.vehicleId()));
+        Vehicle vehicle = vehicleService.getById(transportation.getVehicle().getId());
 
-        User driver = userRepository.findById(dto.driverId())
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.driverId()));
+        User driver = userService.getUserById(transportation.getDriver().getId());
 
-        Storage fromStorage = storageRepository.findById(dto.fromStorageId())
-                .orElseThrow(() -> new StorageNotFoundException("From storage not found with ID: " + dto.fromStorageId()));
+        Storage fromStorage = storageService.getById(transportation.getFromStorage().getId());
 
-        Storage toStorage = storageRepository.findById(dto.toStorageId())
-                .orElseThrow(() -> new StorageNotFoundException("To storage not found with ID: " + dto.toStorageId()));
+        Storage toStorage = storageService.getById(transportation.getToStorage().getId());
 
-        if (dto.fromStorageId().equals(dto.toStorageId())) {
+        if (transportation.getFromStorage().getId().equals(transportation.getToStorage().getId())) {
             throw new OperationNotAllowedException("From and to storage cannot be the same");
         }
 
-        checkDriverAvailability(dto.driverId(), dto.scheduledDeparture(), dto.scheduledArrival());
-        checkVehicleAvailability(dto.vehicleId(), dto.scheduledDeparture(), dto.scheduledArrival());
+        checkDriverAvailability(transportation.getDriver().getId(), transportation.getScheduledDeparture(), transportation.getScheduledArrival());
+        checkVehicleAvailability(transportation.getVehicle().getId(), transportation.getScheduledDeparture(), transportation.getScheduledArrival());
 
-        Transportation transportation = transportationMapper.toEntity(dto);
         transportation.setItem(item);
         transportation.setVehicle(vehicle);
         transportation.setDriver(driver);
@@ -81,21 +74,19 @@ public class TransportationServiceImpl implements TransportationService {
         Transportation savedTransportation = transportationRepository.save(transportation);
         log.info("Transportation created successfully with ID: {}", savedTransportation.getId());
 
-        return transportationMapper.toDTO(savedTransportation);
+        return savedTransportation;
     }
 
     @Override
-    public TransportationDTO getById(Long id) {
+    public Transportation getById(Long id) {
         log.debug("Fetching transportation by ID: {}", id);
 
-        Transportation transportation = transportationRepository.findById(id)
+        return transportationRepository.findById(id)
                 .orElseThrow(() -> new TransportationNotFoundException("Transportation not found with ID: " + id));
-
-        return transportationMapper.toDTO(transportation);
     }
 
     @Override
-    public void update(Long id, TransportationDTO dto) {
+    public void update(Long id, Transportation transportation) {
         log.info("Updating transportation with ID: {}", id);
 
         Transportation existingTransportation = transportationRepository.findById(id)
@@ -106,18 +97,18 @@ public class TransportationServiceImpl implements TransportationService {
                     "Cannot update transportation with status: " + existingTransportation.getStatus());
         }
 
-        updateRelatedEntities(existingTransportation, dto);
+        updateRelatedEntities(existingTransportation, transportation);
 
-        existingTransportation.setStatus(dto.status());
-        existingTransportation.setScheduledDeparture(dto.scheduledDeparture());
-        existingTransportation.setScheduledArrival(dto.scheduledArrival());
+        existingTransportation.setStatus(transportation.getStatus());
+        existingTransportation.setScheduledDeparture(transportation.getScheduledDeparture());
+        existingTransportation.setScheduledArrival(transportation.getScheduledArrival());
 
-        if (dto.status() == TransportStatus.IN_TRANSIT &&
+        if (transportation.getStatus() == TransportStatus.IN_TRANSIT &&
                 existingTransportation.getActualDeparture() == null) {
             existingTransportation.setActualDeparture(LocalDateTime.now());
         }
 
-        if (dto.status() == TransportStatus.DELIVERED &&
+        if (transportation.getStatus() == TransportStatus.DELIVERED &&
                 existingTransportation.getActualArrival() == null) {
             existingTransportation.setActualArrival(LocalDateTime.now());
         }
@@ -143,7 +134,7 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
     @Override
-    public Page<TransportationDTO> findPage(int page, int size, TransportStatus status, Long itemId,
+    public Page<Transportation> findPage(int page, int size, TransportStatus status, Long itemId,
                                             Long fromStorageId, Long toStorageId) {
         log.debug("Fetching transportations page - page: {}, size: {}, status: {}, itemId: {}, fromStorageId: {}, toStorageId: {}",
                 page, size, status, itemId, fromStorageId, toStorageId);
@@ -175,38 +166,33 @@ public class TransportationServiceImpl implements TransportationService {
             transportationsPage = transportationRepository.findAll(pageable);
         }
 
-        return transportationsPage.map(transportationMapper::toDTO);
+        return transportationsPage;
     }
 
 
-    private void updateRelatedEntities(Transportation transportation, TransportationDTO dto) {
-        if (!transportation.getItem().getId().equals(dto.itemId())) {
-            Item item = itemRepository.findById(dto.itemId())
-                    .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
+    private void updateRelatedEntities(Transportation transportation, Transportation newTransportation) {
+        if (!transportation.getItem().getId().equals(newTransportation.getItem().getId())) {
+            Item item = itemService.getById(newTransportation.getItem().getId());
             transportation.setItem(item);
         }
 
-        if (!transportation.getVehicle().getId().equals(dto.vehicleId())) {
-            Vehicle vehicle = vehicleRepository.findById(dto.vehicleId())
-                    .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found with ID: " + dto.vehicleId()));
+        if (!transportation.getVehicle().getId().equals(newTransportation.getVehicle().getId())) {
+            Vehicle vehicle = vehicleService.getById(newTransportation.getVehicle().getId());
             transportation.setVehicle(vehicle);
         }
 
-        if (!transportation.getDriver().getId().equals(dto.driverId())) {
-            User driver = userRepository.findById(dto.driverId())
-                    .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.driverId()));
+        if (!transportation.getDriver().getId().equals(newTransportation.getDriver().getId())) {
+            User driver = userService.getUserById(newTransportation.getDriver().getId());
             transportation.setDriver(driver);
         }
 
-        if (!transportation.getFromStorage().getId().equals(dto.fromStorageId())) {
-            Storage fromStorage = storageRepository.findById(dto.fromStorageId())
-                    .orElseThrow(() -> new StorageNotFoundException("From storage not found with ID: " + dto.fromStorageId()));
+        if (!transportation.getFromStorage().getId().equals(newTransportation.getFromStorage().getId())) {
+            Storage fromStorage = storageService.getById(newTransportation.getFromStorage().getId());
             transportation.setFromStorage(fromStorage);
         }
 
-        if (!transportation.getToStorage().getId().equals(dto.toStorageId())) {
-            Storage toStorage = storageRepository.findById(dto.toStorageId())
-                    .orElseThrow(() -> new StorageNotFoundException("To storage not found with ID: " + dto.toStorageId()));
+        if (!transportation.getToStorage().getId().equals(newTransportation.getToStorage().getId())) {
+            Storage toStorage = storageService.getById(newTransportation.getToStorage().getId());
             transportation.setToStorage(toStorage);
         }
     }
@@ -234,7 +220,7 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
 
-    public TransportationDTO startTransportation(Long id) {
+    public Transportation startTransportation(Long id) {
         log.info("Starting transportation with ID: {}", id);
 
         Transportation transportation = transportationRepository.findById(id)
@@ -251,10 +237,10 @@ public class TransportationServiceImpl implements TransportationService {
         Transportation updatedTransportation = transportationRepository.save(transportation);
         log.info("Transportation with ID: {} started successfully", id);
 
-        return transportationMapper.toDTO(updatedTransportation);
+        return updatedTransportation;
     }
 
-    public TransportationDTO completeTransportation(Long id) {
+    public Transportation completeTransportation(Long id) {
         log.info("Completing transportation with ID: {}", id);
 
         Transportation transportation = transportationRepository.findById(id)
@@ -271,10 +257,10 @@ public class TransportationServiceImpl implements TransportationService {
         Transportation updatedTransportation = transportationRepository.save(transportation);
         log.info("Transportation with ID: {} completed successfully", id);
 
-        return transportationMapper.toDTO(updatedTransportation);
+        return updatedTransportation;
     }
 
-    public TransportationDTO cancelTransportation(Long id) {
+    public Transportation cancelTransportation(Long id) {
         log.info("Canceling transportation with ID: {}", id);
 
         Transportation transportation = transportationRepository.findById(id)
@@ -290,18 +276,16 @@ public class TransportationServiceImpl implements TransportationService {
         Transportation updatedTransportation = transportationRepository.save(transportation);
         log.info("Transportation with ID: {} cancelled successfully", id);
 
-        return transportationMapper.toDTO(updatedTransportation);
+        return updatedTransportation;
     }
 
-    public Page<TransportationDTO> findOverdueTransportations(int page, int size) {
+    public Page<Transportation> findOverdueTransportations(int page, int size) {
         log.debug("Fetching overdue transportations - page: {}, size: {}", page, size);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "scheduledArrival"));
         LocalDateTime now = LocalDateTime.now();
 
-        Page<Transportation> overdueTransportations = transportationRepository.findOverdueTransportations(now, pageable);
-
-        return overdueTransportations.map(transportationMapper::toDTO);
+        return transportationRepository.findOverdueTransportations(now, pageable);
     }
 
     public long countByStatus(TransportStatus status) {
