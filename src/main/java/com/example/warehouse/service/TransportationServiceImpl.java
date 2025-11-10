@@ -43,6 +43,7 @@ public class TransportationServiceImpl implements TransportationService {
     private final StorageService storageService;
 
     @Override
+    @Transactional
     public Transportation create(Transportation transportation) {
         log.info("Creating new transportation for item ID: {} from storage {} to storage {}",
                 transportation.getItem().getId(), transportation.getFromStorage().getId(), transportation.getToStorage().getId());
@@ -86,6 +87,7 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
     @Override
+    @Transactional
     public void update(Long id, Transportation transportation) {
         log.info("Updating transportation with ID: {}", id);
 
