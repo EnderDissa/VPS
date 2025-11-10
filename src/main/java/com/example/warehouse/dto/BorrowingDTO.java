@@ -4,6 +4,7 @@ import com.example.warehouse.entity.Borrowing;
 import com.example.warehouse.enumeration.BorrowStatus;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record BorrowingDTO(
+        @Schema(hidden = true)
         Long id,
 
         @NotNull(message = "Item ID is required")

@@ -5,6 +5,7 @@ import com.example.warehouse.enumeration.BorrowStatus;
 import com.example.warehouse.enumeration.MaintenanceStatus;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
@@ -14,6 +15,7 @@ import lombok.Data;
 
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record ItemMaintenanceDTO(
+        @Schema(hidden = true)
         Long id,
 
         @NotNull(message = "Item ID is required")

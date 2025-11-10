@@ -4,12 +4,14 @@ import com.example.warehouse.entity.UserStorageAccess;
 import com.example.warehouse.enumeration.AccessLevel;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserStorageAccessDTO(
+        @Schema(hidden = true)
         Long id,
 
         @NotNull(message = "User ID is required")

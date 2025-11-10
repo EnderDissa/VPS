@@ -5,6 +5,7 @@ import com.example.warehouse.enumeration.ItemCondition;
 import com.example.warehouse.enumeration.ItemType;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record ItemDTO(
+        @Schema(hidden = true)
         Long id,
 
         @NotBlank(message = "Name is required")

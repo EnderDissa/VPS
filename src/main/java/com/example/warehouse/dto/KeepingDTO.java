@@ -3,6 +3,7 @@ package com.example.warehouse.dto;
 import com.example.warehouse.entity.Keeping;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record KeepingDTO(
+        @Schema(hidden = true)
         Long id,
 
         @NotNull(message = "Storage ID is required")

@@ -4,12 +4,14 @@ import com.example.warehouse.entity.Transportation;
 import com.example.warehouse.enumeration.TransportStatus;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record TransportationDTO(
+        @Schema(hidden = true)
         Long id,
 
         @NotNull(message = "Item ID is required")

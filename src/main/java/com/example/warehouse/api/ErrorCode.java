@@ -29,4 +29,3 @@ public enum ErrorCode {
     USER_STORAGE_ACCESS_NOT_FOUND,
     VEHICLE_NOT_FOUND
 }
-}
