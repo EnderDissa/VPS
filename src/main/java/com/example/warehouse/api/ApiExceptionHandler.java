@@ -1,5 +1,27 @@
 package com.example.warehouse.api;
 
+import com.example.warehouse.exception.AccessDeniedException;
+import com.example.warehouse.exception.BorrowingNotFoundException;
+import com.example.warehouse.exception.BusinessRuleException;
+import com.example.warehouse.exception.ConflictException;
+import com.example.warehouse.exception.DuplicateKeepingException;
+import com.example.warehouse.exception.DuplicateLicensePlateException;
+import com.example.warehouse.exception.DuplicateSerialNumberException;
+import com.example.warehouse.exception.DuplicateStorageException;
+import com.example.warehouse.exception.DuplicateUserStorageAccessException;
+import com.example.warehouse.exception.ItemMaintenanceNotFoundException;
+import com.example.warehouse.exception.ItemNotFoundException;
+import com.example.warehouse.exception.KeepingNotFoundException;
+import com.example.warehouse.exception.OperationNotAllowedException;
+import com.example.warehouse.exception.StorageNotEmptyException;
+import com.example.warehouse.exception.StorageNotFoundException;
+import com.example.warehouse.exception.TransportationNotFoundException;
+import com.example.warehouse.exception.UserAlreadyExistsException;
+import com.example.warehouse.exception.UserNotFoundException;
+import com.example.warehouse.exception.UserStorageAccessNotFoundException;
+import com.example.warehouse.exception.ValidationException;
+import com.example.warehouse.exception.VehicleNotFoundException;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
@@ -73,9 +95,78 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleOther(Exception ex, HttpServletRequest req) {
-        HttpStatus s = HttpStatus.INTERNAL_SERVER_ERROR;
-        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.INTERNAL_ERROR, ex.getMessage(), req.getRequestURI());
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        ErrorCode errorCode = ErrorCode.INTERNAL_ERROR;
+        String message = ex.getMessage();
+        if (ex instanceof AccessDeniedException) {
+            status = HttpStatus.FORBIDDEN;
+            errorCode = ErrorCode.FORBIDDEN;
+        } else if (ex instanceof BorrowingNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorCode = ErrorCode.BORROWING_NOT_FOUND;
+        } else if (ex instanceof BusinessRuleException) {
+            status = HttpStatus.BAD_REQUEST;
+            errorCode = ErrorCode.BUSINESS_RULE_VIOLATION;
+        } else if (ex instanceof ConflictException) {
+            status = HttpStatus.CONFLICT;
+            errorCode = ErrorCode.CONFLICT;
+        } else if (ex instanceof DuplicateKeepingException) {
+            status = HttpStatus.CONFLICT;
+            errorCode = ErrorCode.DUPLICATE_KEEPING;
+        } else if (ex instanceof DuplicateLicensePlateException) {
+            status = HttpStatus.CONFLICT;
+            errorCode = ErrorCode.DUPLICATE_LICENSE_PLATE;
+        } else if (ex instanceof DuplicateSerialNumberException) {
+            status = HttpStatus.CONFLICT;
+            errorCode = ErrorCode.DUPLICATE_SERIAL_NUMBER;
+        } else if (ex instanceof DuplicateStorageException) {
+            status = HttpStatus.CONFLICT;
+            errorCode = ErrorCode.DUPLICATE_STORAGE;
+        } else if (ex instanceof DuplicateUserStorageAccessException) {
+            status = HttpStatus.CONFLICT;
+            errorCode = ErrorCode.DUPLICATE_USER_STORAGE_ACCESS;
+        } else if (ex instanceof ItemMaintenanceNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorCode = ErrorCode.ITEM_MAINTENANCE_NOT_FOUND;
+        } else if (ex instanceof ItemNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorCode = ErrorCode.ITEM_NOT_FOUND;
+        } else if (ex instanceof KeepingNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorCode = ErrorCode.KEEPING_NOT_FOUND;
+        } else if (ex instanceof OperationNotAllowedException) {
+            status = HttpStatus.FORBIDDEN;
+            errorCode = ErrorCode.OPERATION_NOT_ALLOWED;
+        } else if (ex instanceof StorageNotEmptyException) {
+            status = HttpStatus.CONFLICT;
+            errorCode = ErrorCode.STORAGE_NOT_EMPTY;
+        } else if (ex instanceof StorageNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorCode = ErrorCode.STORAGE_NOT_FOUND;
+        } else if (ex instanceof TransportationNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorCode = ErrorCode.TRANSPORTATION_NOT_FOUND;
+        } else if (ex instanceof UserAlreadyExistsException) {
+            status = HttpStatus.CONFLICT;
+            errorCode = ErrorCode.USER_ALREADY_EXISTS;
+        } else if (ex instanceof UserNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorCode = ErrorCode.USER_NOT_FOUND;
+        } else if (ex instanceof UserStorageAccessNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorCode = ErrorCode.USER_STORAGE_ACCESS_NOT_FOUND;
+        } else if (ex instanceof ValidationException) {
+            status = HttpStatus.BAD_REQUEST;
+            errorCode = ErrorCode.VALIDATION_ERROR;
+            // Use field-specific message if available
+        } else if (ex instanceof VehicleNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorCode = ErrorCode.VEHICLE_NOT_FOUND;
+        }
+
+
+        ApiError body = ApiError.of(status.value(), status.getReasonPhrase(), errorCode, message != null ? message : "Internal server error", req.getRequestURI());
         ex.printStackTrace();
-        return ResponseEntity.status(s).body(body);
+        return ResponseEntity.status(status).body(body);
     }
 }
