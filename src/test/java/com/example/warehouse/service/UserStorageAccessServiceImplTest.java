@@ -61,9 +61,11 @@ class UserStorageAccessServiceImplIntegrationTest {
     private StorageRepository storageRepository;
 
     private User testUser;
+    private User nonExistentUser;
     private User testAdmin;
     private Storage testStorage;
     private Storage testStorage2;
+    private Storage nonExistentStorage;
     private UserStorageAccess testAccess;
 
     @BeforeEach
@@ -77,6 +79,16 @@ class UserStorageAccessServiceImplIntegrationTest {
                 .createdAt(LocalDateTime.now())
                 .build();
         testUser = userRepository.save(testUser);
+
+        nonExistentUser = User.builder()
+                .id(999L)
+                .firstName("John")
+                .secondName("Michael")
+                .lastName("Doe")
+                .role(RoleType.STUDENT)
+                .email("john.doe@example.com")
+                .createdAt(LocalDateTime.now())
+                .build();
 
         testAdmin = User.builder()
                 .firstName("Admin")
@@ -104,6 +116,13 @@ class UserStorageAccessServiceImplIntegrationTest {
                 .build();
         testStorage2 = storageRepository.save(testStorage2);
 
+        nonExistentStorage = Storage.builder()
+                .id(999L)
+                .name("Secondary Storage")
+                .address("456 Oak St, Town")
+                .capacity(500)
+                .createdAt(LocalDateTime.now())
+                .build();
 
         testAccess = UserStorageAccess.builder()
                 .user(testUser)
@@ -119,28 +138,28 @@ class UserStorageAccessServiceImplIntegrationTest {
 
     @Test
     void create_ShouldCreateUserStorageAccess_WhenValidData() {
-        UserStorageAccessDTO newAccessDTO = new UserStorageAccessDTO(
+        UserStorageAccess newAccess = new UserStorageAccess(
                 null,
-                testUser.getId(),
-                testStorage2.getId(),
+                testUser,
+                testStorage2,
                 AccessLevel.MANAGER,
-                testAdmin.getId(),
+                testAdmin,
                 null,
                 LocalDateTime.now().plusDays(60),
                 true
         );
 
-        UserStorageAccessDTO result = userStorageAccessService.create(newAccessDTO);
+        UserStorageAccess result = userStorageAccessService.create(newAccess);
 
         assertNotNull(result);
-        assertNotNull(result.id());
-        assertEquals(AccessLevel.MANAGER, result.accessLevel());
-        assertEquals(testUser.getId(), result.userId());
-        assertEquals(testStorage2.getId(), result.storageId());
-        assertEquals(testAdmin.getId(), result.grantedById());
-        assertTrue(result.isActive());
+        assertNotNull(result.getId());
+        assertEquals(AccessLevel.MANAGER, result.getAccessLevel());
+        assertEquals(testUser.getId(), result.getUser().getId());
+        assertEquals(testStorage2.getId(), result.getStorage().getId());
+        assertEquals(testAdmin.getId(), result.getGrantedBy().getId());
+        assertTrue(result.getIsActive());
 
-        UserStorageAccess savedAccess = userStorageAccessRepository.findById(result.id()).orElseThrow();
+        UserStorageAccess savedAccess = userStorageAccessRepository.findById(result.getId()).orElseThrow();
         assertEquals(AccessLevel.MANAGER, savedAccess.getAccessLevel());
         assertNotNull(savedAccess.getGrantedAt());
     }
@@ -148,97 +167,97 @@ class UserStorageAccessServiceImplIntegrationTest {
     @Test
     void create_ShouldThrowException_WhenUserNotFound() {
         Long nonExistentUserId = 999L;
-        UserStorageAccessDTO newAccessDTO = new UserStorageAccessDTO(
+        UserStorageAccess newAccess = new UserStorageAccess(
                 null,
-                nonExistentUserId,
-                testStorage.getId(),
+                nonExistentUser,
+                testStorage,
                 AccessLevel.BASIC,
-                testAdmin.getId(),
+                testAdmin,
                 null,
                 LocalDateTime.now().plusDays(30),
                 true
         );
 
-        assertThrows(UserNotFoundException.class, () -> userStorageAccessService.create(newAccessDTO));
+        assertThrows(UserNotFoundException.class, () -> userStorageAccessService.create(newAccess));
     }
 
     @Test
     void create_ShouldThrowException_WhenStorageNotFound() {
         Long nonExistentStorageId = 999L;
-        UserStorageAccessDTO newAccessDTO = new UserStorageAccessDTO(
+        UserStorageAccess newAccess = new UserStorageAccess(
                 null,
-                testUser.getId(),
-                nonExistentStorageId,
+                testUser,
+                nonExistentStorage,
                 AccessLevel.BASIC,
-                testAdmin.getId(),
+                testAdmin,
                 null,
                 LocalDateTime.now().plusDays(30),
                 true
         );
 
-        assertThrows(StorageNotFoundException.class, () -> userStorageAccessService.create(newAccessDTO));
+        assertThrows(StorageNotFoundException.class, () -> userStorageAccessService.create(newAccess));
     }
 
     @Test
     void create_ShouldThrowException_WhenGrantedByUserNotFound() {
         Long nonExistentGrantedById = 999L;
-        UserStorageAccessDTO newAccessDTO = new UserStorageAccessDTO(
+        UserStorageAccess newAccess = new UserStorageAccess(
                 null,
-                testUser.getId(),
-                testStorage.getId(),
+                testUser,
+                testStorage,
                 AccessLevel.BASIC,
-                nonExistentGrantedById,
+                nonExistentUser,
                 null,
                 LocalDateTime.now().plusDays(30),
                 true
         );
 
-        assertThrows(UserNotFoundException.class, () -> userStorageAccessService.create(newAccessDTO));
+        assertThrows(UserNotFoundException.class, () -> userStorageAccessService.create(newAccess));
     }
 
     @Test
     void create_ShouldThrowException_WhenDuplicateUserStorageAccess() {
-        UserStorageAccessDTO duplicateAccessDTO = new UserStorageAccessDTO(
+        UserStorageAccess duplicateAccess = new UserStorageAccess(
                 null,
-                testUser.getId(),
-                testStorage.getId(),
+                testUser,
+                testStorage,
                 AccessLevel.MANAGER,
-                testAdmin.getId(),
+                testAdmin,
                 null,
                 LocalDateTime.now().plusDays(30),
                 true
         );
 
         assertThrows(DuplicateUserStorageAccessException.class,
-                () -> userStorageAccessService.create(duplicateAccessDTO));
+                () -> userStorageAccessService.create(duplicateAccess));
     }
 
     @Test
     void create_ShouldThrowException_WhenExpirationDateInPast() {
-        UserStorageAccessDTO expiredAccessDTO = new UserStorageAccessDTO(
+        UserStorageAccess expiredAccess = new UserStorageAccess(
                 null,
-                testUser.getId(),
-                testStorage2.getId(),
+                testUser,
+                testStorage2,
                 AccessLevel.BASIC,
-                testAdmin.getId(),
+                testAdmin,
                 null,
                 LocalDateTime.now().minusDays(1),
                 true
         );
 
         assertThrows(OperationNotAllowedException.class,
-                () -> userStorageAccessService.create(expiredAccessDTO));
+                () -> userStorageAccessService.create(expiredAccess));
     }
 
     @Test
     void getById_ShouldReturnUserStorageAccess_WhenExists() {
-        UserStorageAccessDTO result = userStorageAccessService.getById(testAccess.getId());
+        UserStorageAccess result = userStorageAccessService.getById(testAccess.getId());
 
         assertNotNull(result);
-        assertEquals(testAccess.getId(), result.id());
-        assertEquals(testAccess.getAccessLevel(), result.accessLevel());
-        assertEquals(testUser.getId(), result.userId());
-        assertEquals(testStorage.getId(), result.storageId());
+        assertEquals(testAccess.getId(), result.getId());
+        assertEquals(testAccess.getAccessLevel(), result.getAccessLevel());
+        assertEquals(testUser.getId(), result.getUser().getId());
+        assertEquals(testStorage.getId(), result.getStorage().getId());
     }
 
     @Test
@@ -251,18 +270,18 @@ class UserStorageAccessServiceImplIntegrationTest {
 
     @Test
     void update_ShouldUpdateUserStorageAccess_WhenValidData() {
-        UserStorageAccessDTO updateDTO = new UserStorageAccessDTO(
+        UserStorageAccess update = new UserStorageAccess(
                 testAccess.getId(),
-                testUser.getId(),
-                testStorage.getId(),
+                testUser,
+                testStorage,
                 AccessLevel.MANAGER,
-                testAdmin.getId(),
+                testAdmin,
                 testAccess.getGrantedAt(),
                 LocalDateTime.now().plusDays(90),
                 false
         );
 
-        userStorageAccessService.update(testAccess.getId(), updateDTO);
+        userStorageAccessService.update(testAccess.getId(), update);
 
         UserStorageAccess updatedAccess = userStorageAccessRepository.findById(testAccess.getId()).orElseThrow();
         assertEquals(AccessLevel.MANAGER, updatedAccess.getAccessLevel());
@@ -273,19 +292,19 @@ class UserStorageAccessServiceImplIntegrationTest {
 
     @Test
     void update_ShouldThrowException_WhenExpirationDateInPast() {
-        UserStorageAccessDTO updateDTO = new UserStorageAccessDTO(
+        UserStorageAccess update = new UserStorageAccess(
                 testAccess.getId(),
-                testUser.getId(),
-                testStorage.getId(),
+                testUser,
+                testStorage,
                 AccessLevel.BASIC,
-                testAdmin.getId(),
+                testAdmin,
                 testAccess.getGrantedAt(),
                 LocalDateTime.now().minusDays(1),
                 true
         );
 
         assertThrows(OperationNotAllowedException.class,
-                () -> userStorageAccessService.update(testAccess.getId(), updateDTO));
+                () -> userStorageAccessService.update(testAccess.getId(), update));
     }
 
     @Test
@@ -302,19 +321,19 @@ class UserStorageAccessServiceImplIntegrationTest {
                         .build()
         );
 
-        UserStorageAccessDTO updateDTO = new UserStorageAccessDTO(
+        UserStorageAccess update = new UserStorageAccess(
                 secondAccess.getId(),
-                testUser.getId(),
-                testStorage.getId(),
+                testUser,
+                testStorage,
                 AccessLevel.BASIC,
-                testAdmin.getId(),
+                testAdmin,
                 secondAccess.getGrantedAt(),
                 LocalDateTime.now().plusDays(30),
                 true
         );
 
         assertThrows(DuplicateUserStorageAccessException.class,
-                () -> userStorageAccessService.update(secondAccess.getId(), updateDTO));
+                () -> userStorageAccessService.update(secondAccess.getId(), update));
     }
 
     @Test
@@ -336,51 +355,51 @@ class UserStorageAccessServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithUserFilter() {
-        Page<UserStorageAccessDTO> result = userStorageAccessService.findPage(
+        Page<UserStorageAccess> result = userStorageAccessService.findPage(
                 0, 10, testUser.getId(), null, null, null
         );
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
-        assertEquals(testUser.getId(), result.getContent().get(0).userId());
+        assertEquals(testUser.getId(), result.getContent().get(0).getUser().getId());
     }
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithStorageFilter() {
-        Page<UserStorageAccessDTO> result = userStorageAccessService.findPage(
+        Page<UserStorageAccess> result = userStorageAccessService.findPage(
                 0, 10, null, testStorage.getId(), null, null
         );
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
-        assertEquals(testStorage.getId(), result.getContent().get(0).storageId());
+        assertEquals(testStorage.getId(), result.getContent().get(0).getStorage().getId());
     }
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithAccessLevelFilter() {
-        Page<UserStorageAccessDTO> result = userStorageAccessService.findPage(
+        Page<UserStorageAccess> result = userStorageAccessService.findPage(
                 0, 10, null, null, AccessLevel.BASIC, null
         );
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
-        assertEquals(AccessLevel.BASIC, result.getContent().get(0).accessLevel());
+        assertEquals(AccessLevel.BASIC, result.getContent().get(0).getAccessLevel());
     }
 
     @Test
     void findPage_ShouldReturnFilteredResults_WithActiveFilter() {
-        Page<UserStorageAccessDTO> result = userStorageAccessService.findPage(
+        Page<UserStorageAccess> result = userStorageAccessService.findPage(
                 0, 10, null, null, null, true
         );
 
         assertNotNull(result);
         assertTrue(result.getTotalElements() > 0);
-        assertTrue(result.getContent().get(0).isActive());
+        assertTrue(result.getContent().get(0).getIsActive());
     }
 
     @Test
     void findPage_ShouldReturnEmpty_WhenNoMatches() {
-        Page<UserStorageAccessDTO> result = userStorageAccessService.findPage(
+        Page<UserStorageAccess> result = userStorageAccessService.findPage(
                 0, 10, 999L, null, null, null
         );
 
@@ -390,13 +409,13 @@ class UserStorageAccessServiceImplIntegrationTest {
 
     @Test
     void findByUserAndStorage_ShouldReturnAccess_WhenExists() {
-        UserStorageAccessDTO result = userStorageAccessService.findByUserAndStorage(
+        UserStorageAccess result = userStorageAccessService.findByUserAndStorage(
                 testUser.getId(), testStorage.getId()
         );
 
         assertNotNull(result);
-        assertEquals(testUser.getId(), result.userId());
-        assertEquals(testStorage.getId(), result.storageId());
+        assertEquals(testUser.getId(), result.getUser().getId());
+        assertEquals(testStorage.getId(), result.getStorage().getId());
     }
 
     @Test
@@ -473,9 +492,9 @@ class UserStorageAccessServiceImplIntegrationTest {
 
     @Test
     void deactivate_ShouldDeactivateAccess() {
-        UserStorageAccessDTO result = userStorageAccessService.deactivate(testAccess.getId());
+        UserStorageAccess result = userStorageAccessService.deactivate(testAccess.getId());
 
-        assertFalse(result.isActive());
+        assertFalse(result.getIsActive());
 
         UserStorageAccess deactivatedAccess = userStorageAccessRepository.findById(testAccess.getId()).orElseThrow();
         assertFalse(deactivatedAccess.getIsActive());
@@ -486,9 +505,9 @@ class UserStorageAccessServiceImplIntegrationTest {
         testAccess.setIsActive(false);
         userStorageAccessRepository.save(testAccess);
 
-        UserStorageAccessDTO result = userStorageAccessService.activate(testAccess.getId());
+        UserStorageAccess result = userStorageAccessService.activate(testAccess.getId());
 
-        assertTrue(result.isActive());
+        assertTrue(result.getIsActive());
 
         UserStorageAccess activatedAccess = userStorageAccessRepository.findById(testAccess.getId()).orElseThrow();
         assertTrue(activatedAccess.getIsActive());
@@ -496,20 +515,20 @@ class UserStorageAccessServiceImplIntegrationTest {
 
     @Test
     void findByUser_ShouldReturnUserAccesses() {
-        List<UserStorageAccessDTO> result = userStorageAccessService.findByUser(testUser.getId());
+        List<UserStorageAccess> result = userStorageAccessService.findByUser(testUser.getId());
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertEquals(testUser.getId(), result.get(0).userId());
+        assertEquals(testUser.getId(), result.get(0).getUser().getId());
     }
 
     @Test
     void findByStorage_ShouldReturnStorageAccesses() {
-        List<UserStorageAccessDTO> result = userStorageAccessService.findByStorage(testStorage.getId());
+        List<UserStorageAccess> result = userStorageAccessService.findByStorage(testStorage.getId());
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertEquals(testStorage.getId(), result.get(0).storageId());
+        assertEquals(testStorage.getId(), result.get(0).getStorage().getId());
     }
 
     @Test
@@ -517,7 +536,7 @@ class UserStorageAccessServiceImplIntegrationTest {
         testAccess.setExpiresAt(LocalDateTime.now().minusDays(1));
         userStorageAccessRepository.save(testAccess);
 
-        List<UserStorageAccessDTO> result = userStorageAccessService.findExpiredAccesses();
+        List<UserStorageAccess> result = userStorageAccessService.findExpiredAccesses();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -551,16 +570,16 @@ class UserStorageAccessServiceImplIntegrationTest {
 
     @Test
     void findPage_ShouldReturnAllCombinations_WithMultipleFilters() {
-        Page<UserStorageAccessDTO> result1 = userStorageAccessService.findPage(0, 10, testUser.getId(), testStorage.getId(), null, null);
+        Page<UserStorageAccess> result1 = userStorageAccessService.findPage(0, 10, testUser.getId(), testStorage.getId(), null, null);
         assertNotNull(result1);
 
-        Page<UserStorageAccessDTO> result2 = userStorageAccessService.findPage(0, 10, testUser.getId(), null, AccessLevel.BASIC, null);
+        Page<UserStorageAccess> result2 = userStorageAccessService.findPage(0, 10, testUser.getId(), null, AccessLevel.BASIC, null);
         assertNotNull(result2);
 
-        Page<UserStorageAccessDTO> result3 = userStorageAccessService.findPage(0, 10, null, testStorage.getId(), AccessLevel.BASIC, true);
+        Page<UserStorageAccess> result3 = userStorageAccessService.findPage(0, 10, null, testStorage.getId(), AccessLevel.BASIC, true);
         assertNotNull(result3);
 
-        Page<UserStorageAccessDTO> result4 = userStorageAccessService.findPage(0, 10, null, null, null, null);
+        Page<UserStorageAccess> result4 = userStorageAccessService.findPage(0, 10, null, null, null, null);
         assertNotNull(result4);
     }
 }

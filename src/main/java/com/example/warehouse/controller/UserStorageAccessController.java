@@ -1,7 +1,9 @@
 package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.UserStorageAccessDTO;
+import com.example.warehouse.entity.UserStorageAccess;
 import com.example.warehouse.enumeration.AccessLevel;
+import com.example.warehouse.mapper.UserStorageAccessMapper;
 import com.example.warehouse.service.interfaces.UserStorageAccessService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,28 +26,31 @@ import java.util.List;
 public class UserStorageAccessController {
 
     private final UserStorageAccessService service;
+    private final UserStorageAccessMapper mapper;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public UserStorageAccessController(UserStorageAccessService service) {
+    public UserStorageAccessController(UserStorageAccessService service, UserStorageAccessMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
     @PostMapping
     @Operation(summary = "Grant access")
     public ResponseEntity<UserStorageAccessDTO> create(@Valid @RequestBody UserStorageAccessDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
+        UserStorageAccess userStorageAccess = service.create(mapper.toEntity(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDTO(userStorageAccess));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get access by id")
-    public UserStorageAccessDTO getById(@PathVariable Long id) {
+    public UserStorageAccess getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update access by id")
     public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody UserStorageAccessDTO dto) {
-        service.update(id, dto);
+        service.update(id, mapper.toEntity(dto));
         return ResponseEntity.noContent().build();
     }
 
@@ -66,7 +71,7 @@ public class UserStorageAccessController {
             @RequestParam(required = false) AccessLevel accessLevel,
             @RequestParam(required = false) Boolean active
     ) {
-        var result = service.findPage(page, size, userId, storageId, accessLevel, active);
+        var result = service.findPage(page, size, userId, storageId, accessLevel, active).map(mapper::toDTO);
         var headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(result.getTotalElements()));
         return new ResponseEntity<>(result.getContent(), headers, HttpStatus.OK);

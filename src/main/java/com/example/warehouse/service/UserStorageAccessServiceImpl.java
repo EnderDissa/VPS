@@ -14,6 +14,8 @@ import com.example.warehouse.mapper.UserStorageAccessMapper;
 import com.example.warehouse.repository.UserStorageAccessRepository;
 import com.example.warehouse.repository.UserRepository;
 import com.example.warehouse.repository.StorageRepository;
+import com.example.warehouse.service.interfaces.StorageService;
+import com.example.warehouse.service.interfaces.UserService;
 import com.example.warehouse.service.interfaces.UserStorageAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,75 +38,65 @@ import java.util.stream.Collectors;
 public class UserStorageAccessServiceImpl implements UserStorageAccessService {
 
     private final UserStorageAccessRepository userStorageAccessRepository;
-    private final UserRepository userRepository;
-    private final StorageRepository storageRepository;
-    private final UserStorageAccessMapper userStorageAccessMapper;
+    private final UserService userService;
+    private final StorageService storageService;
 
     @Override
-    
-    public UserStorageAccessDTO create(UserStorageAccessDTO dto) {
-        log.info("Creating new user storage access - userId: {}, storageId: {}, accessLevel: {}",
-                dto.userId(), dto.storageId(), dto.accessLevel());
+    public UserStorageAccess create(UserStorageAccess userStorageAccess) {
 
-        User user = userRepository.findById(dto.userId())
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.userId()));
+        User user = userService.getUserById(userStorageAccess.getUser().getId());
 
-        Storage storage = storageRepository.findById(dto.storageId())
-                .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.storageId()));
+        Storage storage = storageService.getById(userStorageAccess.getStorage().getId());
 
-        User grantedBy = userRepository.findById(dto.grantedById())
-                .orElseThrow(() -> new UserNotFoundException("Granted by user not found with ID: " + dto.grantedById()));
+        User grantedBy = userService.getUserById(userStorageAccess.getGrantedBy().getId());
 
-        if (userStorageAccessRepository.existsByUserIdAndStorageId(dto.userId(), dto.storageId())) {
+        if (userStorageAccessRepository.existsByUserIdAndStorageId(userStorageAccess.getUser().getId(), userStorageAccess.getStorage().getId())) {
             throw new DuplicateUserStorageAccessException(
-                    "User storage access already exists for user ID: " + dto.userId() +
-                            " and storage ID: " + dto.storageId());
+                    "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
+                            " and storage ID: " + userStorageAccess.getStorage().getId());
         }
 
-        if (dto.expiresAt() != null && dto.expiresAt().isBefore(LocalDateTime.now())) {
+        if (userStorageAccess.getExpiresAt() != null && userStorageAccess.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new OperationNotAllowedException("Expiration date must be in the future");
         }
 
-        UserStorageAccess access = userStorageAccessMapper.toEntity(dto);
-        access.setUser(user);
-        access.setStorage(storage);
-        access.setGrantedBy(grantedBy);
-        access.setGrantedAt(LocalDateTime.now());
 
-        UserStorageAccess savedAccess = userStorageAccessRepository.save(access);
+        userStorageAccess.setUser(user);
+        userStorageAccess.setStorage(storage);
+        userStorageAccess.setGrantedBy(grantedBy);
+        userStorageAccess.setGrantedAt(LocalDateTime.now());
+
+        UserStorageAccess savedAccess = userStorageAccessRepository.save(userStorageAccess);
         log.info("User storage access created successfully with ID: {}", savedAccess.getId());
 
-        return userStorageAccessMapper.toDTO(savedAccess);
+        return savedAccess;
     }
 
     @Override
-    public UserStorageAccessDTO getById(Long id) {
+    public UserStorageAccess getById(Long id) {
         log.debug("Fetching user storage access by ID: {}", id);
 
-        UserStorageAccess access = userStorageAccessRepository.findById(id)
+        return userStorageAccessRepository.findById(id)
                 .orElseThrow(() -> new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
-
-        return userStorageAccessMapper.toDTO(access);
     }
 
     @Override
-    
-    public void update(Long id, UserStorageAccessDTO dto) {
+    public void update(Long id, UserStorageAccess userStorageAccess) {
         log.info("Updating user storage access with ID: {}", id);
 
         try {
             UserStorageAccess existingAccess = userStorageAccessRepository.findById(id)
                     .orElseThrow(() -> new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
 
-            if (dto.expiresAt() != null && dto.expiresAt().isBefore(LocalDateTime.now())) {
+            if (userStorageAccess.getExpiresAt() != null && userStorageAccess.getExpiresAt().isBefore(LocalDateTime.now())) {
                 throw new OperationNotAllowedException("Expiration date must be in the future");
             }
 
-            updateRelatedEntities(existingAccess, dto);
+            updateRelatedEntities(existingAccess, userStorageAccess);
 
-            existingAccess.setAccessLevel(dto.accessLevel());
-            existingAccess.setExpiresAt(dto.expiresAt());
-            existingAccess.setIsActive(dto.isActive());
+            existingAccess.setAccessLevel(userStorageAccess.getAccessLevel());
+            existingAccess.setExpiresAt(userStorageAccess.getExpiresAt());
+            existingAccess.setIsActive(userStorageAccess.getIsActive());
 
             userStorageAccessRepository.save(existingAccess);
             log.info("User storage access with ID: {} updated successfully", id);
@@ -112,8 +104,8 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage() != null && e.getMessage().contains("uk_user_storage_access")) {
                 throw new DuplicateUserStorageAccessException(
-                        "User storage access already exists for user ID: " + dto.userId() +
-                                " and storage ID: " + dto.storageId());
+                        "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
+                                " and storage ID: " + userStorageAccess.getStorage().getId());
             }
             throw e;
         }
@@ -133,7 +125,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
     }
 
     @Override
-    public Page<UserStorageAccessDTO> findPage(int page, int size, Long userId, Long storageId,
+    public Page<UserStorageAccess> findPage(int page, int size, Long userId, Long storageId,
                                                AccessLevel accessLevel, Boolean active) {
         log.debug("Fetching user storage access page - page: {}, size: {}, userId: {}, storageId: {}, accessLevel: {}, active: {}",
                 page, size, userId, storageId, accessLevel, active);
@@ -181,52 +173,47 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
             accessPage = userStorageAccessRepository.findAll(pageable);
         }
 
-        return accessPage.map(userStorageAccessMapper::toDTO);
+        return accessPage;
     }
 
-    private void updateRelatedEntities(UserStorageAccess access, UserStorageAccessDTO dto) {
-        if (!access.getUser().getId().equals(dto.userId())) {
-            User user = userRepository.findById(dto.userId())
-                    .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + dto.userId()));
+    private void updateRelatedEntities(UserStorageAccess access, UserStorageAccess userStorageAccess) {
+        if (!access.getUser().getId().equals(userStorageAccess.getUser().getId())) {
+            User user = userService.getUserById(userStorageAccess.getUser().getId());
             access.setUser(user);
 
             if (userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
-                    dto.userId(), dto.storageId(), access.getId())) {
+                    userStorageAccess.getUser().getId(), userStorageAccess.getStorage().getId(), access.getId())) {
                 throw new DuplicateUserStorageAccessException(
-                        "User storage access already exists for user ID: " + dto.userId() +
-                                " and storage ID: " + dto.storageId());
+                        "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
+                                " and storage ID: " + userStorageAccess.getStorage().getId());
             }
         }
 
-        if (!access.getStorage().getId().equals(dto.storageId())) {
-            Storage storage = storageRepository.findById(dto.storageId())
-                    .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.storageId()));
+        if (!access.getStorage().getId().equals(userStorageAccess.getStorage().getId())) {
+            Storage storage = storageService.getById(userStorageAccess.getStorage().getId());
             access.setStorage(storage);
 
             if (userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
-                    dto.userId(), dto.storageId(), access.getId())) {
+                    userStorageAccess.getUser().getId(), userStorageAccess.getStorage().getId(), access.getId())) {
                 throw new DuplicateUserStorageAccessException(
-                        "User storage access already exists for user ID: " + dto.userId() +
-                                " and storage ID: " + dto.storageId());
+                        "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
+                                " and storage ID: " + userStorageAccess.getStorage().getId());
             }
         }
 
-        if (!access.getGrantedBy().getId().equals(dto.grantedById())) {
-            User grantedBy = userRepository.findById(dto.grantedById())
-                    .orElseThrow(() -> new UserNotFoundException("Granted by user not found with ID: " + dto.grantedById()));
+        if (!access.getGrantedBy().getId().equals(userStorageAccess.getGrantedBy().getId())) {
+            User grantedBy = userService.getUserById(userStorageAccess.getGrantedBy().getId());
             access.setGrantedBy(grantedBy);
         }
     }
 
 
-    public UserStorageAccessDTO findByUserAndStorage(Long userId, Long storageId) {
+    public UserStorageAccess findByUserAndStorage(Long userId, Long storageId) {
         log.debug("Finding user storage access by userId: {} and storageId: {}", userId, storageId);
 
-        UserStorageAccess access = userStorageAccessRepository.findByUserIdAndStorageId(userId, storageId)
+        return userStorageAccessRepository.findByUserIdAndStorageId(userId, storageId)
                 .orElseThrow(() -> new UserStorageAccessNotFoundException(
                         "User storage access not found for user ID: " + userId + " and storage ID: " + storageId));
-
-        return userStorageAccessMapper.toDTO(access);
     }
 
 
@@ -248,7 +235,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
     }
 
 
-    public UserStorageAccessDTO deactivate(Long id) {
+    public UserStorageAccess deactivate(Long id) {
         log.info("Deactivating user storage access with ID: {}", id);
 
         UserStorageAccess access = userStorageAccessRepository.findById(id)
@@ -258,11 +245,11 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         UserStorageAccess updatedAccess = userStorageAccessRepository.save(access);
 
         log.info("User storage access with ID: {} deactivated successfully", id);
-        return userStorageAccessMapper.toDTO(updatedAccess);
+        return updatedAccess;
     }
 
 
-    public UserStorageAccessDTO activate(Long id) {
+    public UserStorageAccess activate(Long id) {
         log.info("Activating user storage access with ID: {}", id);
 
         UserStorageAccess access = userStorageAccessRepository.findById(id)
@@ -272,40 +259,28 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         UserStorageAccess updatedAccess = userStorageAccessRepository.save(access);
 
         log.info("User storage access with ID: {} activated successfully", id);
-        return userStorageAccessMapper.toDTO(updatedAccess);
+        return updatedAccess;
     }
 
 
-    public List<UserStorageAccessDTO> findByUser(Long userId) {
+    public List<UserStorageAccess> findByUser(Long userId) {
         log.debug("Finding all user storage accesses for userId: {}", userId);
 
-        List<UserStorageAccess> accesses = userStorageAccessRepository.findByUserId(userId);
-
-        return accesses.stream()
-                .map(userStorageAccessMapper::toDTO)
-                .collect(Collectors.toList());
+        return userStorageAccessRepository.findByUserId(userId);
     }
 
 
-    public List<UserStorageAccessDTO> findByStorage(Long storageId) {
+    public List<UserStorageAccess> findByStorage(Long storageId) {
         log.debug("Finding all user storage accesses for storageId: {}", storageId);
 
-        List<UserStorageAccess> accesses = userStorageAccessRepository.findByStorageId(storageId);
-
-        return accesses.stream()
-                .map(userStorageAccessMapper::toDTO)
-                .collect(Collectors.toList());
+        return userStorageAccessRepository.findByStorageId(storageId);
     }
 
 
-    public List<UserStorageAccessDTO> findExpiredAccesses() {
+    public List<UserStorageAccess> findExpiredAccesses() {
         log.debug("Finding all expired user storage accesses");
 
-        List<UserStorageAccess> expiredAccesses = userStorageAccessRepository.findExpiredAccesses(LocalDateTime.now());
-
-        return expiredAccesses.stream()
-                .map(userStorageAccessMapper::toDTO)
-                .collect(Collectors.toList());
+        return userStorageAccessRepository.findExpiredAccesses(LocalDateTime.now());
     }
 
 

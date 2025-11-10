@@ -1,6 +1,8 @@
 package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.KeepingDTO;
+import com.example.warehouse.entity.Keeping;
+import com.example.warehouse.mapper.KeepingMapper;
 import com.example.warehouse.service.interfaces.KeepingService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,28 +25,31 @@ import java.util.List;
 public class KeepingController {
 
     private final KeepingService service;
+    private final KeepingMapper mapper;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public KeepingController(KeepingService service) {
+    public KeepingController(KeepingService service, KeepingMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
     @PostMapping
     @Operation(summary = "Create keeping link")
     public ResponseEntity<KeepingDTO> create(@Valid @RequestBody KeepingDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
+        Keeping keeping = service.create(mapper.toEntity(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDTO(keeping));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get keeping by id")
     public KeepingDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+        return mapper.toDTO(service.getById(id));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update keeping by id")
     public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody KeepingDTO dto) {
-        service.update(id, dto);
+        service.update(id, mapper.toEntity(dto));
         return ResponseEntity.noContent().build();
     }
 
@@ -63,7 +68,7 @@ public class KeepingController {
             @RequestParam(required = false) Long storageId,
             @RequestParam(required = false) Long itemId
     ) {
-        var result = service.findPage(page, size, storageId, itemId);
+        var result = service.findPage(page, size, storageId, itemId).map(mapper::toDTO);
         var headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(result.getTotalElements()));
         return new ResponseEntity<>(result.getContent(), headers, HttpStatus.OK);

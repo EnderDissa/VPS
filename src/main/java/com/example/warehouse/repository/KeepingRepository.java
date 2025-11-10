@@ -23,6 +23,4 @@ public interface KeepingRepository extends JpaRepository<Keeping, Long> {
     Page<Keeping> findByItemId(Long itemId, Pageable pageable);
 
     Page<Keeping> findByStorageIdAndItemId(Long storageId, Long itemId, Pageable pageable);
-
-    long countByStorageId(Long storageId);
 }

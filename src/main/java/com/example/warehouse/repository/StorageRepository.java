@@ -17,4 +17,7 @@ public interface StorageRepository extends JpaRepository<Storage, Long> {
     boolean existsByName(String name);
 
     Page<Storage> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+    @Query("SELECT COUNT(k) FROM Keeping k WHERE k.storage.id = :storageId")
+    long countKeepingsByStorageId(@Param("storageId") Long storageId);
 }

@@ -35,6 +35,7 @@ public class Keeping {
     @NotNull(message = "Quantity is required")
     @Positive(message = "Quantity must be positive")
     @Column(nullable = false)
+    @Builder.Default
     private Integer quantity = 1;
 
     @Size(max = 100, message = "Shelf must not exceed 100 characters")

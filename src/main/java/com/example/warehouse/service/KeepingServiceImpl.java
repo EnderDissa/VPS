@@ -12,9 +12,12 @@ import com.example.warehouse.mapper.KeepingMapper;
 import com.example.warehouse.repository.KeepingRepository;
 import com.example.warehouse.repository.StorageRepository;
 import com.example.warehouse.repository.ItemRepository;
+import com.example.warehouse.service.interfaces.ItemService;
 import com.example.warehouse.service.interfaces.KeepingService;
+import com.example.warehouse.service.interfaces.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,83 +31,72 @@ import org.springframework.transaction.annotation.Transactional;
 public class KeepingServiceImpl implements KeepingService {
 
     private final KeepingRepository keepingRepository;
-    private final StorageRepository storageRepository;
-    private final ItemRepository itemRepository;
-    private final KeepingMapper keepingMapper;
+    private final StorageService storageService;
+    private final ItemService itemService;
 
     @Override
-    
-    public KeepingDTO create(KeepingDTO dto) {
-        log.info("Creating new keeping record - storageId: {}, itemId: {}", dto.storageId(), dto.itemId());
+    public Keeping create(Keeping keeping) {
+        log.info("Creating new keeping record - storageId: {}, itemId: {}", keeping.getStorage().getId(), keeping.getItem().getId());
 
-        Storage storage = storageRepository.findById(dto.storageId())
-                .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.storageId()));
+        Storage storage = storageService.getById(keeping.getStorage().getId());
 
-        Item item = itemRepository.findById(dto.itemId())
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
+        Item item = itemService.getById(keeping.getItem().getId());
 
-        if (keepingRepository.existsByStorageIdAndItemId(dto.storageId(), dto.itemId())) {
+        if (keepingRepository.existsByStorageIdAndItemId(keeping.getStorage().getId(), keeping.getItem().getId())) {
             throw new DuplicateKeepingException(
-                    "Keeping record already exists for storage ID: " + dto.storageId() +
-                            " and item ID: " + dto.itemId());
+                    "Keeping record already exists for storage ID: " + keeping.getStorage().getId() +
+                            " and item ID: " + keeping.getItem().getId());
         }
 
-        Keeping keeping = keepingMapper.toEntity(dto);
         keeping.setStorage(storage);
         keeping.setItem(item);
 
         Keeping savedKeeping = keepingRepository.save(keeping);
         log.info("Keeping record created successfully with ID: {}", savedKeeping.getId());
 
-        return keepingMapper.toDTO(savedKeeping);
+        return savedKeeping;
     }
 
     @Override
-    public KeepingDTO getById(Long id) {
+    public Keeping getById(Long id) {
         log.debug("Fetching keeping record by ID: {}", id);
 
-        Keeping keeping = keepingRepository.findById(id)
+        return keepingRepository.findById(id)
                 .orElseThrow(() -> new KeepingNotFoundException("Keeping record not found with ID: " + id));
-
-        return keepingMapper.toDTO(keeping);
     }
 
     @Override
-    
-    public void update(Long id, KeepingDTO dto) {
+    public void update(Long id, Keeping keeping) {
         log.info("Updating keeping record with ID: {}", id);
 
         Keeping existingKeeping = keepingRepository.findById(id)
                 .orElseThrow(() -> new KeepingNotFoundException("Keeping record not found with ID: " + id));
 
-        if (!existingKeeping.getStorage().getId().equals(dto.storageId())) {
-            Storage storage = storageRepository.findById(dto.storageId())
-                    .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + dto.storageId()));
+        if (!existingKeeping.getStorage().getId().equals(keeping.getStorage().getId())) {
+            Storage storage = storageService.getById(keeping.getStorage().getId());
             existingKeeping.setStorage(storage);
         }
 
-        if (!existingKeeping.getItem().getId().equals(dto.itemId())) {
-            Item item = itemRepository.findById(dto.itemId())
-                    .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + dto.itemId()));
+        if (!existingKeeping.getItem().getId().equals(keeping.getItem().getId())) {
+            Item item = itemService.getById(keeping.getItem().getId());
             existingKeeping.setItem(item);
 
             if (keepingRepository.existsByStorageIdAndItemIdAndIdNot(
-                    dto.storageId(), dto.itemId(), id)) {
+                    keeping.getStorage().getId(), keeping.getItem().getId(), id)) {
                 throw new DuplicateKeepingException(
-                        "Keeping record already exists for storage ID: " + dto.storageId() +
-                                " and item ID: " + dto.itemId());
+                        "Keeping record already exists for storage ID: " + keeping.getStorage().getId() +
+                                " and item ID: " + keeping.getStorage().getId());
             }
         }
 
-        existingKeeping.setQuantity(dto.quantity());
-        existingKeeping.setShelf(dto.shelf());
+        existingKeeping.setQuantity(keeping.getQuantity());
+        existingKeeping.setShelf(keeping.getShelf());
 
         keepingRepository.save(existingKeeping);
         log.info("Keeping record with ID: {} updated successfully", id);
     }
 
     @Override
-    
     public void delete(Long id) {
         log.info("Deleting keeping record with ID: {}", id);
 
@@ -117,7 +109,7 @@ public class KeepingServiceImpl implements KeepingService {
     }
 
     @Override
-    public Page<KeepingDTO> findPage(int page, int size, Long storageId, Long itemId) {
+    public Page<Keeping> findPage(int page, int size, Long storageId, Long itemId) {
         log.debug("Fetching keeping records page - page: {}, size: {}, storageId: {}, itemId: {}",
                 page, size, storageId, itemId);
 
@@ -135,6 +127,6 @@ public class KeepingServiceImpl implements KeepingService {
             keepingPage = keepingRepository.findAll(pageable);
         }
 
-        return keepingPage.map(keepingMapper::toDTO);
+        return keepingPage;
     }
 }
