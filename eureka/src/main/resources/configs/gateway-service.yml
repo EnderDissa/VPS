@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: service1
+          uri: lb://SERVICE1
+          predicates:
+            - Path=/api/service1/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: service1CircuitBreaker
+                fallbackUri: forward:/fallback/service1
+        - id: service2
+          uri: lb://SERVICE2
+          predicates:
+            - Path=/api/service2/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: service2CircuitBreaker
+                fallbackUri: forward:/fallback/service2
+    circuitbreaker:
+      resilience4j:
+        instances:
+          service1CircuitBreaker:
+            sliding-window-size: 10
+            failure-rate-threshold: 50
+            wait-duration-in-open-state: 5s
+          service2CircuitBreaker:
+            sliding-window-size: 10
+            failure-rate-threshold: 50
+            wait-duration-in-open-state: 5s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers
+  endpoint:
+    health:
+      show-details: always
