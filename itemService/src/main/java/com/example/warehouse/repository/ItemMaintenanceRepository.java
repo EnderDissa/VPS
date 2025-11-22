@@ -2,6 +2,7 @@ package com.example.warehouse.repository;
 
 import com.example.warehouse.entity.ItemMaintenance;
 import com.example.warehouse.enumeration.MaintenanceStatus;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,5 +24,10 @@ public interface ItemMaintenanceRepository extends JpaRepository<ItemMaintenance
 
     Page<ItemMaintenance> findByTechnicianId(Long technicianId, Pageable pageable);
 
+    long countByItemId(Long itemId);
+
     long countByStatus(MaintenanceStatus status);
+
+    long countByItemIdAndStatus(Long itemId, MaintenanceStatus status);
+
 }

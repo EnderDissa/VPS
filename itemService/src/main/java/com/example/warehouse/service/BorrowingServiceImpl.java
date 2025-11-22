@@ -1,23 +1,29 @@
 package com.example.warehouse.service;
 
+import com.example.warehouse.client.UserServiceClient;
+import com.example.warehouse.dto.BorrowingDTO;
 import com.example.warehouse.entity.Borrowing;
 import com.example.warehouse.entity.Item;
 import com.example.warehouse.entity.User;
 import com.example.warehouse.enumeration.BorrowStatus;
 import com.example.warehouse.enumeration.ItemCondition;
+import com.example.warehouse.mapper.BorrowingMapper;
 import com.example.warehouse.repository.BorrowingRepository;
 import com.example.warehouse.service.interfaces.BorrowingService;
-import com.example.warehouse.service.interfaces.UserService;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import jakarta.persistence.EntityNotFoundException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,139 +34,177 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     private final BorrowingRepository borrowingRepository;
     private final ItemServiceImpl itemService;
-    private final UserService userService;
+    private final UserServiceClient userService;
+    private final BorrowingMapper mapper;
 
     @Override
-    public Borrowing getById(Long id) {
+    public Mono<Borrowing> getById(Long id) {
         log.debug("Getting borrowing by id: {}", id);
-        return borrowingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Borrowing not found with id: " + id));
+
+        return Mono.fromCallable(() -> borrowingRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> optional.map(Mono::just)
+                        .orElse(Mono.error(new EntityNotFoundException("Borrowing not found with id: " + id))));
     }
 
     @Override
-    public Borrowing create(Borrowing entity) {
+    public Mono<Borrowing> create(BorrowingDTO dto) {
+        Borrowing entity = mapper.toEntity(dto);
+
         log.debug("Creating new borrowing: {}", entity);
 
-        Item item = itemService.getById(entity.getItem().getId());
+        return itemService.getById(entity.getItem().getId())
+                .flatMap(item -> userService.getUserById(entity.getUser().getId())
+                        .flatMap(user -> {
+                            if (item.getCondition() == ItemCondition.NEEDS_MAINTENANCE ||
+                                    item.getCondition() == ItemCondition.UNDER_REPAIR ||
+                                    item.getCondition() == ItemCondition.DECOMMISSIONED) {
+                                return Mono.error(new IllegalStateException("Cannot borrow item in condition: " + item.getCondition()));
+                            }
 
-        User user = userService.getUserById(entity.getUser().getId());
+                            return Mono.fromCallable(() -> borrowingRepository.countActiveBorrowingsByUser(user.getId()))
+                                    .subscribeOn(Schedulers.boundedElastic())
+                                    .flatMap(activeCount -> {
+                                        if (activeCount >= 5) {
+                                            return Mono.error(new IllegalStateException("User has reached maximum active borrowings limit (5)"));
+                                        }
 
-        if (item.getCondition() == ItemCondition.NEEDS_MAINTENANCE || item.getCondition() == ItemCondition.UNDER_REPAIR || item.getCondition() == ItemCondition.DECOMMISSIONED) {
-            throw new IllegalStateException("Cannot borrow item in condition: " + item.getCondition());
-        }
+                                        entity.setId(null);
+                                        entity.setItem(item);
+                                        entity.setUser(user);
+                                        entity.setStatus(BorrowStatus.ACTIVE);
 
-        long activeBorrowingsCount = borrowingRepository.countActiveBorrowingsByUser(user.getId());
-        if (activeBorrowingsCount >= 5) {
-            throw new IllegalStateException("User has reached maximum active borrowings limit (5)");
-        }
-
-        entity.setId(null);
-        entity.setItem(item);
-        entity.setUser(user);
-        entity.setStatus(BorrowStatus.ACTIVE);
-
-        Borrowing savedBorrowing = borrowingRepository.save(entity);
-        log.info("Borrowing created successfully with id: {}", savedBorrowing.getId());
-
-        return savedBorrowing;
+                                        return Mono.fromCallable(() -> borrowingRepository.save(entity))
+                                                .subscribeOn(Schedulers.boundedElastic());
+                                    });
+                        }));
     }
 
     @Override
-    public void activate(Long id) {
-        log.debug("Activating borrowing with id: {}", id);
+    public Mono<Void> activate(Long id) {
+        return Mono.fromCallable(() -> borrowingRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> {
+                    if (optional.isEmpty()) {
+                        return Mono.error(new EntityNotFoundException("Borrowing not found with id: " + id));
+                    }
 
-        Borrowing borrowing = borrowingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Borrowing not found with id: " + id));
+                    Borrowing borrowing = optional.get();
+                    Item item = borrowing.getItem();
 
-        Item item = borrowing.getItem();
-        if (item.getCondition() == ItemCondition.UNDER_REPAIR || item.getCondition() == ItemCondition.NEEDS_MAINTENANCE || item.getCondition() == ItemCondition.DECOMMISSIONED) {
-            throw new IllegalStateException("Cannot activate borrowing - item is not available: " + item.getCondition());
-        }
+                    if (item.getCondition() == ItemCondition.UNDER_REPAIR ||
+                            item.getCondition() == ItemCondition.NEEDS_MAINTENANCE ||
+                            item.getCondition() == ItemCondition.DECOMMISSIONED) {
+                        return Mono.error(new IllegalStateException("Cannot activate borrowing - item is not available: " + item.getCondition()));
+                    }
 
-        borrowing.setStatus(BorrowStatus.ACTIVE);
-        borrowing.setBorrowDate(LocalDateTime.now());
+                    borrowing.setStatus(BorrowStatus.ACTIVE);
+                    borrowing.setBorrowDate(LocalDateTime.now());
 
-        borrowingRepository.save(borrowing);
-        log.info("Borrowing activated successfully with id: {}", id);
+                    return Mono.fromCallable(() -> borrowingRepository.save(borrowing))
+                            .subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(v -> log.info("Borrowing activated successfully with id: {}", id))
+                .then();
     }
 
     @Override
-    public Borrowing extend(Long id, LocalDateTime newDueAt) {
+    public Mono<Borrowing> extend(Long id, LocalDateTime newDueAt) {
         log.debug("Extending borrowing with id: {} to new due date: {}", id, newDueAt);
 
         if (newDueAt.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("New due date must be in the future");
+            return Mono.error(new IllegalArgumentException("New due date must be in the future"));
         }
 
-        Borrowing borrowing = borrowingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Borrowing not found with id: " + id));
+        return Mono.fromCallable(() -> borrowingRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> {
+                    if (optional.isEmpty()) {
+                        return Mono.error(new EntityNotFoundException("Borrowing not found with id: " + id));
+                    }
 
-        if (borrowing.getStatus() != BorrowStatus.ACTIVE) {
-            throw new IllegalStateException("Only active borrowings can be extended");
-        }
+                    Borrowing borrowing = optional.get();
 
-        if (newDueAt.isBefore(borrowing.getExpectedReturnDate())) {
-            throw new IllegalArgumentException("New due date must be after current expected return date");
-        }
+                    if (borrowing.getStatus() != BorrowStatus.ACTIVE) {
+                        return Mono.error(new IllegalStateException("Only active borrowings can be extended"));
+                    }
 
-        borrowing.setExpectedReturnDate(newDueAt);
-        Borrowing updatedBorrowing = borrowingRepository.save(borrowing);
+                    if (newDueAt.isBefore(borrowing.getExpectedReturnDate())) {
+                        return Mono.error(new IllegalArgumentException("New due date must be after current expected return date"));
+                    }
 
-        log.info("Borrowing extended successfully with id: {}, new due date: {}", id, newDueAt);
-        return updatedBorrowing;
+                    borrowing.setExpectedReturnDate(newDueAt);
+
+                    return Mono.fromCallable(() -> borrowingRepository.save(borrowing))
+                            .subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(updated -> log.info("Borrowing extended successfully with id: {}, new due date: {}", id, newDueAt));
     }
 
     @Override
-    public Borrowing returnBorrowing(Long id) {
+    public Mono<Borrowing> returnBorrowing(Long id) {
         log.debug("Returning borrowing with id: {}", id);
 
-        Borrowing borrowing = borrowingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Borrowing not found with id: " + id));
+        return Mono.fromCallable(() -> borrowingRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> {
+                    if (optional.isEmpty()) {
+                        return Mono.error(new EntityNotFoundException("Borrowing not found with id: " + id));
+                    }
 
-        if (borrowing.getStatus() != BorrowStatus.ACTIVE && borrowing.getStatus() != BorrowStatus.OVERDUE) {
-            throw new IllegalStateException("Only active or overdue borrowings can be returned");
-        }
+                    Borrowing borrowing = optional.get();
 
-        borrowing.setStatus(BorrowStatus.RETURNED);
-        borrowing.setActualReturnDate(LocalDateTime.now());
+                    if (borrowing.getStatus() != BorrowStatus.ACTIVE && borrowing.getStatus() != BorrowStatus.OVERDUE) {
+                        return Mono.error(new IllegalStateException("Only active or overdue borrowings can be returned"));
+                    }
 
-        if (borrowing.getActualReturnDate().isAfter(borrowing.getExpectedReturnDate())) {
-            log.warn("Borrowing {} was returned late", id);
+                    borrowing.setStatus(BorrowStatus.RETURNED);
+                    borrowing.setActualReturnDate(LocalDateTime.now());
 
-        }
+                    if (borrowing.getActualReturnDate().isAfter(borrowing.getExpectedReturnDate())) {
+                        log.warn("Borrowing {} was returned late", id);
+                    }
 
-        Borrowing returnedBorrowing = borrowingRepository.save(borrowing);
-        log.info("Borrowing returned successfully with id: {}", id);
-
-        return returnedBorrowing;
+                    return Mono.fromCallable(() -> borrowingRepository.save(borrowing))
+                            .subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(returned -> log.info("Borrowing returned successfully with id: {}", id));
     }
 
     @Override
-    public void cancel(Long id) {
+    public Mono<Void> cancel(Long id) {
         log.debug("Canceling borrowing with id: {}", id);
 
-        Borrowing borrowing = borrowingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Borrowing not found with id: " + id));
+        return Mono.fromCallable(() -> borrowingRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> {
+                    if (optional.isEmpty()) {
+                        return Mono.error(new EntityNotFoundException("Borrowing not found with id: " + id));
+                    }
 
-        if (borrowing.getStatus() != BorrowStatus.ACTIVE) {
-            throw new IllegalStateException("Only pending borrowings can be canceled");
-        }
+                    Borrowing borrowing = optional.get();
 
-        borrowing.setStatus(BorrowStatus.CANCELLED);
-        borrowingRepository.save(borrowing);
+                    if (borrowing.getStatus() != BorrowStatus.ACTIVE) {
+                        return Mono.error(new IllegalStateException("Only pending borrowings can be canceled"));
+                    }
 
-        log.info("Borrowing cancelled successfully with id: {}", id);
+                    borrowing.setStatus(BorrowStatus.CANCELLED);
+
+                    return Mono.fromCallable(() -> borrowingRepository.save(borrowing))
+                            .subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(v -> log.info("Borrowing cancelled successfully with id: {}", id))
+                .then();
     }
 
+    // New methods for reactive pagination
     @Override
-    
-    public Page<Borrowing> findPage(int page, int size, BorrowStatus status, Long userId, Long itemId,
-                                       LocalDateTime from, LocalDateTime to) {
-        log.debug("Finding borrowings with filters - page: {}, size: {}, status: {}, userId: {}, itemId: {}, from: {}, to: {}",
-                page, size, status, userId, itemId, from, to);
+    public Flux<Borrowing> findBorrowingsByFilters(BorrowStatus status, Long userId, Long itemId,
+                                                   LocalDateTime from, LocalDateTime to, Pageable pageable) {
+        log.debug("Finding borrowings with filters - pageable: {}, status: {}, userId: {}, itemId: {}, from: {}, to: {}",
+                pageable, status, userId, itemId, from, to);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "borrowDate"));
-
+        // Create specification based on filters
         Specification<Borrowing> spec = Specification.unrestricted();
 
         if (status != null) {
@@ -183,38 +227,98 @@ public class BorrowingServiceImpl implements BorrowingService {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("borrowDate"), to));
         }
 
-        return borrowingRepository.findAll(spec, pageable);
+        // Wrap blocking call and convert to Flux
+        Specification<Borrowing> finalSpec = spec;
+        return Mono.fromCallable(() -> borrowingRepository.findAll(finalSpec, pageable))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMapMany(page -> Flux.fromIterable(page.getContent()));
     }
 
     @Override
-    
-    public Page<Borrowing> findOverdue(int page, int size) {
-        log.debug("Finding overdue borrowings - page: {}, size: {}", page, size);
+    public Mono<Long> countBorrowingsByFilters(BorrowStatus status, Long userId, Long itemId,
+                                               LocalDateTime from, LocalDateTime to) {
+        log.debug("Counting borrowings with filters - status: {}, userId: {}, itemId: {}, from: {}, to: {}",
+                status, userId, itemId, from, to);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "expectedReturnDate"));
-        LocalDateTime now = LocalDateTime.now();
+        // Create specification based on filters
+        Specification<Borrowing> spec = Specification.unrestricted();
 
-        Page<Borrowing> overdueBorrowings = borrowingRepository.findOverdueBorrowings(now, pageable);
-
-        List<Borrowing> borrowingsToUpdate = overdueBorrowings.getContent().stream()
-                .filter(b -> b.getStatus() == BorrowStatus.ACTIVE)
-                .toList();
-
-        if (!borrowingsToUpdate.isEmpty()) {
-            borrowingsToUpdate.forEach(b -> b.setStatus(BorrowStatus.OVERDUE));
-            borrowingRepository.saveAll(borrowingsToUpdate);
-            log.info("Updated {} borrowings to OVERDUE status", borrowingsToUpdate.size());
+        if (status != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
         }
 
-        return overdueBorrowings;
+        if (userId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("user").get("id"), userId));
+        }
+
+        if (itemId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("item").get("id"), itemId));
+        }
+
+        if (from != null && to != null) {
+            spec = spec.and((root, query, cb) -> cb.between(root.get("borrowDate"), from, to));
+        } else if (from != null) {
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("borrowDate"), from));
+        } else if (to != null) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("borrowDate"), to));
+        }
+
+        // Wrap blocking count call
+        Specification<Borrowing> finalSpec = spec;
+        return Mono.fromCallable(() -> borrowingRepository.count(finalSpec))
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
+    @Override
+    public Flux<Borrowing> findOverdueBorrowings(Pageable pageable) {
+        log.debug("Finding overdue borrowings - pageable: {}", pageable);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Wrap blocking call and convert to Flux
+        return Mono.fromCallable(() -> borrowingRepository.findOverdueBorrowings(now, pageable))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMapMany(page -> {
+                    List<Borrowing> borrowings = page.getContent();
+
+                    // Update overdue status if needed
+                    List<Borrowing> borrowingsToUpdate = borrowings.stream()
+                            .filter(b -> b.getStatus() == BorrowStatus.ACTIVE)
+                            .toList();
+
+                    if (!borrowingsToUpdate.isEmpty()) {
+                        borrowingsToUpdate.forEach(b -> b.setStatus(BorrowStatus.OVERDUE));
+                        // Note: This saveAll is still blocking but wrapped in reactive call
+                        Mono.fromCallable(() -> borrowingRepository.saveAll(borrowingsToUpdate))
+                                .subscribeOn(Schedulers.boundedElastic())
+                                .subscribe(); // Fire and forget the update
+                        log.info("Updated {} borrowings to OVERDUE status", borrowingsToUpdate.size());
+                    }
+
+                    return Flux.fromIterable(borrowings);
+                });
+    }
+
+    @Override
+    public Mono<Long> countOverdueBorrowings() {
+        log.debug("Counting overdue borrowings");
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Assuming repository has a count method for overdue borrowings
+        // If not, you might need to add it to the repository
+        return Mono.fromCallable(() -> borrowingRepository.countOverdueBorrowings(now))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    // Note: @Scheduled is not reactive and remains blocking
+    // You might need to reconsider this in a fully reactive context
     @Scheduled(cron = "0 0 6 * * ?")
-    
     public void updateOverdueBorrowings() {
         log.debug("Running scheduled task to update overdue borrowings");
         LocalDateTime now = LocalDateTime.now();
 
+        // This remains a blocking operation
         List<Borrowing> activeBorrowings = borrowingRepository.findAll()
                 .stream()
                 .filter(b -> b.getStatus() == BorrowStatus.ACTIVE

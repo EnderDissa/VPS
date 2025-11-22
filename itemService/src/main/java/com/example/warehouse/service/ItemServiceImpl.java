@@ -9,146 +9,192 @@ import com.example.warehouse.repository.ItemRepository;
 import com.example.warehouse.service.interfaces.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemRepository itemRepository;
+    private final ItemRepository itemRepository; // Assuming JPA Repository wrapped reactively
 
     @Override
-    public Item create(Item item) {
+    public Mono<Item> create(Item item) {
         log.info("Creating new item: {}", item.getName());
 
-        if (item.getSerialNumber() != null && !item.getSerialNumber().isEmpty()) {
-            if (itemRepository.existsBySerialNumber(item.getSerialNumber())) {
-                throw new DuplicateSerialNumberException(
-                        "Item with serial number '" + item.getSerialNumber() + "' already exists");
-            }
-        }
-        item.setId(null);
-        Item savedItem = itemRepository.save(item);
-        log.info("Item created successfully with ID: {}", savedItem.getId());
-
-        return savedItem;
+        return Mono.just(item)
+                .filter(i -> i.getSerialNumber() == null || i.getSerialNumber().isEmpty() ||
+                        !itemRepository.existsBySerialNumber(i.getSerialNumber()))
+                .switchIfEmpty(Mono.error(new DuplicateSerialNumberException(
+                        "Item with serial number '" + item.getSerialNumber() + "' already exists")))
+                .flatMap(i -> {
+                    i.setId(null);
+                    return Mono.fromCallable(() -> itemRepository.save(i))
+                            .subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(savedItem -> log.info("Item created successfully with ID: {}", savedItem.getId()));
     }
 
     @Override
-    public Item getById(Long id) {
+    public Mono<Item> getById(Long id) {
         log.debug("Fetching item by ID: {}", id);
 
-        return itemRepository.findById(id)
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + id));
+        return Mono.fromCallable(() -> itemRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> optional.map(Mono::just)
+                        .orElse(Mono.error(new ItemNotFoundException("Item not found with ID: " + id))));
     }
 
     @Override
-    public void update(Long id, Item item) {
-        log.info("Updating item with ID: {}", id);
+    public Mono<Void> update(Long id, Item item) {
+        return Mono.fromCallable(() -> itemRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> {
+                    if (optional.isEmpty()) {
+                        return Mono.error(new ItemNotFoundException("Item not found with ID: " + id));
+                    }
 
-        Item existingItem = itemRepository.findById(id)
-                .orElseThrow(() -> new ItemNotFoundException("Item not found with ID: " + id));
+                    Item existingItem = optional.get();
 
-        if (item.getSerialNumber() != null && !item.getSerialNumber().isEmpty() &&
-                !item.getSerialNumber().equals(existingItem.getSerialNumber())) {
-            if (itemRepository.existsBySerialNumber(item.getSerialNumber())) {
-                throw new DuplicateSerialNumberException(
-                        "Item with serial number '" + item.getSerialNumber() + "' already exists");
-            }
-        }
+                    if (item.getSerialNumber() != null && !item.getSerialNumber().isEmpty() &&
+                            !item.getSerialNumber().equals(existingItem.getSerialNumber())) {
+                        if (itemRepository.existsBySerialNumber(item.getSerialNumber())) {
+                            return Mono.error(new DuplicateSerialNumberException(
+                                    "Item with serial number '" + item.getSerialNumber() + "' already exists"));
+                        }
+                    }
 
-        existingItem.setName(item.getName());
-        existingItem.setType(item.getType());
-        existingItem.setCondition(item.getCondition());
-        existingItem.setSerialNumber(item.getSerialNumber());
-        existingItem.setDescription(item.getDescription());
+                    existingItem.setName(item.getName());
+                    existingItem.setType(item.getType());
+                    existingItem.setCondition(item.getCondition());
+                    existingItem.setSerialNumber(item.getSerialNumber());
+                    existingItem.setDescription(item.getDescription());
 
-        itemRepository.save(existingItem);
-        log.info("Item with ID: {} updated successfully", id);
+                    return Mono.fromCallable(() -> itemRepository.save(existingItem))
+                            .subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(v -> log.info("Item with ID: {} updated successfully", id))
+                .then();
     }
 
     @Override
-    
-    public void delete(Long id) {
-        log.info("Deleting item with ID: {}", id);
+    public Mono<Void> delete(Long id) {
+        return Mono.fromCallable(() -> itemRepository.existsById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(exists -> {
+                    if (!exists) {
+                        return Mono.error(new ItemNotFoundException("Item not found with ID: " + id));
+                    }
+                    return Mono.fromCallable(() -> {
+                        itemRepository.deleteById(id);
+                        return null;
+                    }).subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(v -> log.info("Item with ID: {} deleted successfully", id))
+                .then();
+    }
 
-        if (!itemRepository.existsById(id)) {
-            throw new ItemNotFoundException("Item not found with ID: " + id);
-        }
+    // Implement the new methods for reactive pagination
+    @Override
+    public Flux<Item> findItemsByFilters(ItemType type, ItemCondition condition, Pageable pageable) {
+        log.debug("Fetching items page - pageable: {}, type: {}, condition: {}",
+                pageable, type, condition);
 
-        itemRepository.deleteById(id);
-        log.info("Item with ID: {} deleted successfully", id);
+        // Use the repository to get a Flux<Item> for the specific page
+        // This requires the repository to have a method returning Flux<Item> based on Pageable
+        // Since JPA repo returns Page<T>, we wrap the call and convert its content to Flux
+        // This is a compromise when using blocking JPA repo within reactive code
+        return Mono.fromCallable(() -> {
+                    if (type != null && condition != null) {
+                        return itemRepository.findByTypeAndCondition(type, condition, pageable);
+                    } else if (type != null) {
+                        return itemRepository.findByType(type, pageable);
+                    } else if (condition != null) {
+                        return itemRepository.findByCondition(condition, pageable);
+                    } else {
+                        return itemRepository.findAll(pageable);
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMapMany(page -> Flux.fromIterable(page.getContent())); // Convert List to Flux
     }
 
     @Override
-    public Page<Item> findPage(int page, int size, ItemType type, ItemCondition condition) {
-        log.debug("Fetching items page - page: {}, size: {}, type: {}, condition: {}",
-                page, size, type, condition);
+    public Mono<Long> countItemsByFilters(ItemType type, ItemCondition condition) {
+        log.debug("Counting items - type: {}, condition: {}", type, condition);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        Page<Item> itemsPage;
-
-        if (type != null && condition != null) {
-            itemsPage = itemRepository.findByTypeAndCondition(type, condition, pageable);
-        } else if (type != null) {
-            itemsPage = itemRepository.findByType(type, pageable);
-        } else if (condition != null) {
-            itemsPage = itemRepository.findByCondition(condition, pageable);
-        } else {
-            itemsPage = itemRepository.findAll(pageable);
-        }
-
-        return itemsPage;
+        // Use the repository to get a count
+        // This requires the repository to have a count method
+        // Again, wrapping the blocking call
+        return Mono.fromCallable(() -> {
+                    if (type != null && condition != null) {
+                        return itemRepository.findByTypeAndCondition(type, condition, PageRequest.of(0, 1)).getTotalElements(); // Less efficient
+                        // A better approach would be a dedicated count method in the repo:
+                        // return itemRepository.countByTypeAndCondition(type, condition);
+                    } else if (type != null) {
+                        return itemRepository.findByType(type, PageRequest.of(0, 1)).getTotalElements(); // Less efficient
+                        // return itemRepository.countByType(type);
+                    } else if (condition != null) {
+                        return itemRepository.findByCondition(condition, PageRequest.of(0, 1)).getTotalElements(); // Less efficient
+                        // return itemRepository.countByCondition(condition);
+                    } else {
+                        return itemRepository.count();
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
+
     @Override
-    public List<Item> findAvailable(LocalDateTime from, LocalDateTime to, Long storageId,
-                                       ItemType type, ItemCondition condition, Long cursor, int limit) {
+    public Flux<Item> findAvailable(LocalDateTime from, LocalDateTime to, Long storageId,
+                                    ItemType type, ItemCondition condition, Long cursor, int limit) {
         log.debug("Finding available items - from: {}, to: {}, storageId: {}, type: {}, condition: {}, cursor: {}, limit: {}",
                 from, to, storageId, type, condition, cursor, limit);
 
-        Page<Item> availableItems;
-
-        if (cursor != null) {
-            if (type != null && condition != null) {
-                availableItems = itemRepository.findByIdGreaterThanAndTypeAndCondition(
-                        cursor, type, condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
-            } else if (type != null) {
-                availableItems = itemRepository.findByIdGreaterThanAndType(
-                        cursor, type, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
-            } else if (condition != null) {
-                availableItems = itemRepository.findByIdGreaterThanAndCondition(
-                        cursor, condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
-            } else {
-                availableItems = itemRepository.findByIdGreaterThan(
-                        cursor, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
-            }
-        } else {
-            if (type != null && condition != null) {
-                availableItems = itemRepository.findByTypeAndCondition(
-                        type, condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
-            } else if (type != null) {
-                availableItems = itemRepository.findByType(
-                        type, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
-            } else if (condition != null) {
-                availableItems = itemRepository.findByCondition(
-                        condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
-            } else {
-                availableItems = itemRepository.findAll(
-                        PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id")));
-            }
-        }
-
-        return availableItems.stream()
-                .collect(Collectors.toList());
+        // This method likely needs similar treatment as findItemsByFilters
+        // if it relies on blocking repository methods returning Page<T>
+        return Mono.fromCallable(() -> {
+                    // ... existing logic to get Page<Item> ...
+                    PageRequest pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id"));
+                    if (cursor != null) {
+                        if (type != null && condition != null) {
+                            return itemRepository.findByIdGreaterThanAndTypeAndCondition(
+                                    cursor, type, condition, pageable);
+                        } else if (type != null) {
+                            return itemRepository.findByIdGreaterThanAndType(
+                                    cursor, type, pageable);
+                        } else if (condition != null) {
+                            return itemRepository.findByIdGreaterThanAndCondition(
+                                    cursor, condition, pageable);
+                        } else {
+                            return itemRepository.findByIdGreaterThan(
+                                    cursor, pageable);
+                        }
+                    } else {
+                        if (type != null && condition != null) {
+                            return itemRepository.findByTypeAndCondition(
+                                    type, condition, pageable);
+                        } else if (type != null) {
+                            return itemRepository.findByType(
+                                    type, pageable);
+                        } else if (condition != null) {
+                            return itemRepository.findByCondition(
+                                    condition, pageable);
+                        } else {
+                            return itemRepository.findAll(pageable);
+                        }
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMapMany(page -> Flux.fromIterable(page.getContent())); // Convert List to Flux
     }
 }

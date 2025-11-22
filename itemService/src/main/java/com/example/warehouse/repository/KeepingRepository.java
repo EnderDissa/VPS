@@ -16,11 +16,16 @@ public interface KeepingRepository extends JpaRepository<Keeping, Long> {
 
     boolean existsByStorageIdAndItemId(Long storageId, Long itemId);
 
-    boolean existsByStorageIdAndItemIdAndIdNot(Long storageId, Long itemId, Long id);
 
     Page<Keeping> findByStorageId(Long storageId, Pageable pageable);
 
     Page<Keeping> findByItemId(Long itemId, Pageable pageable);
 
     Page<Keeping> findByStorageIdAndItemId(Long storageId, Long itemId, Pageable pageable);
+
+    long countByStorageId(Long storageId);
+    long countByItemId(Long itemId);
+    long countByStorageIdAndItemId(Long storageId, Long itemId);
+
+    boolean existsByStorageIdAndItemIdAndIdNot(Long storageId, Long itemId, Long id);
 }

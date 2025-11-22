@@ -1,20 +1,23 @@
 package com.example.warehouse.service.interfaces;
 
-import com.example.warehouse.dto.ItemDTO;
 import com.example.warehouse.entity.Item;
 import com.example.warehouse.enumeration.ItemCondition;
 import com.example.warehouse.enumeration.ItemType;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public interface ItemService {
-    Item create(Item item);
-    Item getById(Long id);
-    void update(Long id, Item item);
-    void delete(Long id);
-    Page<Item> findPage(int page, int size, ItemType type, ItemCondition condition);
-    List<Item> findAvailable(LocalDateTime from, LocalDateTime to, Long storageId,
-                                ItemType type, ItemCondition condition, Long cursor, int limit);
+    Mono<Item> create(Item item);
+    Mono<Item> getById(Long id);
+    Mono<Void> update(Long id, Item item);
+    Mono<Void> delete(Long id);
+    // Change findPage to return Flux<Item> for the specific page
+    Flux<Item> findItemsByFilters(ItemType type, ItemCondition condition, Pageable pageable);
+    // Add a method to get total count
+    Mono<Long> countItemsByFilters(ItemType type, ItemCondition condition);
+    Flux<Item> findAvailable(LocalDateTime from, LocalDateTime to, Long storageId,
+                             ItemType type, ItemCondition condition, Long cursor, int limit);
 }

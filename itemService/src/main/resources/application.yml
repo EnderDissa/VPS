@@ -1,6 +1,8 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
-    name: service1
+    name: itemService
   config:
     import: 'optional:eureka:,optional:configserver:'
   cloud:
@@ -13,7 +15,14 @@ spring:
         multiplier: 1.1
         max-attempts: 10
 
+
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+logging:
+  level:
+    org.springframework.web.reactive: DEBUG
+    org.springframework.http.codec: DEBUG
+    com.example.warehouse: DEBUG
