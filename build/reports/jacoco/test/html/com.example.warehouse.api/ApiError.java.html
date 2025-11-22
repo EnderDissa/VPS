@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiError.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.api</a> &gt; <span class="el_source">ApiError.java</span></div><h1>ApiError.java</h1><pre class="source lang-java linenums">package com.example.warehouse.api;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ApiError {
+    private OffsetDateTime timestamp;
+    private int status;
+    private String error;
+    private ErrorCode code;
+    private String message;
+    private String path;
+    private List&lt;String&gt; details;
+    private List&lt;ValidationError&gt; validationErrors;
+
+<span class="nc" id="L17">    public ApiError() {</span>
+<span class="nc" id="L18">    }</span>
+
+<span class="nc" id="L20">    public ApiError(OffsetDateTime timestamp, int status, String error, ErrorCode code, String message, String path, List&lt;String&gt; details, List&lt;ValidationError&gt; validationErrors) {</span>
+<span class="nc" id="L21">        this.timestamp = timestamp;</span>
+<span class="nc" id="L22">        this.status = status;</span>
+<span class="nc" id="L23">        this.error = error;</span>
+<span class="nc" id="L24">        this.code = code;</span>
+<span class="nc" id="L25">        this.message = message;</span>
+<span class="nc" id="L26">        this.path = path;</span>
+<span class="nc" id="L27">        this.details = details;</span>
+<span class="nc" id="L28">        this.validationErrors = validationErrors;</span>
+<span class="nc" id="L29">    }</span>
+
+    public static ApiError of(int status, String error, ErrorCode code, String message, String path) {
+<span class="nc" id="L32">        return new ApiError(OffsetDateTime.now(), status, error, code, message, path, new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;());</span>
+    }
+
+    public OffsetDateTime getTimestamp() {
+<span class="nc" id="L36">        return timestamp;</span>
+    }
+
+    public int getStatus() {
+<span class="nc" id="L40">        return status;</span>
+    }
+
+    public String getError() {
+<span class="nc" id="L44">        return error;</span>
+    }
+
+    public ErrorCode getCode() {
+<span class="nc" id="L48">        return code;</span>
+    }
+
+    public String getMessage() {
+<span class="nc" id="L52">        return message;</span>
+    }
+
+    public String getPath() {
+<span class="nc" id="L56">        return path;</span>
+    }
+
+    public List&lt;String&gt; getDetails() {
+<span class="nc" id="L60">        return details;</span>
+    }
+
+    public List&lt;ValidationError&gt; getValidationErrors() {
+<span class="nc" id="L64">        return validationErrors;</span>
+    }
+
+    public void setTimestamp(OffsetDateTime timestamp) {
+<span class="nc" id="L68">        this.timestamp = timestamp;</span>
+<span class="nc" id="L69">    }</span>
+
+    public void setStatus(int status) {
+<span class="nc" id="L72">        this.status = status;</span>
+<span class="nc" id="L73">    }</span>
+
+    public void setError(String error) {
+<span class="nc" id="L76">        this.error = error;</span>
+<span class="nc" id="L77">    }</span>
+
+    public void setCode(ErrorCode code) {
+<span class="nc" id="L80">        this.code = code;</span>
+<span class="nc" id="L81">    }</span>
+
+    public void setMessage(String message) {
+<span class="nc" id="L84">        this.message = message;</span>
+<span class="nc" id="L85">    }</span>
+
+    public void setPath(String path) {
+<span class="nc" id="L88">        this.path = path;</span>
+<span class="nc" id="L89">    }</span>
+
+    public void setDetails(List&lt;String&gt; details) {
+<span class="nc" id="L92">        this.details = details;</span>
+<span class="nc" id="L93">    }</span>
+
+    public void setValidationErrors(List&lt;ValidationError&gt; validationErrors) {
+<span class="nc" id="L96">        this.validationErrors = validationErrors;</span>
+<span class="nc" id="L97">    }</span>
+
+    public void addDetail(String detail) {
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        if (this.details == null) this.details = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L101">        this.details.add(detail);</span>
+<span class="nc" id="L102">    }</span>
+
+    public void addValidationError(String field, Object rejectedValue, String message) {
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (this.validationErrors == null) this.validationErrors = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L106">        this.validationErrors.add(new ValidationError(field, rejectedValue, message));</span>
+<span class="nc" id="L107">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

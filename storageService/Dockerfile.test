@@ -1,0 +1,24 @@
+# Use the same base as your app, but keep test dependencies
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+
+# Copy build files (adjust for Gradle or Maven)
+# ---- For GRADLE ----
+COPY gradlew gradlew
+COPY gradle gradle
+COPY build.gradle settings.gradle ./
+
+# ---- For MAVEN (uncomment if using Maven) ----
+# COPY pom.xml ./
+
+# Download dependencies (including test deps)
+RUN chmod +x ./gradlew && ./gradlew dependencies --no-daemon > /dev/null 2>&1 || true
+# For Maven: RUN mvn dependency:go-offline -DskipTests
+
+# Copy source code
+COPY src src
+
+# Run tests and exit
+CMD ["./gradlew", "test", "--no-daemon", "--info"]
+# For Maven: CMD ["mvn", "test"]

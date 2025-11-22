@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BorrowingDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.dto</a> &gt; <span class="el_source">BorrowingDTO.java</span></div><h1>BorrowingDTO.java</h1><pre class="source lang-java linenums">package com.example.warehouse.dto;
+
+import com.example.warehouse.entity.Borrowing;
+import com.example.warehouse.enumeration.BorrowStatus;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+import java.time.LocalDateTime;
+
+@JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
+public record BorrowingDTO(
+        Long id,
+
+        @NotNull(message = &quot;Item ID is required&quot;)
+        Long itemId,
+
+        @NotNull(message = &quot;User ID is required&quot;)
+        Long userId,
+
+        @NotNull(message = &quot;Quantity is required&quot;)
+        @Positive(message = &quot;Quantity must be positive&quot;)
+        Integer quantity,
+
+        @NotNull(message = &quot;Borrow date is required&quot;)
+        LocalDateTime borrowDate,
+
+        @NotNull(message = &quot;Expected return date is required&quot;)
+        @Future(message = &quot;Expected return date must be in the future&quot;)
+        LocalDateTime expectedReturnDate,
+
+        LocalDateTime actualReturnDate,
+
+        @NotNull(message = &quot;Status is required&quot;)
+        BorrowStatus status,
+
+        String purpose
+) {
+
+<span class="nc" id="L42">    public BorrowingDTO {</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (quantity == null) {</span>
+<span class="nc" id="L44">            quantity = 1;</span>
+        }
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (borrowDate == null) {</span>
+<span class="nc" id="L47">            borrowDate = LocalDateTime.now();</span>
+        }
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (status == null) {</span>
+<span class="nc" id="L50">            status = BorrowStatus.ACTIVE;</span>
+        }
+<span class="nc" id="L52">    }</span>
+
+    public BorrowingDTO(Borrowing borrowing) {
+<span class="nc" id="L55">        this(</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                borrowing != null ? borrowing.getId() : null,</span>
+<span class="nc bnc" id="L57" title="All 4 branches missed.">                borrowing != null &amp;&amp; borrowing.getItem() != null ? borrowing.getItem().getId() : null,</span>
+<span class="nc bnc" id="L58" title="All 4 branches missed.">                borrowing != null &amp;&amp; borrowing.getUser() != null ? borrowing.getUser().getId() : null,</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                borrowing != null ? borrowing.getQuantity() : 1,</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                borrowing != null ? borrowing.getBorrowDate() : LocalDateTime.now(),</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">                borrowing != null ? borrowing.getExpectedReturnDate() : null,</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">                borrowing != null ? borrowing.getActualReturnDate() : null,</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">                borrowing != null ? borrowing.getStatus() : BorrowStatus.ACTIVE,</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">                borrowing != null ? borrowing.getPurpose() : null</span>
+        );
+<span class="nc" id="L66">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

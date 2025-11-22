@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.warehouse.mapper.MapperToEntityTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2025-11-10T12:44:30.700Z" hostname="ASUS-TUF" time="0.091">
+  <properties/>
+  <testcase name="shouldReturnNullWhenVehicleDTOIsNull()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.007"/>
+  <testcase name="shouldMapVehicleDTOToEntity()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.006"/>
+  <testcase name="shouldReturnNullWhenBorrowingDTOIsNull()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.006"/>
+  <testcase name="shouldReturnNullWhenStorageDTOIsNull()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.005"/>
+  <testcase name="shouldMapTransportationDTOToEntity()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.006"/>
+  <testcase name="shouldMapItemMaintenanceDTOToEntity()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.005"/>
+  <testcase name="shouldReturnNullWhenUserStorageAccessDTOIsNull()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.004"/>
+  <testcase name="shouldReturnNullWhenTransportationDTOIsNull()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.005"/>
+  <testcase name="shouldMapStorageDTOToEntity()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.004"/>
+  <testcase name="shouldReturnNullWhenKeepingDTOIsNull()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.005"/>
+  <testcase name="shouldMapItemDTOToEntity()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.004"/>
+  <testcase name="shouldMapBorrowingDTOToEntity()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.005"/>
+  <testcase name="shouldReturnNullWhenItemMaintenanceDTOIsNull()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.004"/>
+  <testcase name="shouldReturnNullWhenItemDTOIsNull()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.004"/>
+  <testcase name="shouldMapUserStorageAccessDTOToEntity()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.003"/>
+  <testcase name="shouldMapKeepingDTOToEntity()" classname="com.example.warehouse.mapper.MapperToEntityTest" time="0.004"/>
+  <system-out><![CDATA[2025-11-10T15:44:30.680+03:00  INFO 16084 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.warehouse.mapper.MapperToEntityTest]: MapperToEntityTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-11-10T15:44:30.693+03:00  INFO 16084 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.warehouse.WarehouseApplication for test class com.example.warehouse.mapper.MapperToEntityTest
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

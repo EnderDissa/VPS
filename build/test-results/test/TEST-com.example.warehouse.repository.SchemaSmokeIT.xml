@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.warehouse.repository.SchemaSmokeIT" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-11-10T12:44:30.869Z" hostname="ASUS-TUF" time="0.03">
+  <properties/>
+  <testcase name="unique_user_storage_access_userId_storageId_exists()" classname="com.example.warehouse.repository.SchemaSmokeIT" time="0.03"/>
+  <system-out><![CDATA[2025-11-10T15:44:30.864+03:00  INFO 16084 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.warehouse.repository.SchemaSmokeIT]: SchemaSmokeIT does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-11-10T15:44:30.865+03:00  INFO 16084 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.warehouse.WarehouseApplication for test class com.example.warehouse.repository.SchemaSmokeIT
+2025-11-10T15:44:30.874+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.core.JdbcTemplate               : Executing SQL query [select tc.constraint_name, tc.constraint_type, ccu.column_name from information_schema.table_constraints tc join information_schema.constraint_column_usage ccu on tc.constraint_name = ccu.constraint_name and tc.table_schema = ccu.table_schema where tc.table_schema = 'public' and tc.table_name = 'user_storage_access' and tc.constraint_type = 'UNIQUE']
+2025-11-10T15:44:30.880+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Fetching JDBC Connection from DataSource
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

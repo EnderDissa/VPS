@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Transportation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.entity</a> &gt; <span class="el_source">Transportation.java</span></div><h1>Transportation.java</h1><pre class="source lang-java linenums">package com.example.warehouse.entity;
+
+import com.example.warehouse.enumeration.TransportStatus;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@Entity
+@Table(name = &quot;transportations&quot;)
+<span class="fc" id="L16">public class Transportation {</span>
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotNull(message = &quot;Item is required&quot;)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;item_id&quot;, nullable = false)
+    private Item item;
+
+    @NotNull(message = &quot;Vehicle is required&quot;)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;vehicle_id&quot;, nullable = false)
+    private Vehicle vehicle;
+
+    @NotNull(message = &quot;Driver is required&quot;)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;driver_id&quot;, nullable = false)
+    private User driver;
+
+    @NotNull(message = &quot;From storage is required&quot;)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;from_storage_id&quot;, nullable = false)
+    private Storage fromStorage;
+
+    @NotNull(message = &quot;To storage is required&quot;)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;to_storage_id&quot;, nullable = false)
+    private Storage toStorage;
+
+<span class="fc" id="L47">    @NotNull(message = &quot;Status is required&quot;)</span>
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransportStatus status = TransportStatus.PLANNED;
+
+    @Column(name = &quot;scheduled_departure&quot;)
+    private LocalDateTime scheduledDeparture;
+
+    @Column(name = &quot;actual_departure&quot;)
+    private LocalDateTime actualDeparture;
+
+    @Column(name = &quot;scheduled_arrival&quot;)
+    private LocalDateTime scheduledArrival;
+
+    @Column(name = &quot;actual_arrival&quot;)
+    private LocalDateTime actualArrival;
+
+    @CreationTimestamp
+    @Column(name = &quot;created_at&quot;, updatable = false)
+    private LocalDateTime createdAt;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

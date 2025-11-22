@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VehicleServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.service</a> &gt; <span class="el_source">VehicleServiceImpl.java</span></div><h1>VehicleServiceImpl.java</h1><pre class="source lang-java linenums">package com.example.warehouse.service;
+
+import com.example.warehouse.entity.Vehicle;
+import com.example.warehouse.enumeration.VehicleStatus;
+import com.example.warehouse.repository.VehicleRepository;
+import com.example.warehouse.service.interfaces.VehicleService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+<span class="fc" id="L17">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class VehicleServiceImpl implements VehicleService {
+
+    private final VehicleRepository vehicleRepository;
+
+    @Override
+    public Vehicle create(Vehicle vehicle) {
+<span class="nc" id="L26">        log.info(&quot;Creating new vehicle with license plate: {}&quot;, vehicle.getLicensePlate());</span>
+
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (vehicleRepository.existsByLicensePlate(vehicle.getLicensePlate())) {</span>
+<span class="nc" id="L29">            throw new IllegalArgumentException(&quot;Vehicle with license plate '&quot; + vehicle.getLicensePlate() + &quot;' already exists&quot;);</span>
+        }
+
+<span class="nc" id="L32">        Vehicle savedVehicle = vehicleRepository.save(vehicle);</span>
+
+<span class="nc" id="L34">        log.info(&quot;Vehicle created successfully with ID: {}&quot;, savedVehicle.getId());</span>
+<span class="nc" id="L35">        return savedVehicle;</span>
+    }
+
+    @Override
+    public Vehicle getById(Long id) {
+<span class="fc" id="L40">        log.info(&quot;Getting vehicle by ID: {}&quot;, id);</span>
+
+<span class="fc" id="L42">        return (vehicleRepository.findById(id)</span>
+<span class="pc" id="L43">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Vehicle not found with ID: &quot; + id)));</span>
+    }
+
+    @Override
+    public void update(Long id, Vehicle vehicle) {
+<span class="nc" id="L48">        log.info(&quot;Updating vehicle with ID: {}&quot;, id);</span>
+
+<span class="nc" id="L50">        Vehicle existingVehicle = vehicleRepository.findById(id)</span>
+<span class="nc" id="L51">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Vehicle not found with ID: &quot; + id));</span>
+
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (!existingVehicle.getLicensePlate().equals(vehicle.getLicensePlate()) &amp;&amp;</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                vehicleRepository.existsByLicensePlateAndIdNot(vehicle.getLicensePlate(), id)) {</span>
+<span class="nc" id="L55">            throw new IllegalArgumentException(&quot;Vehicle with license plate '&quot; + vehicle.getLicensePlate() + &quot;' already exists&quot;);</span>
+        }
+
+<span class="nc" id="L58">        existingVehicle.setBrand(vehicle.getBrand());</span>
+<span class="nc" id="L59">        existingVehicle.setModel(vehicle.getModel());</span>
+<span class="nc" id="L60">        existingVehicle.setLicensePlate(vehicle.getLicensePlate());</span>
+<span class="nc" id="L61">        existingVehicle.setYear(vehicle.getYear());</span>
+<span class="nc" id="L62">        existingVehicle.setCapacity(vehicle.getCapacity());</span>
+<span class="nc" id="L63">        existingVehicle.setStatus(vehicle.getStatus());</span>
+
+<span class="nc" id="L65">        vehicleRepository.save(existingVehicle);</span>
+<span class="nc" id="L66">        log.info(&quot;Vehicle updated successfully with ID: {}&quot;, id);</span>
+<span class="nc" id="L67">    }</span>
+
+    @Override
+    public void delete(Long id) {
+<span class="nc" id="L71">        log.info(&quot;Deleting vehicle with ID: {}&quot;, id);</span>
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (!vehicleRepository.existsById(id)) {</span>
+<span class="nc" id="L74">            throw new IllegalArgumentException(&quot;Vehicle not found with ID: &quot; + id);</span>
+        }
+
+<span class="nc" id="L77">        vehicleRepository.deleteById(id);</span>
+<span class="nc" id="L78">        log.info(&quot;Vehicle deleted successfully with ID: {}&quot;, id);</span>
+<span class="nc" id="L79">    }</span>
+
+    @Override
+    public Page&lt;Vehicle&gt; findPage(int page, int size, VehicleStatus status, String brand, String model) {
+<span class="nc" id="L83">        log.info(&quot;Finding vehicles page - page: {}, size: {}, status: {}, brand: {}, model: {}&quot;,</span>
+<span class="nc" id="L84">                page, size, status, brand, model);</span>
+
+<span class="nc" id="L86">        Pageable pageable = PageRequest.of(page, size, Sort.by(&quot;brand&quot;).and(Sort.by(&quot;model&quot;)));</span>
+
+        Page&lt;Vehicle&gt; vehicles;
+
+<span class="nc bnc" id="L90" title="All 6 branches missed.">        if (status != null &amp;&amp; brand != null &amp;&amp; model != null) {</span>
+<span class="nc" id="L91">            vehicles = vehicleRepository.findByStatusAndBrandContainingIgnoreCaseAndModelContainingIgnoreCase(</span>
+                    status, brand, model, pageable);
+<span class="nc bnc" id="L93" title="All 4 branches missed.">        } else if (status != null &amp;&amp; brand != null) {</span>
+<span class="nc" id="L94">            vehicles = vehicleRepository.findByStatusAndBrandContainingIgnoreCase(status, brand, pageable);</span>
+<span class="nc bnc" id="L95" title="All 4 branches missed.">        } else if (status != null &amp;&amp; model != null) {</span>
+<span class="nc" id="L96">            vehicles = vehicleRepository.findByStatusAndModelContainingIgnoreCase(status, model, pageable);</span>
+<span class="nc bnc" id="L97" title="All 4 branches missed.">        } else if (brand != null &amp;&amp; model != null) {</span>
+<span class="nc" id="L98">            vehicles = vehicleRepository.findByBrandContainingIgnoreCaseAndModelContainingIgnoreCase(</span>
+                    brand, model, pageable);
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        } else if (status != null) {</span>
+<span class="nc" id="L101">            vehicles = vehicleRepository.findByStatus(status, pageable);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        } else if (brand != null) {</span>
+<span class="nc" id="L103">            vehicles = vehicleRepository.findByBrandContainingIgnoreCase(brand, pageable);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        } else if (model != null) {</span>
+<span class="nc" id="L105">            vehicles = vehicleRepository.findByModelContainingIgnoreCase(model, pageable);</span>
+        } else {
+<span class="nc" id="L107">            vehicles = vehicleRepository.findAll(pageable);</span>
+        }
+
+<span class="nc" id="L110">        return vehicles;</span>
+    }
+
+    public List&lt;Vehicle&gt; findByStatus(VehicleStatus status) {
+<span class="nc" id="L114">        List&lt;Vehicle&gt; vehicles = vehicleRepository.findByStatus(status, Pageable.unpaged()).getContent();</span>
+<span class="nc" id="L115">        return vehicles.stream()</span>
+<span class="nc" id="L116">                .toList();</span>
+    }
+
+    public Vehicle findByLicensePlate(String licensePlate) {
+<span class="nc" id="L120">        return vehicleRepository.findByLicensePlate(licensePlate)</span>
+<span class="nc" id="L121">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Vehicle not found with license plate: &quot; + licensePlate));</span>
+    }
+
+    public List&lt;Vehicle&gt; findAvailableVehicles() {
+<span class="nc" id="L125">        return findByStatus(VehicleStatus.AVAILABLE);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

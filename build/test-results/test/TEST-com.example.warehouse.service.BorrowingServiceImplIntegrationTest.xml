@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" tests="21" skipped="0" failures="0" errors="0" timestamp="2025-11-10T12:44:41.623Z" hostname="ASUS-TUF" time="2.724">
+  <properties/>
+  <testcase name="create_ShouldThrowException_WhenItemUnavailable()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.592"/>
+  <testcase name="returnBorrowing_ShouldReturnBorrowing_WhenActive()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.134"/>
+  <testcase name="getById_ShouldReturnBorrowing_WhenBorrowingExists()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.087"/>
+  <testcase name="create_ShouldCreateBorrowing_WhenValidData()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.129"/>
+  <testcase name="findOverdue_ShouldUpdateStatusToOverdue()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.142"/>
+  <testcase name="getById_ShouldThrowException_WhenBorrowingNotFound()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.11"/>
+  <testcase name="extend_ShouldThrowException_WhenNewDueDateBeforeCurrent()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.107"/>
+  <testcase name="create_ShouldThrowException_WhenUserExceedsBorrowingLimit()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.166"/>
+  <testcase name="returnBorrowing_ShouldReturnBorrowing_WhenOverdue()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.096"/>
+  <testcase name="create_ShouldThrowException_WhenUserNotFound()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.089"/>
+  <testcase name="updateOverdueBorrowings_ShouldUpdateActiveToOverdue()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.102"/>
+  <testcase name="findPage_ShouldReturnPagedResults()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.129"/>
+  <testcase name="create_ShouldThrowException_WhenItemNotFound()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.088"/>
+  <testcase name="extend_ShouldExtendBorrowing_WhenValidConditions()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.104"/>
+  <testcase name="findPage_ShouldReturnFilteredResults_WithAllFilters()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.089"/>
+  <testcase name="findOverdue_ShouldReturnOverdueBorrowings()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.094"/>
+  <testcase name="findPage_ShouldReturnEmpty_WhenNoMatches()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.087"/>
+  <testcase name="activate_ShouldThrowException_WhenBorrowingNotFound()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.08"/>
+  <testcase name="extend_ShouldThrowException_WhenBorrowingNotActive()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.093"/>
+  <testcase name="returnBorrowing_ShouldThrowException_WhenBorrowingNotActiveOrOverdue()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.103"/>
+  <testcase name="extend_ShouldThrowException_WhenNewDueDateInPast()" classname="com.example.warehouse.service.BorrowingServiceImplIntegrationTest" time="0.085"/>
+  <system-out><![CDATA[2025-11-10T15:44:31.163+03:00  INFO 16084 --- [    Test worker] tc.postgres:15-alpine                    : Creating container for image: postgres:15-alpine
+2025-11-10T15:44:32.201+03:00  INFO 16084 --- [    Test worker] tc.postgres:15-alpine                    : Container postgres:15-alpine is starting: afd972061c42c46844f406e03e53fef25deb925e4ecfa71143526d61e9716652
+2025-11-10T15:44:32.630+03:00 DEBUG 16084 --- [l-1:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10/10, idle=10/10, active=0, waiting=0)
+2025-11-10T15:44:32.630+03:00 DEBUG 16084 --- [l-1:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool has sufficient level or currently being filled.
+2025-11-10T15:44:39.920+03:00  INFO 16084 --- [    Test worker] tc.postgres:15-alpine                    : Container postgres:15-alpine started in PT8.756614S
+2025-11-10T15:44:39.920+03:00  INFO 16084 --- [    Test worker] tc.postgres:15-alpine                    : Container is started (JDBC URL: jdbc:postgresql://localhost:62566/testdb?loggerLevel=OFF)
+2025-11-10T15:44:39.926+03:00  INFO 16084 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.warehouse.service.BorrowingServiceImplIntegrationTest]: BorrowingServiceImplIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-11-10T15:44:39.940+03:00  INFO 16084 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.warehouse.WarehouseApplication for test class com.example.warehouse.service.BorrowingServiceImplIntegrationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.6)
+
+2025-11-10T15:44:39.966+03:00  INFO 16084 --- [    Test worker] .w.s.BorrowingServiceImplIntegrationTest : Starting BorrowingServiceImplIntegrationTest using Java 17.0.15 with PID 16084 (started by dimak in C:\Users\dimak\Desktop\studing\high_performance_systems\VPS)
+2025-11-10T15:44:39.967+03:00  INFO 16084 --- [    Test worker] .w.s.BorrowingServiceImplIntegrationTest : No active profile set, falling back to 1 default profile: "default"
+2025-11-10T15:44:40.235+03:00  INFO 16084 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-11-10T15:44:40.275+03:00  INFO 16084 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 38 ms. Found 9 JPA repository interfaces.
+2025-11-10T15:44:40.347+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : Class org.postgresql.Driver found in Thread context class loader jdk.internal.loader.ClassLoaders$AppClassLoader@60e53b93
+2025-11-10T15:44:40.351+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : HikariPool-4 - configuration:
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : allowPoolSuspension.............false
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : autoCommit......................true
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : catalog.........................none
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : connectionInitSql...............none
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : connectionTestQuery.............none
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : connectionTimeout...............30000
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : credentials.....................com.zaxxer.hikari.util.Credentials@45ea20d5
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : dataSource......................none
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : dataSourceClassName.............none
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : dataSourceJNDI..................none
+2025-11-10T15:44:40.352+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : dataSourceProperties............{password=<masked>}
+2025-11-10T15:44:40.353+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : driverClassName................."org.postgresql.Driver"
+2025-11-10T15:44:40.353+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : exceptionOverride...............none
+2025-11-10T15:44:40.353+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : exceptionOverrideClassName......none
+2025-11-10T15:44:40.353+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : healthCheckProperties...........{}
+2025-11-10T15:44:40.354+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : healthCheckRegistry.............none
+2025-11-10T15:44:40.354+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : idleTimeout.....................600000
+2025-11-10T15:44:40.354+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : initializationFailTimeout.......1
+2025-11-10T15:44:40.354+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : isolateInternalQueries..........false
+2025-11-10T15:44:40.355+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : jdbcUrl.........................jdbc:postgresql://localhost:62566/testdb?loggerLevel=OFF
+2025-11-10T15:44:40.355+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : keepaliveTime...................120000
+2025-11-10T15:44:40.355+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : leakDetectionThreshold..........0
+2025-11-10T15:44:40.355+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : maxLifetime.....................1800000
+2025-11-10T15:44:40.355+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : maximumPoolSize.................10
+2025-11-10T15:44:40.355+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : metricRegistry..................none
+2025-11-10T15:44:40.356+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : metricsTrackerFactory...........none
+2025-11-10T15:44:40.356+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : minimumIdle.....................10
+2025-11-10T15:44:40.356+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : password........................<masked>
+2025-11-10T15:44:40.357+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : poolName........................"HikariPool-4"
+2025-11-10T15:44:40.358+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : readOnly........................false
+2025-11-10T15:44:40.358+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : registerMbeans..................false
+2025-11-10T15:44:40.358+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : scheduledExecutor...............none
+2025-11-10T15:44:40.358+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : schema..........................none
+2025-11-10T15:44:40.360+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : threadFactory...................internal
+2025-11-10T15:44:40.360+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : transactionIsolation............default
+2025-11-10T15:44:40.360+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : username........................"test"
+2025-11-10T15:44:40.360+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : validationTimeout...............5000
+2025-11-10T15:44:40.360+03:00  INFO 16084 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2025-11-10T15:44:40.360+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Attempting to create/setup new connection (4467dc65-e8d0-46f7-a456-22841e76528b)
+2025-11-10T15:44:40.385+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Established new connection (4467dc65-e8d0-46f7-a456-22841e76528b)
+2025-11-10T15:44:40.385+03:00  INFO 16084 --- [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@272e639c
+2025-11-10T15:44:40.385+03:00  INFO 16084 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2025-11-10T15:44:40.401+03:00  INFO 16084 --- [    Test worker] liquibase.database                       : Set default schema name to public
+2025-11-10T15:44:40.435+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Creating database history table with name: public.databasechangelog
+2025-11-10T15:44:40.448+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Reading from public.databasechangelog
+2025-11-10T15:44:40.474+03:00  INFO 16084 --- [    Test worker] liquibase.snapshot                       : Creating snapshot
+2025-11-10T15:44:40.496+03:00 DEBUG 16084 --- [l-4:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Pool stats (total=1/10, idle=0/10, active=1, waiting=0)
+2025-11-10T15:44:40.496+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Attempting to create/setup new connection (776444d9-9ebe-4d8b-ba0c-a08d9b31a14a)
+2025-11-10T15:44:40.510+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Established new connection (776444d9-9ebe-4d8b-ba0c-a08d9b31a14a)
+2025-11-10T15:44:40.510+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@708636f7
+2025-11-10T15:44:40.531+03:00  INFO 16084 --- [    Test worker] liquibase.lockservice                    : Successfully acquired change log lock
+2025-11-10T15:44:40.533+03:00  INFO 16084 --- [    Test worker] liquibase.command                        : Using deploymentId: 2778641640
+2025-11-10T15:44:40.535+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Reading from public.databasechangelog
+2025-11-10T15:44:40.542+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - After adding stats (total=2/10, idle=1/10, active=1, waiting=0)
+2025-11-10T15:44:40.542+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Attempting to create/setup new connection (092e51d5-f838-4dc7-9e44-7f9fbda8b292)
+2025-11-10T15:44:40.559+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Established new connection (092e51d5-f838-4dc7-9e44-7f9fbda8b292)
+2025-11-10T15:44:40.559+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@7e41c697
+2025-11-10T15:44:40.559+03:00  INFO 16084 --- [    Test worker] liquibase.ui                             : Running Changeset: db/changelog/changes/001-initial-schema.yaml::1::warehouse
+2025-11-10T15:44:40.571+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Table users created
+2025-11-10T15:44:40.578+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Table items created
+2025-11-10T15:44:40.584+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Table storages created
+2025-11-10T15:44:40.590+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Table vehicles created
+2025-11-10T15:44:40.596+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Table keeping created
+2025-11-10T15:44:40.603+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - After adding stats (total=3/10, idle=2/10, active=1, waiting=0)
+2025-11-10T15:44:40.603+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Table transportations created
+2025-11-10T15:44:40.603+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Attempting to create/setup new connection (1434e5b0-d339-464d-8c5f-0031dfde9084)
+2025-11-10T15:44:40.610+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Table borrowings created
+2025-11-10T15:44:40.618+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Table item_maintenance created
+2025-11-10T15:44:40.618+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Established new connection (1434e5b0-d339-464d-8c5f-0031dfde9084)
+2025-11-10T15:44:40.618+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@7a7e5d87
+2025-11-10T15:44:40.623+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Table user_storage_access created
+2025-11-10T15:44:40.628+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to keeping (storage_id)
+2025-11-10T15:44:40.632+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to keeping (item_id)
+2025-11-10T15:44:40.636+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to transportations (item_id)
+2025-11-10T15:44:40.640+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to transportations (vehicle_id)
+2025-11-10T15:44:40.644+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to transportations (driver_id)
+2025-11-10T15:44:40.647+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to transportations (from_storage_id)
+2025-11-10T15:44:40.651+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to transportations (to_storage_id)
+2025-11-10T15:44:40.655+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to borrowings (item_id)
+2025-11-10T15:44:40.658+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to borrowings (user_id)
+2025-11-10T15:44:40.662+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to item_maintenance (item_id)
+2025-11-10T15:44:40.663+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - After adding stats (total=4/10, idle=3/10, active=1, waiting=0)
+2025-11-10T15:44:40.663+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Attempting to create/setup new connection (9afd912e-5408-4e3a-929c-f1c69e15093e)
+2025-11-10T15:44:40.665+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to item_maintenance (technician_id)
+2025-11-10T15:44:40.669+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to user_storage_access (user_id)
+2025-11-10T15:44:40.673+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to user_storage_access (storage_id)
+2025-11-10T15:44:40.677+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Foreign key constraint added to user_storage_access (granted_by)
+2025-11-10T15:44:40.679+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Established new connection (9afd912e-5408-4e3a-929c-f1c69e15093e)
+2025-11-10T15:44:40.679+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@3f7cccac
+2025-11-10T15:44:40.681+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Unique constraint added to user_storage_access(user_id, storage_id)
+2025-11-10T15:44:40.684+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Index idx_keeping_storage_item created
+2025-11-10T15:44:40.687+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Index idx_borrowing_status created
+2025-11-10T15:44:40.691+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Index idx_transportation_status created
+2025-11-10T15:44:40.693+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : ChangeSet db/changelog/changes/001-initial-schema.yaml::1::warehouse ran successfully in 133ms
+2025-11-10T15:44:40.706+03:00  INFO 16084 --- [    Test worker] liquibase.ui                             : Running Changeset: db/changelog/changes/002-insert-test-data.yaml::2::warehouse
+2025-11-10T15:44:40.712+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into users
+2025-11-10T15:44:40.715+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into users
+2025-11-10T15:44:40.718+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into users
+2025-11-10T15:44:40.722+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into storages
+2025-11-10T15:44:40.724+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - After adding stats (total=5/10, idle=4/10, active=1, waiting=0)
+2025-11-10T15:44:40.724+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Attempting to create/setup new connection (31e36d85-193e-4afa-acb7-9d9716fe6300)
+2025-11-10T15:44:40.725+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into storages
+2025-11-10T15:44:40.729+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into vehicles
+2025-11-10T15:44:40.733+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into items
+2025-11-10T15:44:40.737+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into items
+2025-11-10T15:44:40.739+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Established new connection (31e36d85-193e-4afa-acb7-9d9716fe6300)
+2025-11-10T15:44:40.740+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@7e0c643a
+2025-11-10T15:44:40.741+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into items
+2025-11-10T15:44:40.745+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into keeping
+2025-11-10T15:44:40.748+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into keeping
+2025-11-10T15:44:40.751+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : New row inserted into keeping
+2025-11-10T15:44:40.752+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : ChangeSet db/changelog/changes/002-insert-test-data.yaml::2::warehouse ran successfully in 46ms
+2025-11-10T15:44:40.757+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : UPDATE SUMMARY
+2025-11-10T15:44:40.757+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : Run:                          2
+2025-11-10T15:44:40.757+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : Previously run:               0
+2025-11-10T15:44:40.757+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : Filtered out:                 0
+2025-11-10T15:44:40.757+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : -------------------------------
+2025-11-10T15:44:40.757+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : Total change sets:            2
+2025-11-10T15:44:40.757+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : Update summary generated
+2025-11-10T15:44:40.757+03:00  INFO 16084 --- [    Test worker] liquibase.command                        : Update command completed successfully.
+2025-11-10T15:44:40.757+03:00  INFO 16084 --- [    Test worker] liquibase.ui                             : Liquibase: Update has been successful. Rows affected: 14
+2025-11-10T15:44:40.763+03:00  INFO 16084 --- [    Test worker] liquibase.lockservice                    : Successfully released change log lock
+2025-11-10T15:44:40.765+03:00  INFO 16084 --- [    Test worker] liquibase.command                        : Command execution complete
+2025-11-10T15:44:40.771+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - After adding stats (total=6/10, idle=6/10, active=0, waiting=0)
+2025-11-10T15:44:40.771+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Attempting to create/setup new connection (2163ad35-5456-44bc-8d28-78873982ee27)
+2025-11-10T15:44:40.784+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Established new connection (2163ad35-5456-44bc-8d28-78873982ee27)
+2025-11-10T15:44:40.785+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@e897012
+2025-11-10T15:44:40.794+03:00  INFO 16084 --- [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-11-10T15:44:40.798+03:00  INFO 16084 --- [    Test worker] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-11-10T15:44:40.817+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - After adding stats (total=7/10, idle=7/10, active=0, waiting=0)
+2025-11-10T15:44:40.817+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Attempting to create/setup new connection (20237269-8208-4e51-9e85-1138f617b387)
+2025-11-10T15:44:40.822+03:00  INFO 16084 --- [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-11-10T15:44:40.831+03:00  INFO 16084 --- [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-4)']
+	Database driver: undefined/unknown
+	Database version: 15.14
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-11-10T15:44:40.833+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Established new connection (20237269-8208-4e51-9e85-1138f617b387)
+2025-11-10T15:44:40.833+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@6138621
+2025-11-10T15:44:40.864+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - After adding stats (total=8/10, idle=8/10, active=0, waiting=0)
+2025-11-10T15:44:40.864+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Attempting to create/setup new connection (ae735715-2ce8-462f-a9a8-fbabc6d71980)
+2025-11-10T15:44:40.880+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Established new connection (ae735715-2ce8-462f-a9a8-fbabc6d71980)
+2025-11-10T15:44:40.880+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@5f5333e3
+2025-11-10T15:44:40.911+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - After adding stats (total=9/10, idle=9/10, active=0, waiting=0)
+2025-11-10T15:44:40.911+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Attempting to create/setup new connection (f2929ffc-a034-44b7-9d1e-76648b6a1ef4)
+2025-11-10T15:44:40.925+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-4 - Established new connection (f2929ffc-a034-44b7-9d1e-76648b6a1ef4)
+2025-11-10T15:44:40.926+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@42e3a187
+2025-11-10T15:44:40.958+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - After adding stats (total=10/10, idle=10/10, active=0, waiting=0)
+2025-11-10T15:44:40.958+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Connection not added, stats (total=10/10, idle=10/10, active=0, waiting=0)
+2025-11-10T15:44:40.975+03:00  INFO 16084 --- [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-11-10T15:44:40.995+03:00  INFO 16084 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-11-10T15:44:41.333+03:00  WARN 16084 --- [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-11-10T15:44:41.621+03:00  INFO 16084 --- [    Test worker] .w.s.BorrowingServiceImplIntegrationTest : Started BorrowingServiceImplIntegrationTest in 1.678 seconds (process running for 51.911)
+2025-11-10T15:44:41.668+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:41.683+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:41.685+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 14 ms.
+2025-11-10T15:44:42.093+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:42.157+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:42.185+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@119237885 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.206+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@119237885 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.208+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@2052390888 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.212+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@2052390888 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.218+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:42.232+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:42.232+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 14 ms.
+2025-11-10T15:44:42.266+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:42.279+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:42.299+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1791064601 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.314+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1791064601 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.344+03:00  INFO 16084 --- [    Test worker] c.e.w.service.BorrowingServiceImpl       : Borrowing returned successfully with id: 1
+2025-11-10T15:44:42.344+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@518609307 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.348+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@518609307 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.353+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:42.366+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:42.366+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 13 ms.
+2025-11-10T15:44:42.403+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:42.412+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:42.431+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1751476291 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.435+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1751476291 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.440+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:42.454+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:42.454+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 14 ms.
+2025-11-10T15:44:42.486+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:42.495+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:42.518+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@427076172 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.522+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@427076172 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.523+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@827465346 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.526+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@827465346 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.561+03:00  INFO 16084 --- [    Test worker] c.e.w.service.BorrowingServiceImpl       : Borrowing created successfully with id: 3
+2025-11-10T15:44:42.561+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@708472516 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.565+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@708472516 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.570+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:42.585+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:42.585+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 15 ms.
+2025-11-10T15:44:42.627+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:42.638+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:42.701+03:00  INFO 16084 --- [    Test worker] c.e.w.service.BorrowingServiceImpl       : Updated 1 borrowings to OVERDUE status
+2025-11-10T15:44:42.702+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@2023848505 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.707+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@2023848505 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.713+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:42.730+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:42.730+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 17 ms.
+2025-11-10T15:44:42.774+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:42.788+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:42.813+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@676082897 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.818+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@676082897 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.824+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:42.843+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:42.843+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 19 ms.
+2025-11-10T15:44:42.888+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:42.901+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:42.922+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1672987902 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:42.926+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1672987902 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:42.932+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:42.946+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:42.946+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 14 ms.
+2025-11-10T15:44:42.984+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:42.995+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:43.078+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@886631728 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.082+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@886631728 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.083+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1931156394 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.087+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1931156394 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.100+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:43.114+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:43.114+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 14 ms.
+2025-11-10T15:44:43.144+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:43.152+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:43.181+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@65194757 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.184+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@65194757 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.185+03:00  WARN 16084 --- [    Test worker] c.e.w.service.BorrowingServiceImpl       : Borrowing 2 was returned late
+2025-11-10T15:44:43.192+03:00  INFO 16084 --- [    Test worker] c.e.w.service.BorrowingServiceImpl       : Borrowing returned successfully with id: 2
+2025-11-10T15:44:43.195+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:43.208+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:43.209+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 14 ms.
+2025-11-10T15:44:43.242+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:43.253+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:43.272+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@618088248 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.277+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@618088248 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.278+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1098862223 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.282+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1098862223 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.286+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:43.299+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:43.300+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 14 ms.
+2025-11-10T15:44:43.334+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:43.343+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:43.362+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1301991789 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.368+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1301991789 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.375+03:00  INFO 16084 --- [    Test worker] c.e.w.service.BorrowingServiceImpl       : Updated 1 borrowings to OVERDUE status via scheduled task
+2025-11-10T15:44:43.376+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@633375552 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.381+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@633375552 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.381+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1779277071 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.385+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1779277071 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.389+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:43.404+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:43.405+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 16 ms.
+2025-11-10T15:44:43.437+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:43.449+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:43.501+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@519395099 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.514+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@519395099 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.519+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:43.533+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:43.533+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 14 ms.
+2025-11-10T15:44:43.566+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:43.577+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:43.600+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1119115827 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.603+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1119115827 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.607+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:43.632+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:43.632+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 25 ms.
+2025-11-10T15:44:43.661+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:43.670+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:43.692+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@385099184 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.695+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@385099184 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.703+03:00  INFO 16084 --- [    Test worker] c.e.w.service.BorrowingServiceImpl       : Borrowing extended successfully with id: 1, new due date: 2025-11-20T15:44:43.692058800
+2025-11-10T15:44:43.704+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@2091059052 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.707+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@2091059052 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.712+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:43.725+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:43.725+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 13 ms.
+2025-11-10T15:44:43.757+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:43.766+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:43.787+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@691238248 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.797+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@691238248 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.802+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:43.817+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:43.817+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 15 ms.
+2025-11-10T15:44:43.853+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:43.866+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:43.892+03:00  INFO 16084 --- [    Test worker] c.e.w.service.BorrowingServiceImpl       : Updated 1 borrowings to OVERDUE status
+2025-11-10T15:44:43.897+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:43.911+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:43.911+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 14 ms.
+2025-11-10T15:44:43.943+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:43.952+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:43.971+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1363866893 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:43.981+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1363866893 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:43.984+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:43.998+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:43.998+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 13 ms.
+2025-11-10T15:44:44.029+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:44.038+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:44.057+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@2009768596 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:44.061+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@2009768596 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:44.065+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:44.079+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:44.080+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 15 ms.
+2025-11-10T15:44:44.112+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:44.120+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:44.150+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1769879183 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:44.154+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1769879183 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:44.159+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:44.177+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:44.177+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 18 ms.
+2025-11-10T15:44:44.212+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:44.223+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+2025-11-10T15:44:44.250+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Setting JDBC Connection [HikariProxyConnection@1544891521 wrapping org.postgresql.jdbc.PgConnection@272e639c] read-only
+2025-11-10T15:44:44.257+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.DataSourceUtils      : Resetting read-only flag of JDBC Connection [HikariProxyConnection@1544891521 wrapping org.postgresql.jdbc.PgConnection@272e639c]
+2025-11-10T15:44:44.264+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executing SQL script from class path resource [cleanup.sql]
+2025-11-10T15:44:44.282+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : 0 returned as update count for SQL: TRUNCATE TABLE vehicles, user_storage_access, storages, users, items, borrowings, transportations, keeping, item_maintenance, user_storage_access RESTART IDENTITY CASCADE
+2025-11-10T15:44:44.283+03:00 DEBUG 16084 --- [    Test worker] o.s.jdbc.datasource.init.ScriptUtils     : Executed SQL script from class path resource [cleanup.sql] in 19 ms.
+2025-11-10T15:44:44.315+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Creating new item: Test Laptop
+2025-11-10T15:44:44.325+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.service.ItemServiceImpl    : Item created successfully with ID: 1
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

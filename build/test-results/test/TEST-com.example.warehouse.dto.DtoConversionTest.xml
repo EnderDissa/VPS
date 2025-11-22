@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.warehouse.dto.DtoConversionTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2025-11-10T12:44:27.783Z" hostname="ASUS-TUF" time="1.283">
+  <properties/>
+  <testcase name="shouldUseDefaultsWhenBorrowingIsNull()" classname="com.example.warehouse.dto.DtoConversionTest" time="1.217"/>
+  <testcase name="shouldMapTransportationEntityToDTO()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <testcase name="shouldMapItemMaintenanceEntityToDTO()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.039"/>
+  <testcase name="shouldUseDefaultStatusWhenTransportationStatusIsNull()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.0"/>
+  <testcase name="shouldHandleNullTransportation()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <testcase name="shouldHandleNullItemMaintenance()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <testcase name="shouldMapUserStorageAccessEntityToDTO()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <testcase name="shouldMapKeepingEntityToDTO()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.002"/>
+  <testcase name="shouldHandleNullKeeping()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <testcase name="shouldMapItemEntityToItemDTO()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.002"/>
+  <testcase name="shouldHandleNullUserStorageAccess()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <testcase name="shouldHandleNullItemInItemDTO()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <testcase name="shouldMapBorrowingEntityToBorrowingDTO()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.002"/>
+  <testcase name="shouldMapStorageEntityToStorageDTO()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <testcase name="shouldHandleNullVehicle()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <testcase name="shouldMapVehicleEntityToDTO()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <testcase name="shouldUseDefaultStatusWhenVehicleStatusIsNull()" classname="com.example.warehouse.dto.DtoConversionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

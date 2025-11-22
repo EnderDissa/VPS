@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.warehouse.dto.ItemDTOValidationTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-11-10T12:44:29.081Z" hostname="ASUS-TUF" time="0.08">
+  <properties/>
+  <testcase name="valid_minimal()" classname="com.example.warehouse.dto.ItemDTOValidationTest" time="0.08"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

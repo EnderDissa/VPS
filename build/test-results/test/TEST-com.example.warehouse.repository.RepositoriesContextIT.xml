@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.warehouse.repository.RepositoriesContextIT" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-11-10T12:44:30.850Z" hostname="ASUS-TUF" time="0.009">
+  <properties/>
+  <testcase name="allSpringDataRepositoriesAreRegistered()" classname="com.example.warehouse.repository.RepositoriesContextIT" time="0.009"/>
+  <system-out><![CDATA[2025-11-10T15:44:30.799+03:00  INFO 16084 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.warehouse.repository.RepositoriesContextIT]: RepositoriesContextIT does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-11-10T15:44:30.812+03:00  INFO 16084 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.warehouse.WarehouseApplication for test class com.example.warehouse.repository.RepositoriesContextIT
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

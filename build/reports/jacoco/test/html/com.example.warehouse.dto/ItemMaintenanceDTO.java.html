@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemMaintenanceDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.dto</a> &gt; <span class="el_source">ItemMaintenanceDTO.java</span></div><h1>ItemMaintenanceDTO.java</h1><pre class="source lang-java linenums">package com.example.warehouse.dto;
+
+import com.example.warehouse.entity.ItemMaintenance;
+import com.example.warehouse.enumeration.BorrowStatus;
+import com.example.warehouse.enumeration.MaintenanceStatus;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import lombok.Data;
+
+@JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
+public record ItemMaintenanceDTO(
+        Long id,
+
+        @NotNull(message = &quot;Item ID is required&quot;)
+        Long itemId,
+
+        @NotNull(message = &quot;Technician ID is required&quot;)
+        Long technicianId,
+
+        @NotNull(message = &quot;Maintenance date is required&quot;)
+        LocalDateTime maintenanceDate,
+
+        LocalDateTime nextMaintenanceDate,
+
+        @PositiveOrZero(message = &quot;Cost must be positive or zero&quot;)
+        BigDecimal cost,
+
+        String description,
+
+        @NotNull(message = &quot;Status is required&quot;)
+        MaintenanceStatus status,
+
+        LocalDateTime createdAt
+) {
+<span class="nc" id="L40">    public ItemMaintenanceDTO {</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        if (status == null) {</span>
+<span class="nc" id="L42">            status = MaintenanceStatus.COMPLETED;</span>
+        }
+<span class="nc" id="L44">    }</span>
+
+    public ItemMaintenanceDTO(ItemMaintenance maintenance) {
+<span class="nc" id="L47">        this(</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">                maintenance != null ? maintenance.getId() : null,</span>
+<span class="nc bnc" id="L49" title="All 4 branches missed.">                maintenance != null &amp;&amp; maintenance.getItem() != null ? maintenance.getItem().getId() : null,</span>
+<span class="nc bnc" id="L50" title="All 4 branches missed.">                maintenance != null &amp;&amp; maintenance.getTechnician() != null ? maintenance.getTechnician().getId() : null,</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">                maintenance != null ? maintenance.getMaintenanceDate() : null,</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">                maintenance != null ? maintenance.getNextMaintenanceDate() : null,</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">                maintenance != null ? maintenance.getCost() : null,</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                maintenance != null ? maintenance.getDescription() : null,</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                maintenance != null ? maintenance.getStatus() : null,</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                maintenance != null ? maintenance.getCreatedAt() : null</span>
+        );
+<span class="nc" id="L58">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

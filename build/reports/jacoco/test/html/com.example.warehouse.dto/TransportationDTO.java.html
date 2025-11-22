@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransportationDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.dto</a> &gt; <span class="el_source">TransportationDTO.java</span></div><h1>TransportationDTO.java</h1><pre class="source lang-java linenums">package com.example.warehouse.dto;
+
+import com.example.warehouse.entity.Transportation;
+import com.example.warehouse.enumeration.TransportStatus;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import jakarta.validation.constraints.NotNull;
+
+import java.time.LocalDateTime;
+
+@JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
+public record TransportationDTO(
+        Long id,
+
+        @NotNull(message = &quot;Item ID is required&quot;)
+        Long itemId,
+
+        @NotNull(message = &quot;Vehicle ID is required&quot;)
+        Long vehicleId,
+
+        @NotNull(message = &quot;Driver ID is required&quot;)
+        Long driverId,
+
+        @NotNull(message = &quot;From storage ID is required&quot;)
+        Long fromStorageId,
+
+        @NotNull(message = &quot;To storage ID is required&quot;)
+        Long toStorageId,
+
+        @NotNull(message = &quot;Status is required&quot;)
+        TransportStatus status,
+
+        LocalDateTime scheduledDeparture,
+        LocalDateTime actualDeparture,
+        LocalDateTime scheduledArrival,
+        LocalDateTime actualArrival,
+
+        LocalDateTime createdAt
+) {
+
+<span class="nc" id="L41">    public TransportationDTO {</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (status == null) {</span>
+<span class="nc" id="L43">            status = TransportStatus.PLANNED;</span>
+        }
+<span class="nc" id="L45">    }</span>
+
+    public TransportationDTO(Transportation transportation) {
+<span class="nc" id="L48">        this(</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">                transportation != null ? transportation.getId() : null,</span>
+<span class="nc bnc" id="L50" title="All 4 branches missed.">                transportation != null &amp;&amp; transportation.getItem() != null ? transportation.getItem().getId() : null,</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">                transportation != null &amp;&amp; transportation.getVehicle() != null ? transportation.getVehicle().getId() : null,</span>
+<span class="nc bnc" id="L52" title="All 4 branches missed.">                transportation != null &amp;&amp; transportation.getDriver() != null ? transportation.getDriver().getId() : null,</span>
+<span class="nc bnc" id="L53" title="All 4 branches missed.">                transportation != null &amp;&amp; transportation.getFromStorage() != null ? transportation.getFromStorage().getId() : null,</span>
+<span class="nc bnc" id="L54" title="All 4 branches missed.">                transportation != null &amp;&amp; transportation.getToStorage() != null ? transportation.getToStorage().getId() : null,</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                transportation != null ? transportation.getStatus() : TransportStatus.PLANNED,</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                transportation != null ? transportation.getScheduledDeparture() : null,</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                transportation != null ? transportation.getActualDeparture() : null,</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                transportation != null ? transportation.getScheduledArrival() : null,</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                transportation != null ? transportation.getActualArrival() : null,</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                transportation != null ? transportation.getCreatedAt() : null</span>
+        );
+<span class="nc" id="L62">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

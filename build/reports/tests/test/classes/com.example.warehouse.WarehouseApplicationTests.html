@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - WarehouseApplicationTests</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>WarehouseApplicationTests</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/com.example.warehouse.html">com.example.warehouse</a> &gt; WarehouseApplicationTests</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">1</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.608s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a href="#">Tests</a>
+</li>
+<li>
+<a href="#">Standard output</a>
+</li>
+</ul>
+<div class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">contextLoads()</td>
+<td class="success">0.608s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre id="class-stdout">15:43:54.827 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.example.warehouse.WarehouseApplicationTests]: WarehouseApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+15:43:55.294 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.example.warehouse.WarehouseApplication for test class com.example.warehouse.WarehouseApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.6)
+
+2025-11-10T15:43:57.080+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.WarehouseApplicationTests  : Starting WarehouseApplicationTests using Java 17.0.15 with PID 16084 (started by dimak in C:\Users\dimak\Desktop\studing\high_performance_systems\VPS)
+2025-11-10T15:43:57.083+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.WarehouseApplicationTests  : No active profile set, falling back to 1 default profile: &quot;default&quot;
+2025-11-10T15:43:59.997+03:00  INFO 16084 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-11-10T15:44:00.247+03:00  INFO 16084 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 220 ms. Found 9 JPA repository interfaces.
+2025-11-10T15:44:01.457+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : Class org.postgresql.Driver found in Thread context class loader jdk.internal.loader.ClassLoaders$AppClassLoader@60e53b93
+2025-11-10T15:44:01.731+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : HikariPool-1 - configuration:
+2025-11-10T15:44:01.738+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : allowPoolSuspension.............false
+2025-11-10T15:44:01.739+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : autoCommit......................true
+2025-11-10T15:44:01.739+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : catalog.........................none
+2025-11-10T15:44:01.739+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : connectionInitSql...............none
+2025-11-10T15:44:01.740+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : connectionTestQuery.............none
+2025-11-10T15:44:01.740+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : connectionTimeout...............30000
+2025-11-10T15:44:01.741+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : credentials.....................com.zaxxer.hikari.util.Credentials@563c72bc
+2025-11-10T15:44:01.741+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : dataSource......................none
+2025-11-10T15:44:01.742+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : dataSourceClassName.............none
+2025-11-10T15:44:01.742+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : dataSourceJNDI..................none
+2025-11-10T15:44:01.743+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : dataSourceProperties............{password=&lt;masked&gt;}
+2025-11-10T15:44:01.744+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : driverClassName.................&quot;org.postgresql.Driver&quot;
+2025-11-10T15:44:01.744+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : exceptionOverride...............none
+2025-11-10T15:44:01.745+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : exceptionOverrideClassName......none
+2025-11-10T15:44:01.745+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : healthCheckProperties...........{}
+2025-11-10T15:44:01.746+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : healthCheckRegistry.............none
+2025-11-10T15:44:01.746+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : idleTimeout.....................600000
+2025-11-10T15:44:01.747+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : initializationFailTimeout.......1
+2025-11-10T15:44:01.748+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : isolateInternalQueries..........false
+2025-11-10T15:44:01.748+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : jdbcUrl.........................jdbc:postgresql://localhost:5432/warehouse
+2025-11-10T15:44:01.748+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : keepaliveTime...................120000
+2025-11-10T15:44:01.750+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : leakDetectionThreshold..........0
+2025-11-10T15:44:01.751+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : maxLifetime.....................1800000
+2025-11-10T15:44:01.751+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : maximumPoolSize.................10
+2025-11-10T15:44:01.752+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : metricRegistry..................none
+2025-11-10T15:44:01.752+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : metricsTrackerFactory...........none
+2025-11-10T15:44:01.753+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : minimumIdle.....................10
+2025-11-10T15:44:01.753+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : password........................&lt;masked&gt;
+2025-11-10T15:44:01.754+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : poolName........................&quot;HikariPool-1&quot;
+2025-11-10T15:44:01.754+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : readOnly........................false
+2025-11-10T15:44:01.755+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : registerMbeans..................false
+2025-11-10T15:44:01.756+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : scheduledExecutor...............none
+2025-11-10T15:44:01.757+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : schema..........................none
+2025-11-10T15:44:01.757+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : threadFactory...................internal
+2025-11-10T15:44:01.757+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : transactionIsolation............default
+2025-11-10T15:44:01.758+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : username........................&quot;liquibase&quot;
+2025-11-10T15:44:01.759+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.HikariConfig           : validationTimeout...............5000
+2025-11-10T15:44:01.759+03:00  INFO 16084 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-11-10T15:44:01.819+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (38ed116a-e9ac-426a-a8ec-cd4d50dee33c)
+2025-11-10T15:44:02.503+03:00 DEBUG 16084 --- [    Test worker] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (38ed116a-e9ac-426a-a8ec-cd4d50dee33c)
+2025-11-10T15:44:02.507+03:00  INFO 16084 --- [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@76f1834d
+2025-11-10T15:44:02.514+03:00  INFO 16084 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-11-10T15:44:02.621+03:00 DEBUG 16084 --- [l-1:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=1/10, idle=0/10, active=1, waiting=0)
+2025-11-10T15:44:02.622+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (162f7967-adef-4783-9748-ae78fc65dd4b)
+2025-11-10T15:44:02.650+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (162f7967-adef-4783-9748-ae78fc65dd4b)
+2025-11-10T15:44:02.650+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@2cc9a77e
+2025-11-10T15:44:02.683+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=2/10, idle=1/10, active=1, waiting=0)
+2025-11-10T15:44:02.683+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (79513337-6b21-4010-a7ff-224600739bc0)
+2025-11-10T15:44:02.702+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (79513337-6b21-4010-a7ff-224600739bc0)
+2025-11-10T15:44:02.702+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@69cb2c83
+2025-11-10T15:44:02.743+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=3/10, idle=2/10, active=1, waiting=0)
+2025-11-10T15:44:02.743+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (34b3a968-e5ee-4c3d-a78b-db1fa51e9feb)
+2025-11-10T15:44:02.761+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (34b3a968-e5ee-4c3d-a78b-db1fa51e9feb)
+2025-11-10T15:44:02.761+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@397b5f54
+2025-11-10T15:44:02.805+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=4/10, idle=3/10, active=1, waiting=0)
+2025-11-10T15:44:02.805+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (c7b791c1-4325-426a-b0b1-796ddfc103b4)
+2025-11-10T15:44:02.823+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (c7b791c1-4325-426a-b0b1-796ddfc103b4)
+2025-11-10T15:44:02.823+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@9e4d3cc
+2025-11-10T15:44:02.867+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=5/10, idle=4/10, active=1, waiting=0)
+2025-11-10T15:44:02.868+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (975f9cf6-c246-47dd-9088-db0c1b745d39)
+2025-11-10T15:44:02.887+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (975f9cf6-c246-47dd-9088-db0c1b745d39)
+2025-11-10T15:44:02.888+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@5ee19c74
+2025-11-10T15:44:02.929+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=6/10, idle=5/10, active=1, waiting=0)
+2025-11-10T15:44:02.930+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (9332d36b-a670-40d1-8137-a9d6726b127b)
+2025-11-10T15:44:02.950+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (9332d36b-a670-40d1-8137-a9d6726b127b)
+2025-11-10T15:44:02.951+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@419d9529
+2025-11-10T15:44:02.990+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=7/10, idle=6/10, active=1, waiting=0)
+2025-11-10T15:44:02.990+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (810f6c1b-d855-4dc2-8636-7741a5067988)
+2025-11-10T15:44:03.010+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (810f6c1b-d855-4dc2-8636-7741a5067988)
+2025-11-10T15:44:03.010+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@227ff3b1
+2025-11-10T15:44:03.052+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=8/10, idle=7/10, active=1, waiting=0)
+2025-11-10T15:44:03.053+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (3bc8fd95-013a-421e-91b1-9d25f4f48eba)
+2025-11-10T15:44:03.068+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (3bc8fd95-013a-421e-91b1-9d25f4f48eba)
+2025-11-10T15:44:03.069+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@daa2e81
+2025-11-10T15:44:03.114+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=9/10, idle=8/10, active=1, waiting=0)
+2025-11-10T15:44:03.115+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Attempting to create/setup new connection (0d5497dd-e974-4f96-a695-9589079d70a8)
+2025-11-10T15:44:03.132+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Established new connection (0d5497dd-e974-4f96-a695-9589079d70a8)
+2025-11-10T15:44:03.132+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@5ffa117c
+2025-11-10T15:44:03.167+03:00  INFO 16084 --- [    Test worker] liquibase.database                       : Set default schema name to public
+2025-11-10T15:44:03.177+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=10/10, idle=9/10, active=1, waiting=0)
+2025-11-10T15:44:03.177+03:00 DEBUG 16084 --- [onnection-adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Connection not added, stats (total=10/10, idle=9/10, active=1, waiting=0)
+2025-11-10T15:44:04.565+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Reading from public.databasechangelog
+2025-11-10T15:44:04.819+03:00  INFO 16084 --- [    Test worker] liquibase.ui                             : Database is up to date, no changesets to execute
+2025-11-10T15:44:04.824+03:00  INFO 16084 --- [    Test worker] liquibase.changelog                      : Reading from public.databasechangelog
+2025-11-10T15:44:04.845+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : UPDATE SUMMARY
+2025-11-10T15:44:04.845+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : Run:                          0
+2025-11-10T15:44:04.846+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : Previously run:               2
+2025-11-10T15:44:04.846+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : Filtered out:                 0
+2025-11-10T15:44:04.846+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : -------------------------------
+2025-11-10T15:44:04.846+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : Total change sets:            2
+2025-11-10T15:44:04.849+03:00  INFO 16084 --- [    Test worker] liquibase.util                           : Update summary generated
+2025-11-10T15:44:04.853+03:00  INFO 16084 --- [    Test worker] liquibase.command                        : Command execution complete
+2025-11-10T15:44:05.786+03:00  INFO 16084 --- [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-11-10T15:44:06.035+03:00  INFO 16084 --- [    Test worker] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.29.Final
+2025-11-10T15:44:06.198+03:00  INFO 16084 --- [    Test worker] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-11-10T15:44:07.394+03:00  INFO 16084 --- [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-11-10T15:44:07.716+03:00  INFO 16084 --- [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 15.14
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-11-10T15:44:11.285+03:00  INFO 16084 --- [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-11-10T15:44:11.422+03:00  INFO 16084 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-11-10T15:44:12.183+03:00  INFO 16084 --- [    Test worker] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-11-10T15:44:15.907+03:00  WARN 16084 --- [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-11-10T15:44:17.042+03:00  INFO 16084 --- [    Test worker] c.e.warehouse.WarehouseApplicationTests  : Started WarehouseApplicationTests in 21.033 seconds (process running for 27.333)
+</pre>
+<button class="clipboard-copy-btn" aria-label="Copy to clipboard" data-copy-element-id="class-stdout">Copy</button>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="https://www.gradle.org">Gradle 9.2.0</a> at 10 нояб. 2025 г., 15:45:41</p>
+</div>
+</div>
+</body>
+</html>

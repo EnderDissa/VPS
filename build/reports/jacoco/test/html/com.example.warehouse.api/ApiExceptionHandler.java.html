@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.api</a> &gt; <span class="el_source">ApiExceptionHandler.java</span></div><h1>ApiExceptionHandler.java</h1><pre class="source lang-java linenums">package com.example.warehouse.api;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.validation.FieldError;
+
+import java.util.Arrays;
+
+@RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
+<span class="fc" id="L22">public class ApiExceptionHandler {</span>
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity&lt;ApiError&gt; handleInvalidJson(HttpMessageNotReadableException ex, HttpServletRequest req) {
+<span class="nc" id="L26">        HttpStatus s = HttpStatus.BAD_REQUEST;</span>
+<span class="nc" id="L27">        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.INVALID_JSON, &quot;Malformed JSON request&quot;, req.getRequestURI());</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (ex.getMostSpecificCause() != null) body.addDetail(ex.getMostSpecificCause().getMessage());</span>
+<span class="nc" id="L29">        return ResponseEntity.status(s).body(body);</span>
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity&lt;ApiError&gt; handleMissingParam(MissingServletRequestParameterException ex, HttpServletRequest req) {
+<span class="nc" id="L34">        HttpStatus s = HttpStatus.BAD_REQUEST;</span>
+<span class="nc" id="L35">        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.MISSING_REQUEST_PARAM, &quot;Required request parameter is missing&quot;, req.getRequestURI());</span>
+<span class="nc" id="L36">        body.addDetail(&quot;Parameter '&quot; + ex.getParameterName() + &quot;' of type '&quot; + ex.getParameterType() + &quot;' is required&quot;);</span>
+<span class="nc" id="L37">        return ResponseEntity.status(s).body(body);</span>
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity&lt;ApiError&gt; handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
+<span class="nc" id="L42">        HttpStatus s = HttpStatus.BAD_REQUEST;</span>
+<span class="nc" id="L43">        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.TYPE_MISMATCH, &quot;Request parameter has wrong type&quot;, req.getRequestURI());</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        String required = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : &quot;unknown&quot;;</span>
+<span class="nc" id="L45">        body.addDetail(&quot;Parameter '&quot; + ex.getName() + &quot;' must be of type '&quot; + required + &quot;'&quot;);</span>
+<span class="nc" id="L46">        return ResponseEntity.status(s).body(body);</span>
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;ApiError&gt; handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
+<span class="nc" id="L51">        HttpStatus s = HttpStatus.BAD_REQUEST;</span>
+<span class="nc" id="L52">        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.VALIDATION_ERROR, &quot;Validation failed&quot;, req.getRequestURI());</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        for (FieldError fe : ex.getBindingResult().getFieldErrors()) {</span>
+<span class="nc" id="L54">            body.addValidationError(fe.getField(), fe.getRejectedValue(), fe.getDefaultMessage());</span>
+<span class="nc" id="L55">        }</span>
+<span class="nc" id="L56">        return ResponseEntity.status(s).body(body);</span>
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity&lt;ApiError&gt; handleNotFound(EntityNotFoundException ex, HttpServletRequest req) {
+<span class="nc" id="L61">        HttpStatus s = HttpStatus.NOT_FOUND;</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.NOT_FOUND, ex.getMessage() != null ? ex.getMessage() : &quot;Entity not found&quot;, req.getRequestURI());</span>
+<span class="nc" id="L63">        return ResponseEntity.status(s).body(body);</span>
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity&lt;ApiError&gt; handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest req) {
+<span class="nc" id="L68">        HttpStatus s = HttpStatus.CONFLICT;</span>
+<span class="nc" id="L69">        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.DATA_INTEGRITY_VIOLATION, &quot;Data integrity violation&quot;, req.getRequestURI());</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (ex.getMostSpecificCause() != null) body.addDetail(ex.getMostSpecificCause().getMessage());</span>
+<span class="nc" id="L71">        return ResponseEntity.status(s).body(body);</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ApiError&gt; handleOther(Exception ex, HttpServletRequest req) {
+<span class="nc" id="L76">        HttpStatus s = HttpStatus.INTERNAL_SERVER_ERROR;</span>
+<span class="nc" id="L77">        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.INTERNAL_ERROR, ex.getMessage(), req.getRequestURI());</span>
+<span class="nc" id="L78">        ex.printStackTrace();</span>
+<span class="nc" id="L79">        return ResponseEntity.status(s).body(body);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

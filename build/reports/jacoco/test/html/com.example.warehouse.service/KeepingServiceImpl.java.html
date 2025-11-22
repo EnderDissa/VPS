@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KeepingServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.service</a> &gt; <span class="el_source">KeepingServiceImpl.java</span></div><h1>KeepingServiceImpl.java</h1><pre class="source lang-java linenums">package com.example.warehouse.service;
+
+import com.example.warehouse.dto.KeepingDTO;
+import com.example.warehouse.entity.Keeping;
+import com.example.warehouse.entity.Storage;
+import com.example.warehouse.entity.Item;
+import com.example.warehouse.exception.KeepingNotFoundException;
+import com.example.warehouse.exception.StorageNotFoundException;
+import com.example.warehouse.exception.ItemNotFoundException;
+import com.example.warehouse.exception.DuplicateKeepingException;
+import com.example.warehouse.mapper.KeepingMapper;
+import com.example.warehouse.repository.KeepingRepository;
+import com.example.warehouse.repository.StorageRepository;
+import com.example.warehouse.repository.ItemRepository;
+import com.example.warehouse.service.interfaces.ItemService;
+import com.example.warehouse.service.interfaces.KeepingService;
+import com.example.warehouse.service.interfaces.StorageService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+<span class="fc" id="L28">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class KeepingServiceImpl implements KeepingService {
+
+    private final KeepingRepository keepingRepository;
+    private final StorageService storageService;
+    private final ItemService itemService;
+
+    @Override
+    public Keeping create(Keeping keeping) {
+<span class="nc" id="L39">        log.info(&quot;Creating new keeping record - storageId: {}, itemId: {}&quot;, keeping.getStorage().getId(), keeping.getItem().getId());</span>
+
+<span class="nc" id="L41">        Storage storage = storageService.getById(keeping.getStorage().getId());</span>
+
+<span class="nc" id="L43">        Item item = itemService.getById(keeping.getItem().getId());</span>
+
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (keepingRepository.existsByStorageIdAndItemId(keeping.getStorage().getId(), keeping.getItem().getId())) {</span>
+<span class="nc" id="L46">            throw new DuplicateKeepingException(</span>
+<span class="nc" id="L47">                    &quot;Keeping record already exists for storage ID: &quot; + keeping.getStorage().getId() +</span>
+<span class="nc" id="L48">                            &quot; and item ID: &quot; + keeping.getItem().getId());</span>
+        }
+
+<span class="nc" id="L51">        keeping.setStorage(storage);</span>
+<span class="nc" id="L52">        keeping.setItem(item);</span>
+
+<span class="nc" id="L54">        Keeping savedKeeping = keepingRepository.save(keeping);</span>
+<span class="nc" id="L55">        log.info(&quot;Keeping record created successfully with ID: {}&quot;, savedKeeping.getId());</span>
+
+<span class="nc" id="L57">        return savedKeeping;</span>
+    }
+
+    @Override
+    public Keeping getById(Long id) {
+<span class="nc" id="L62">        log.debug(&quot;Fetching keeping record by ID: {}&quot;, id);</span>
+
+<span class="nc" id="L64">        return keepingRepository.findById(id)</span>
+<span class="nc" id="L65">                .orElseThrow(() -&gt; new KeepingNotFoundException(&quot;Keeping record not found with ID: &quot; + id));</span>
+    }
+
+    @Override
+    public void update(Long id, Keeping keeping) {
+<span class="nc" id="L70">        log.info(&quot;Updating keeping record with ID: {}&quot;, id);</span>
+
+<span class="nc" id="L72">        Keeping existingKeeping = keepingRepository.findById(id)</span>
+<span class="nc" id="L73">                .orElseThrow(() -&gt; new KeepingNotFoundException(&quot;Keeping record not found with ID: &quot; + id));</span>
+
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (!existingKeeping.getStorage().getId().equals(keeping.getStorage().getId())) {</span>
+<span class="nc" id="L76">            Storage storage = storageService.getById(keeping.getStorage().getId());</span>
+<span class="nc" id="L77">            existingKeeping.setStorage(storage);</span>
+        }
+
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (!existingKeeping.getItem().getId().equals(keeping.getItem().getId())) {</span>
+<span class="nc" id="L81">            Item item = itemService.getById(keeping.getItem().getId());</span>
+<span class="nc" id="L82">            existingKeeping.setItem(item);</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            if (keepingRepository.existsByStorageIdAndItemIdAndIdNot(</span>
+<span class="nc" id="L85">                    keeping.getStorage().getId(), keeping.getItem().getId(), id)) {</span>
+<span class="nc" id="L86">                throw new DuplicateKeepingException(</span>
+<span class="nc" id="L87">                        &quot;Keeping record already exists for storage ID: &quot; + keeping.getStorage().getId() +</span>
+<span class="nc" id="L88">                                &quot; and item ID: &quot; + keeping.getStorage().getId());</span>
+            }
+        }
+
+<span class="nc" id="L92">        existingKeeping.setQuantity(keeping.getQuantity());</span>
+<span class="nc" id="L93">        existingKeeping.setShelf(keeping.getShelf());</span>
+
+<span class="nc" id="L95">        keepingRepository.save(existingKeeping);</span>
+<span class="nc" id="L96">        log.info(&quot;Keeping record with ID: {} updated successfully&quot;, id);</span>
+<span class="nc" id="L97">    }</span>
+
+    @Override
+    public void delete(Long id) {
+<span class="nc" id="L101">        log.info(&quot;Deleting keeping record with ID: {}&quot;, id);</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (!keepingRepository.existsById(id)) {</span>
+<span class="nc" id="L104">            throw new KeepingNotFoundException(&quot;Keeping record not found with ID: &quot; + id);</span>
+        }
+
+<span class="nc" id="L107">        keepingRepository.deleteById(id);</span>
+<span class="nc" id="L108">        log.info(&quot;Keeping record with ID: {} deleted successfully&quot;, id);</span>
+<span class="nc" id="L109">    }</span>
+
+    @Override
+    public Page&lt;Keeping&gt; findPage(int page, int size, Long storageId, Long itemId) {
+<span class="nc" id="L113">        log.debug(&quot;Fetching keeping records page - page: {}, size: {}, storageId: {}, itemId: {}&quot;,</span>
+<span class="nc" id="L114">                page, size, storageId, itemId);</span>
+
+<span class="nc" id="L116">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;lastUpdated&quot;));</span>
+
+        Page&lt;Keeping&gt; keepingPage;
+
+<span class="nc bnc" id="L120" title="All 4 branches missed.">        if (storageId != null &amp;&amp; itemId != null) {</span>
+<span class="nc" id="L121">            keepingPage = keepingRepository.findByStorageIdAndItemId(storageId, itemId, pageable);</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        } else if (storageId != null) {</span>
+<span class="nc" id="L123">            keepingPage = keepingRepository.findByStorageId(storageId, pageable);</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        } else if (itemId != null) {</span>
+<span class="nc" id="L125">            keepingPage = keepingRepository.findByItemId(itemId, pageable);</span>
+        } else {
+<span class="nc" id="L127">            keepingPage = keepingRepository.findAll(pageable);</span>
+        }
+
+<span class="nc" id="L130">        return keepingPage;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

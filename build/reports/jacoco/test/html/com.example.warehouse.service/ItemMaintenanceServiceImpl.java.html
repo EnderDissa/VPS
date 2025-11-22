@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemMaintenanceServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.service</a> &gt; <span class="el_source">ItemMaintenanceServiceImpl.java</span></div><h1>ItemMaintenanceServiceImpl.java</h1><pre class="source lang-java linenums">package com.example.warehouse.service;
+
+import com.example.warehouse.dto.ItemMaintenanceDTO;
+import com.example.warehouse.entity.ItemMaintenance;
+import com.example.warehouse.entity.Item;
+import com.example.warehouse.entity.User;
+import com.example.warehouse.enumeration.MaintenanceStatus;
+import com.example.warehouse.exception.ItemMaintenanceNotFoundException;
+import com.example.warehouse.exception.ItemNotFoundException;
+import com.example.warehouse.exception.UserNotFoundException;
+import com.example.warehouse.mapper.ItemMaintenanceMapper;
+import com.example.warehouse.repository.ItemMaintenanceRepository;
+import com.example.warehouse.repository.ItemRepository;
+import com.example.warehouse.repository.UserRepository;
+import com.example.warehouse.service.interfaces.ItemMaintenanceService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+<span class="fc" id="L27">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
+
+    private final ItemMaintenanceRepository itemMaintenanceRepository;
+    private final ItemServiceImpl itemService;
+    private final UserServiceImpl userService;
+
+    @Override
+    
+    public ItemMaintenance create(ItemMaintenance maintenance) {
+<span class="nc" id="L39">        log.info(&quot;Creating new item maintenance for item ID: {}&quot;, maintenance.getItem().getId());</span>
+
+<span class="nc" id="L41">        Item item = itemService.getById(maintenance.getItem().getId());</span>
+
+<span class="nc" id="L43">        User technician = userService.getUserById(maintenance.getTechnician().getId());</span>
+
+<span class="nc" id="L45">        maintenance.setItem(item);</span>
+<span class="nc" id="L46">        maintenance.setTechnician(technician);</span>
+
+<span class="nc" id="L48">        ItemMaintenance savedMaintenance = itemMaintenanceRepository.save(maintenance);</span>
+<span class="nc" id="L49">        log.info(&quot;Item maintenance created successfully with ID: {}&quot;, savedMaintenance.getId());</span>
+
+<span class="nc" id="L51">        return savedMaintenance;</span>
+    }
+
+    @Override
+    public ItemMaintenance getById(Long id) {
+<span class="nc" id="L56">        log.debug(&quot;Fetching item maintenance by ID: {}&quot;, id);</span>
+
+<span class="nc" id="L58">        return itemMaintenanceRepository.findById(id)</span>
+<span class="nc" id="L59">                .orElseThrow(() -&gt; new ItemMaintenanceNotFoundException(&quot;Item maintenance not found with ID: &quot; + id));</span>
+    }
+
+    @Override
+    
+    public void update(Long id, ItemMaintenance maintenance) {
+<span class="nc" id="L65">        log.info(&quot;Updating item maintenance with ID: {}&quot;, id);</span>
+
+<span class="nc" id="L67">        ItemMaintenance existingMaintenance = itemMaintenanceRepository.findById(id)</span>
+<span class="nc" id="L68">                .orElseThrow(() -&gt; new ItemMaintenanceNotFoundException(&quot;Item maintenance not found with ID: &quot; + id));</span>
+
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (!existingMaintenance.getItem().getId().equals(maintenance.getItem().getId())) {</span>
+<span class="nc" id="L71">            Item item = itemService.getById(maintenance.getItem().getId());</span>
+<span class="nc" id="L72">            existingMaintenance.setItem(item);</span>
+        }
+
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (!existingMaintenance.getTechnician().getId().equals(maintenance.getTechnician().getId())) {</span>
+<span class="nc" id="L76">            User technician = userService.getUserById(maintenance.getTechnician().getId());</span>
+<span class="nc" id="L77">            existingMaintenance.setTechnician(technician);</span>
+        }
+
+<span class="nc" id="L80">        existingMaintenance.setMaintenanceDate(maintenance.getMaintenanceDate());</span>
+<span class="nc" id="L81">        existingMaintenance.setNextMaintenanceDate(maintenance.getNextMaintenanceDate());</span>
+<span class="nc" id="L82">        existingMaintenance.setCost(maintenance.getCost());</span>
+<span class="nc" id="L83">        existingMaintenance.setDescription(maintenance.getDescription());</span>
+<span class="nc" id="L84">        existingMaintenance.setStatus(maintenance.getStatus());</span>
+
+<span class="nc" id="L86">        itemMaintenanceRepository.save(existingMaintenance);</span>
+<span class="nc" id="L87">        log.info(&quot;Item maintenance with ID: {} updated successfully&quot;, id);</span>
+<span class="nc" id="L88">    }</span>
+
+    @Override
+    
+    public void delete(Long id) {
+<span class="nc" id="L93">        log.info(&quot;Deleting item maintenance with ID: {}&quot;, id);</span>
+
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (!itemMaintenanceRepository.existsById(id)) {</span>
+<span class="nc" id="L96">            throw new ItemMaintenanceNotFoundException(&quot;Item maintenance not found with ID: &quot; + id);</span>
+        }
+
+<span class="nc" id="L99">        itemMaintenanceRepository.deleteById(id);</span>
+<span class="nc" id="L100">        log.info(&quot;Item maintenance with ID: {} deleted successfully&quot;, id);</span>
+<span class="nc" id="L101">    }</span>
+
+    @Override
+    public Page&lt;ItemMaintenance&gt; findPage(int page, int size, Long itemId, MaintenanceStatus status) {
+<span class="nc" id="L105">        log.debug(&quot;Fetching item maintenance page - page: {}, size: {}, itemId: {}, status: {}&quot;,</span>
+<span class="nc" id="L106">                page, size, itemId, status);</span>
+
+<span class="nc" id="L108">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;maintenanceDate&quot;));</span>
+
+        Page&lt;ItemMaintenance&gt; maintenancePage;
+
+<span class="nc bnc" id="L112" title="All 4 branches missed.">        if (itemId != null &amp;&amp; status != null) {</span>
+<span class="nc" id="L113">            maintenancePage = itemMaintenanceRepository.findByItemIdAndStatus(itemId, status, pageable);</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        } else if (itemId != null) {</span>
+<span class="nc" id="L115">            maintenancePage = itemMaintenanceRepository.findByItemId(itemId, pageable);</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        } else if (status != null) {</span>
+<span class="nc" id="L117">            maintenancePage = itemMaintenanceRepository.findByStatus(status, pageable);</span>
+        } else {
+<span class="nc" id="L119">            maintenancePage = itemMaintenanceRepository.findAll(pageable);</span>
+        }
+
+<span class="nc" id="L122">        return maintenancePage;</span>
+    }
+
+
+    public Page&lt;ItemMaintenance&gt; findByTechnician(Long technicianId, int page, int size) {
+<span class="nc" id="L127">        log.debug(&quot;Fetching item maintenance by technician ID: {}&quot;, technicianId);</span>
+
+<span class="nc" id="L129">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;maintenanceDate&quot;));</span>
+
+<span class="nc" id="L131">        return itemMaintenanceRepository.findByTechnicianId(technicianId, pageable);</span>
+    }
+
+    public long countByStatus(MaintenanceStatus status) {
+<span class="nc" id="L135">        log.debug(&quot;Counting item maintenance records with status: {}&quot;, status);</span>
+<span class="nc" id="L136">        return itemMaintenanceRepository.countByStatus(status);</span>
+    }
+
+    
+    public void updateStatus(Long id, MaintenanceStatus status) {
+<span class="nc" id="L141">        log.info(&quot;Updating status to {} for item maintenance ID: {}&quot;, status, id);</span>
+
+<span class="nc" id="L143">        ItemMaintenance maintenance = itemMaintenanceRepository.findById(id)</span>
+<span class="nc" id="L144">                .orElseThrow(() -&gt; new ItemMaintenanceNotFoundException(&quot;Item maintenance not found with ID: &quot; + id));</span>
+
+<span class="nc" id="L146">        maintenance.setStatus(status);</span>
+<span class="nc" id="L147">        itemMaintenanceRepository.save(maintenance);</span>
+<span class="nc" id="L148">        log.info(&quot;Status updated successfully for item maintenance ID: {}&quot;, id);</span>
+<span class="nc" id="L149">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

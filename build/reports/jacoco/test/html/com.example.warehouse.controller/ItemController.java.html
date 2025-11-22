@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.controller</a> &gt; <span class="el_source">ItemController.java</span></div><h1>ItemController.java</h1><pre class="source lang-java linenums">package com.example.warehouse.controller;
+
+import com.example.warehouse.dto.ItemDTO;
+import com.example.warehouse.entity.Item;
+import com.example.warehouse.enumeration.ItemCondition;
+import com.example.warehouse.enumeration.ItemType;
+import com.example.warehouse.mapper.ItemMapper;
+import com.example.warehouse.service.interfaces.ItemService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Validated
+@RestController
+@RequestMapping(&quot;/api/v1/items&quot;)
+@Tag(name = &quot;Items&quot;)
+public class ItemController {
+
+<span class="fc" id="L34">    public ItemController(ItemService service, ItemMapper mapper) {</span>
+<span class="fc" id="L35">        this.service = service;</span>
+<span class="fc" id="L36">        this.mapper = mapper;</span>
+<span class="fc" id="L37">    }</span>
+
+    private final ItemService service;
+    private final ItemMapper mapper;
+
+
+    @PostMapping
+    @Operation(summary = &quot;Create item&quot;)
+    public ResponseEntity&lt;ItemDTO&gt; create(@Valid @RequestBody ItemDTO dto) {
+<span class="nc" id="L46">        Item created = service.create(mapper.toEntity(dto));</span>
+<span class="nc" id="L47">        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDTO(created));</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Get item by id&quot;)
+    public ItemDTO getById(@PathVariable Long id) {
+<span class="nc" id="L53">        return mapper.toDTO(service.getById(id));</span>
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Update item by id&quot;)
+    public ResponseEntity&lt;Void&gt; update(@PathVariable Long id, @Valid @RequestBody ItemDTO dto) {
+<span class="nc" id="L59">        service.update(id, mapper.toEntity(dto));</span>
+<span class="nc" id="L60">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Delete item by id&quot;)
+    public ResponseEntity&lt;Void&gt; delete(@PathVariable Long id) {
+<span class="nc" id="L66">        service.delete(id);</span>
+<span class="nc" id="L67">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @GetMapping
+    @Operation(summary = &quot;List items with pagination and total count&quot;)
+    public ResponseEntity&lt;List&lt;ItemDTO&gt;&gt; list(
+            @RequestParam(defaultValue = &quot;0&quot;) @Min(0) int page,
+            @RequestParam(defaultValue = &quot;20&quot;) @Min(1) @Max(50) int size,
+            @RequestParam(required = false) ItemType type,
+            @RequestParam(required = false) ItemCondition condition
+    ) {
+<span class="nc" id="L78">        var pageResult = service.findPage(page, size, type, condition).map(mapper::toDTO);</span>
+<span class="nc" id="L79">        var headers = new HttpHeaders();</span>
+<span class="nc" id="L80">        headers.add(&quot;X-Total-Count&quot;, String.valueOf(pageResult.getTotalElements()));</span>
+<span class="nc" id="L81">        return new ResponseEntity&lt;&gt;(pageResult.getContent(), headers, HttpStatus.OK);</span>
+    }
+
+    @GetMapping(&quot;/availability&quot;)
+    @Operation(summary = &quot;Availability infinite feed&quot;)
+    public List&lt;ItemDTO&gt; availability(
+            @RequestParam @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            @RequestParam(required = false) Long storageId,
+            @RequestParam(required = false) ItemType type,
+            @RequestParam(required = false) ItemCondition condition,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = &quot;50&quot;) @Min(1) @Max(50) int limit
+    ) {
+<span class="nc" id="L95">        List&lt;Item&gt; result = service.findAvailable(from, to, storageId, type, condition, cursor, limit);</span>
+<span class="nc" id="L96">        return result.stream()</span>
+<span class="nc" id="L97">                .map(mapper::toDTO)</span>
+<span class="nc" id="L98">                .collect(Collectors.toList());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

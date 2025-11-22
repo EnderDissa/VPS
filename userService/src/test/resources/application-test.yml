@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16-alpine:///warehouse
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  liquibase:
+    enabled: true
+    change-log: classpath:./db.changelog-master.yaml
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  test:
+    database:
+      replace: none
+
+logging:
+  level:
+    org.testcontainers: WARN
+    org.hibernate.SQL: WARN

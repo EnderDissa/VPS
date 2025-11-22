@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VPS</a> &gt; <a href="index.source.html" class="el_package">com.example.warehouse.service</a> &gt; <span class="el_source">ItemServiceImpl.java</span></div><h1>ItemServiceImpl.java</h1><pre class="source lang-java linenums">package com.example.warehouse.service;
+
+import com.example.warehouse.entity.Item;
+import com.example.warehouse.enumeration.ItemCondition;
+import com.example.warehouse.enumeration.ItemType;
+import com.example.warehouse.exception.ItemNotFoundException;
+import com.example.warehouse.exception.DuplicateSerialNumberException;
+import com.example.warehouse.repository.ItemRepository;
+import com.example.warehouse.service.interfaces.ItemService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+<span class="fc" id="L21">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class ItemServiceImpl implements ItemService {
+
+    private final ItemRepository itemRepository;
+
+    @Override
+    public Item create(Item item) {
+<span class="nc" id="L30">        log.info(&quot;Creating new item: {}&quot;, item.getName());</span>
+
+<span class="nc bnc" id="L32" title="All 4 branches missed.">        if (item.getSerialNumber() != null &amp;&amp; !item.getSerialNumber().isEmpty()) {</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">            if (itemRepository.existsBySerialNumber(item.getSerialNumber())) {</span>
+<span class="nc" id="L34">                throw new DuplicateSerialNumberException(</span>
+<span class="nc" id="L35">                        &quot;Item with serial number '&quot; + item.getSerialNumber() + &quot;' already exists&quot;);</span>
+            }
+        }
+<span class="nc" id="L38">        item.setId(null);</span>
+<span class="nc" id="L39">        Item savedItem = itemRepository.save(item);</span>
+<span class="nc" id="L40">        log.info(&quot;Item created successfully with ID: {}&quot;, savedItem.getId());</span>
+
+<span class="nc" id="L42">        return savedItem;</span>
+    }
+
+    @Override
+    public Item getById(Long id) {
+<span class="fc" id="L47">        log.debug(&quot;Fetching item by ID: {}&quot;, id);</span>
+
+<span class="fc" id="L49">        return itemRepository.findById(id)</span>
+<span class="fc" id="L50">                .orElseThrow(() -&gt; new ItemNotFoundException(&quot;Item not found with ID: &quot; + id));</span>
+    }
+
+    @Override
+    public void update(Long id, Item item) {
+<span class="nc" id="L55">        log.info(&quot;Updating item with ID: {}&quot;, id);</span>
+
+<span class="nc" id="L57">        Item existingItem = itemRepository.findById(id)</span>
+<span class="nc" id="L58">                .orElseThrow(() -&gt; new ItemNotFoundException(&quot;Item not found with ID: &quot; + id));</span>
+
+<span class="nc bnc" id="L60" title="All 4 branches missed.">        if (item.getSerialNumber() != null &amp;&amp; !item.getSerialNumber().isEmpty() &amp;&amp;</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">                !item.getSerialNumber().equals(existingItem.getSerialNumber())) {</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            if (itemRepository.existsBySerialNumber(item.getSerialNumber())) {</span>
+<span class="nc" id="L63">                throw new DuplicateSerialNumberException(</span>
+<span class="nc" id="L64">                        &quot;Item with serial number '&quot; + item.getSerialNumber() + &quot;' already exists&quot;);</span>
+            }
+        }
+
+<span class="nc" id="L68">        existingItem.setName(item.getName());</span>
+<span class="nc" id="L69">        existingItem.setType(item.getType());</span>
+<span class="nc" id="L70">        existingItem.setCondition(item.getCondition());</span>
+<span class="nc" id="L71">        existingItem.setSerialNumber(item.getSerialNumber());</span>
+<span class="nc" id="L72">        existingItem.setDescription(item.getDescription());</span>
+
+<span class="nc" id="L74">        itemRepository.save(existingItem);</span>
+<span class="nc" id="L75">        log.info(&quot;Item with ID: {} updated successfully&quot;, id);</span>
+<span class="nc" id="L76">    }</span>
+
+    @Override
+    
+    public void delete(Long id) {
+<span class="nc" id="L81">        log.info(&quot;Deleting item with ID: {}&quot;, id);</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (!itemRepository.existsById(id)) {</span>
+<span class="nc" id="L84">            throw new ItemNotFoundException(&quot;Item not found with ID: &quot; + id);</span>
+        }
+
+<span class="nc" id="L87">        itemRepository.deleteById(id);</span>
+<span class="nc" id="L88">        log.info(&quot;Item with ID: {} deleted successfully&quot;, id);</span>
+<span class="nc" id="L89">    }</span>
+
+    @Override
+    public Page&lt;Item&gt; findPage(int page, int size, ItemType type, ItemCondition condition) {
+<span class="nc" id="L93">        log.debug(&quot;Fetching items page - page: {}, size: {}, type: {}, condition: {}&quot;,</span>
+<span class="nc" id="L94">                page, size, type, condition);</span>
+
+<span class="nc" id="L96">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
+
+        Page&lt;Item&gt; itemsPage;
+
+<span class="nc bnc" id="L100" title="All 4 branches missed.">        if (type != null &amp;&amp; condition != null) {</span>
+<span class="nc" id="L101">            itemsPage = itemRepository.findByTypeAndCondition(type, condition, pageable);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        } else if (type != null) {</span>
+<span class="nc" id="L103">            itemsPage = itemRepository.findByType(type, pageable);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        } else if (condition != null) {</span>
+<span class="nc" id="L105">            itemsPage = itemRepository.findByCondition(condition, pageable);</span>
+        } else {
+<span class="nc" id="L107">            itemsPage = itemRepository.findAll(pageable);</span>
+        }
+
+<span class="nc" id="L110">        return itemsPage;</span>
+    }
+
+    @Override
+    public List&lt;Item&gt; findAvailable(LocalDateTime from, LocalDateTime to, Long storageId,
+                                       ItemType type, ItemCondition condition, Long cursor, int limit) {
+<span class="nc" id="L116">        log.debug(&quot;Finding available items - from: {}, to: {}, storageId: {}, type: {}, condition: {}, cursor: {}, limit: {}&quot;,</span>
+<span class="nc" id="L117">                from, to, storageId, type, condition, cursor, limit);</span>
+
+        Page&lt;Item&gt; availableItems;
+
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if (cursor != null) {</span>
+<span class="nc bnc" id="L122" title="All 4 branches missed.">            if (type != null &amp;&amp; condition != null) {</span>
+<span class="nc" id="L123">                availableItems = itemRepository.findByIdGreaterThanAndTypeAndCondition(</span>
+<span class="nc" id="L124">                        cursor, type, condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, &quot;id&quot;)));</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            } else if (type != null) {</span>
+<span class="nc" id="L126">                availableItems = itemRepository.findByIdGreaterThanAndType(</span>
+<span class="nc" id="L127">                        cursor, type, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, &quot;id&quot;)));</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            } else if (condition != null) {</span>
+<span class="nc" id="L129">                availableItems = itemRepository.findByIdGreaterThanAndCondition(</span>
+<span class="nc" id="L130">                        cursor, condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, &quot;id&quot;)));</span>
+            } else {
+<span class="nc" id="L132">                availableItems = itemRepository.findByIdGreaterThan(</span>
+<span class="nc" id="L133">                        cursor, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, &quot;id&quot;)));</span>
+            }
+        } else {
+<span class="nc bnc" id="L136" title="All 4 branches missed.">            if (type != null &amp;&amp; condition != null) {</span>
+<span class="nc" id="L137">                availableItems = itemRepository.findByTypeAndCondition(</span>
+<span class="nc" id="L138">                        type, condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, &quot;id&quot;)));</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">            } else if (type != null) {</span>
+<span class="nc" id="L140">                availableItems = itemRepository.findByType(</span>
+<span class="nc" id="L141">                        type, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, &quot;id&quot;)));</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">            } else if (condition != null) {</span>
+<span class="nc" id="L143">                availableItems = itemRepository.findByCondition(</span>
+<span class="nc" id="L144">                        condition, PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, &quot;id&quot;)));</span>
+            } else {
+<span class="nc" id="L146">                availableItems = itemRepository.findAll(</span>
+<span class="nc" id="L147">                        PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, &quot;id&quot;)));</span>
+            }
+        }
+
+<span class="nc" id="L151">        return availableItems.stream()</span>
+<span class="nc" id="L152">                .collect(Collectors.toList());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

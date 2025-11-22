@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.warehouse.mapper.AllMappersRoundtripDynamicTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-11-10T12:44:30.667Z" hostname="ASUS-TUF" time="0.006">
+  <properties/>
+  <testcase name="MapStruct roundtrip" classname="com.example.warehouse.mapper.AllMappersRoundtripDynamicTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
