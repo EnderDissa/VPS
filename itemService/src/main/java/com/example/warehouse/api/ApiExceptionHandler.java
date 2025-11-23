@@ -19,10 +19,9 @@ import com.example.warehouse.exception.TransportationNotFoundException;
 import com.example.warehouse.exception.UserAlreadyExistsException;
 import com.example.warehouse.exception.UserNotFoundException;
 import com.example.warehouse.exception.UserStorageAccessNotFoundException;
-import com.example.warehouse.exception.ValidationException; // Assuming this is your custom one
+import com.example.warehouse.exception.ValidationException;
 import com.example.warehouse.exception.VehicleNotFoundException;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -32,60 +31,50 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException; // This is for Web MVC, might not be needed
-import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.support.WebExchangeBindException; // This is the key one for WebFlux
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException; // This might be handled differently in WebFlux, but keep for custom logic if needed
-import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler; // Extend this!
+import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.ServerWebInputException; // Another Spring WebFlux specific exception
+import org.springframework.web.server.ServerWebInputException;
+
+import jakarta.persistence.EntityNotFoundException;
 import reactor.core.publisher.Mono;
 
-// Remove the generic Exception handler or make it very specific to non-Spring errors
-// @ExceptionHandler(Exception.class) // Don't catch generic Exception here
-
 @RestControllerAdvice
-@Order(Ordered.HIGHEST_PRECEDENCE) // Maintain high precedence if needed
-public class ApiExceptionHandler extends ResponseEntityExceptionHandler { // Extend the base class
-
-    // --- Override Spring's handlers for specific error formats ---
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected Mono<ResponseEntity<Object>> handleWebExchangeBindException(
             WebExchangeBindException ex, HttpHeaders headers, HttpStatusCode status, ServerWebExchange exchange) {
-        // Use your custom ApiError format instead of ProblemDetail
         HttpStatus s = HttpStatus.BAD_REQUEST;
         String requestUri = exchange.getRequest().getURI().toString();
         ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.VALIDATION_ERROR, "Validation failed", requestUri);
 
-        // Add details for each field error
-        for (org.springframework.validation.FieldError fe : ex.getBindingResult().getFieldErrors()) {
+        for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
             body.addValidationError(fe.getField(), fe.getRejectedValue(), fe.getDefaultMessage());
         }
-        // Add details for global errors (if any)
         for (org.springframework.validation.ObjectError oe : ex.getBindingResult().getGlobalErrors()) {
             body.addDetail(oe.getObjectName() + ": " + oe.getDefaultMessage());
         }
 
-        // Return your custom format wrapped in Mono
         return Mono.just(new ResponseEntity<>(body, headers, status));
     }
 
-    // You might also want to override handleServerWebInputException for JSON parsing errors
     @Override
     protected Mono<ResponseEntity<Object>> handleServerWebInputException(
             ServerWebInputException ex, HttpHeaders headers, HttpStatusCode status, ServerWebExchange exchange) {
         HttpStatus s = HttpStatus.BAD_REQUEST;
         String requestUri = exchange.getRequest().getURI().toString();
         ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.INVALID_JSON, "Malformed JSON request", requestUri);
-        body.addDetail(ex.getReason() != null ? ex.getReason() : "Input error"); // ex.getReason is more descriptive than cause for parsing errors
+        body.addDetail(ex.getReason() != null ? ex.getReason() : "Input error");
 
         return Mono.just(new ResponseEntity<>(body, headers, status));
     }
 
-    // Add specific handlers for your custom exceptions
     @ExceptionHandler(AccessDeniedException.class)
     public Mono<ResponseEntity<Object>> handleAccessDenied(AccessDeniedException ex, ServerWebExchange exchange) {
         HttpStatus s = HttpStatus.FORBIDDEN;
@@ -238,12 +227,11 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler { // Ext
         return Mono.just(new ResponseEntity<>(body, new HttpHeaders(), s));
     }
 
-    @ExceptionHandler(ValidationException.class) // Your custom ValidationException
+    @ExceptionHandler(ValidationException.class)
     public Mono<ResponseEntity<Object>> handleCustomValidation(ValidationException ex, ServerWebExchange exchange) {
         HttpStatus s = HttpStatus.BAD_REQUEST;
         String requestUri = exchange.getRequest().getURI().toString();
         ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.VALIDATION_ERROR, ex.getMessage(), requestUri);
-        // If your ValidationException has field-specific details, add them here
         return Mono.just(new ResponseEntity<>(body, new HttpHeaders(), s));
     }
 
@@ -380,12 +368,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler { // Ext
         return Mono.just(ResponseEntity.status(status).body(body));
     }
 
-    // --- Optional: Generic handler for unexpected errors (should be very last resort) ---
-    // Only handle exceptions that are NOT handled by Spring's built-in handlers or your specific ones.
-    // It's generally better to avoid a catch-all here if Spring's default behavior is sufficient.
-    // If you must have one, ensure it doesn't interfere with Spring's handlers.
-    // This example shows how it *could* be done, but consider if it's necessary.
-     @ExceptionHandler(Throwable.class) // Catch Throwable for truly unexpected errors
+     @ExceptionHandler(Throwable.class)
      public Mono<ResponseEntity<Object>> handleUnexpected(Throwable ex, ServerWebExchange exchange) {
          HttpStatus s = HttpStatus.INTERNAL_SERVER_ERROR;
          String requestUri = exchange.getRequest().getURI().toString();

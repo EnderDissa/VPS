@@ -10,8 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -101,7 +99,7 @@ public class BorrowingController {
     ) {
         PageRequest pageable = PageRequest.of(page, size);
 
-        // Assuming service returns Flux for items and Mono for count
+
         Flux<Borrowing> borrowingsFlux = service.findBorrowingsByFilters(status, userId, itemId, from, to, pageable);
         Mono<Long> totalCountMono = service.countBorrowingsByFilters(status, userId, itemId, from, to);
 
@@ -112,7 +110,7 @@ public class BorrowingController {
                     List<Borrowing> borrowings = tuple.getT1();
                     Long totalCount = tuple.getT2();
 
-                    // Map to DTOs
+
                     List<BorrowingDTO> borrowingDtos = borrowings.stream()
                             .map(mapper::toDTO)
                             .toList();
@@ -142,7 +140,7 @@ public class BorrowingController {
                     List<Borrowing> borrowings = tuple.getT1();
                     Long totalCount = tuple.getT2();
 
-                    // Map to DTOs
+
                     List<BorrowingDTO> borrowingDtos = borrowings.stream()
                             .map(mapper::toDTO)
                             .toList();

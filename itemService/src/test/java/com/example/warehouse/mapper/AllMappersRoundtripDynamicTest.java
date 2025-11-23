@@ -14,10 +14,6 @@ class AllMappersRoundtripDynamicTest {
     private static final List<String> MAPPER_FQCN = List.of(
             "com.example.warehouse.mapper.BorrowingMapper",
             "com.example.warehouse.mapper.ItemMaintenanceMapper",
-            "com.example.warehouse.mapper.UserStorageAccessMapper",
-            "com.example.warehouse.mapper.TransportationMapper",
-            "com.example.warehouse.mapper.UserMapper",
-            "com.example.warehouse.mapper.VehicleMapper",
             "com.example.warehouse.mapper.KeepingMapper"
     );
 

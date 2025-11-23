@@ -14,9 +14,7 @@ public interface ItemService {
     Mono<Item> getById(Long id);
     Mono<Void> update(Long id, Item item);
     Mono<Void> delete(Long id);
-    // Change findPage to return Flux<Item> for the specific page
     Flux<Item> findItemsByFilters(ItemType type, ItemCondition condition, Pageable pageable);
-    // Add a method to get total count
     Mono<Long> countItemsByFilters(ItemType type, ItemCondition condition);
     Flux<Item> findAvailable(LocalDateTime from, LocalDateTime to, Long storageId,
                              ItemType type, ItemCondition condition, Long cursor, int limit);

@@ -8,12 +8,15 @@ import com.example.warehouse.enumeration.MaintenanceStatus;
 import com.example.warehouse.exception.ItemMaintenanceNotFoundException;
 import com.example.warehouse.repository.ItemMaintenanceRepository;
 import com.example.warehouse.service.interfaces.ItemMaintenanceService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -108,7 +111,7 @@ public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
                 .then();
     }
 
-    // New methods for reactive pagination
+
     @Override
     public Flux<ItemMaintenance> findMaintenancesByFilters(Long itemId, MaintenanceStatus status, Pageable pageable) {
         log.debug("Fetching item maintenance page - pageable: {}, itemId: {}, status: {}",
@@ -147,7 +150,7 @@ public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
-    // Additional methods
+
     @Override
     public Flux<ItemMaintenance> findByTechnician(Long technicianId, Pageable pageable) {
         log.debug("Fetching item maintenance by technician ID: {}", technicianId);

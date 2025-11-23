@@ -85,17 +85,17 @@ public class KeepingServiceImpl implements KeepingService {
                             .switchIfEmpty(Mono.just(existingKeeping.getItem()))
                             .doOnNext(item -> {
                                 existingKeeping.setItem(item);
-                                // Check for duplicate if item changes
+
                                 if (!existingKeeping.getItem().getId().equals(keeping.getItem().getId())) {
-                                    // This check is a bit complex in reactive context, might need to adjust
-                                    // For now, we'll do it after we have the item
+
+
                                 }
                             });
 
                     return storageMono
                             .then(itemMono)
                             .flatMap(v -> {
-                                // Check for duplicate after we know the new item ID
+
                                 if (!existingKeeping.getItem().getId().equals(keeping.getItem().getId())) {
                                     return Mono.fromCallable(() -> keepingRepository.existsByStorageIdAndItemIdAndIdNot(
                                                     keeping.getStorage().getId(), keeping.getItem().getId(), id))
@@ -138,7 +138,7 @@ public class KeepingServiceImpl implements KeepingService {
                 .then();
     }
 
-    // New methods for reactive pagination
+
     @Override
     public Flux<Keeping> findKeepingsByFilters(Long storageId, Long itemId, Pageable pageable) {
         log.debug("Fetching keeping records page - pageable: {}, storageId: {}, itemId: {}",

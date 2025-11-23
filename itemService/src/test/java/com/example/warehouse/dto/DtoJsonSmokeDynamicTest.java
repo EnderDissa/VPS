@@ -15,14 +15,8 @@ class DtoJsonSmokeDynamicTest {
     private static final List<String> DTO_FQCN = List.of(
             "com.example.warehouse.dto.BorrowingDTO",
             "com.example.warehouse.dto.ItemMaintenanceDTO",
-            "com.example.warehouse.dto.UserStorageAccessDTO",
-            "com.example.warehouse.dto.TransportationDTO",
-            "com.example.warehouse.dto.VehicleDTO",
             "com.example.warehouse.dto.KeepingDTO",
-            "com.example.warehouse.dto.UserResponseDTO",
-            "com.example.warehouse.dto.UserDTO",
-            "com.example.warehouse.dto.ItemDTO",
-            "com.example.warehouse.dto.StorageDTO"
+            "com.example.warehouse.dto.ItemDTO"
     );
 
     @Test

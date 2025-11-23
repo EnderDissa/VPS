@@ -7,12 +7,15 @@ import com.example.warehouse.exception.ItemNotFoundException;
 import com.example.warehouse.exception.DuplicateSerialNumberException;
 import com.example.warehouse.repository.ItemRepository;
 import com.example.warehouse.service.interfaces.ItemService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -25,7 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemRepository itemRepository; // Assuming JPA Repository wrapped reactively
+    private final ItemRepository itemRepository;
 
     @Override
     public Mono<Item> create(Item item) {
@@ -103,16 +106,13 @@ public class ItemServiceImpl implements ItemService {
                 .then();
     }
 
-    // Implement the new methods for reactive pagination
+
     @Override
     public Flux<Item> findItemsByFilters(ItemType type, ItemCondition condition, Pageable pageable) {
         log.debug("Fetching items page - pageable: {}, type: {}, condition: {}",
                 pageable, type, condition);
 
-        // Use the repository to get a Flux<Item> for the specific page
-        // This requires the repository to have a method returning Flux<Item> based on Pageable
-        // Since JPA repo returns Page<T>, we wrap the call and convert its content to Flux
-        // This is a compromise when using blocking JPA repo within reactive code
+
         return Mono.fromCallable(() -> {
                     if (type != null && condition != null) {
                         return itemRepository.findByTypeAndCondition(type, condition, pageable);
@@ -125,27 +125,25 @@ public class ItemServiceImpl implements ItemService {
                     }
                 })
                 .subscribeOn(Schedulers.boundedElastic())
-                .flatMapMany(page -> Flux.fromIterable(page.getContent())); // Convert List to Flux
+                .flatMapMany(page -> Flux.fromIterable(page.getContent()));
     }
 
     @Override
     public Mono<Long> countItemsByFilters(ItemType type, ItemCondition condition) {
         log.debug("Counting items - type: {}, condition: {}", type, condition);
 
-        // Use the repository to get a count
-        // This requires the repository to have a count method
-        // Again, wrapping the blocking call
+
         return Mono.fromCallable(() -> {
                     if (type != null && condition != null) {
-                        return itemRepository.findByTypeAndCondition(type, condition, PageRequest.of(0, 1)).getTotalElements(); // Less efficient
-                        // A better approach would be a dedicated count method in the repo:
-                        // return itemRepository.countByTypeAndCondition(type, condition);
+                        return itemRepository.findByTypeAndCondition(type, condition, PageRequest.of(0, 1)).getTotalElements();
+
+
                     } else if (type != null) {
-                        return itemRepository.findByType(type, PageRequest.of(0, 1)).getTotalElements(); // Less efficient
-                        // return itemRepository.countByType(type);
+                        return itemRepository.findByType(type, PageRequest.of(0, 1)).getTotalElements();
+
                     } else if (condition != null) {
-                        return itemRepository.findByCondition(condition, PageRequest.of(0, 1)).getTotalElements(); // Less efficient
-                        // return itemRepository.countByCondition(condition);
+                        return itemRepository.findByCondition(condition, PageRequest.of(0, 1)).getTotalElements();
+
                     } else {
                         return itemRepository.count();
                     }
@@ -160,10 +158,9 @@ public class ItemServiceImpl implements ItemService {
         log.debug("Finding available items - from: {}, to: {}, storageId: {}, type: {}, condition: {}, cursor: {}, limit: {}",
                 from, to, storageId, type, condition, cursor, limit);
 
-        // This method likely needs similar treatment as findItemsByFilters
-        // if it relies on blocking repository methods returning Page<T>
+
         return Mono.fromCallable(() -> {
-                    // ... existing logic to get Page<Item> ...
+
                     PageRequest pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.ASC, "id"));
                     if (cursor != null) {
                         if (type != null && condition != null) {
@@ -195,6 +192,6 @@ public class ItemServiceImpl implements ItemService {
                     }
                 })
                 .subscribeOn(Schedulers.boundedElastic())
-                .flatMapMany(page -> Flux.fromIterable(page.getContent())); // Convert List to Flux
+                .flatMapMany(page -> Flux.fromIterable(page.getContent()));
     }
 }

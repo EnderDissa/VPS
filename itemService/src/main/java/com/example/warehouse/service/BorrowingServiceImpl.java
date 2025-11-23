@@ -14,12 +14,14 @@ import com.example.warehouse.service.interfaces.BorrowingService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -197,14 +199,14 @@ public class BorrowingServiceImpl implements BorrowingService {
                 .then();
     }
 
-    // New methods for reactive pagination
+
     @Override
     public Flux<Borrowing> findBorrowingsByFilters(BorrowStatus status, Long userId, Long itemId,
                                                    LocalDateTime from, LocalDateTime to, Pageable pageable) {
         log.debug("Finding borrowings with filters - pageable: {}, status: {}, userId: {}, itemId: {}, from: {}, to: {}",
                 pageable, status, userId, itemId, from, to);
 
-        // Create specification based on filters
+
         Specification<Borrowing> spec = Specification.unrestricted();
 
         if (status != null) {
@@ -227,7 +229,7 @@ public class BorrowingServiceImpl implements BorrowingService {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("borrowDate"), to));
         }
 
-        // Wrap blocking call and convert to Flux
+
         Specification<Borrowing> finalSpec = spec;
         return Mono.fromCallable(() -> borrowingRepository.findAll(finalSpec, pageable))
                 .subscribeOn(Schedulers.boundedElastic())
@@ -240,7 +242,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         log.debug("Counting borrowings with filters - status: {}, userId: {}, itemId: {}, from: {}, to: {}",
                 status, userId, itemId, from, to);
 
-        // Create specification based on filters
+
         Specification<Borrowing> spec = Specification.unrestricted();
 
         if (status != null) {
@@ -263,7 +265,7 @@ public class BorrowingServiceImpl implements BorrowingService {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("borrowDate"), to));
         }
 
-        // Wrap blocking count call
+
         Specification<Borrowing> finalSpec = spec;
         return Mono.fromCallable(() -> borrowingRepository.count(finalSpec))
                 .subscribeOn(Schedulers.boundedElastic());
@@ -275,23 +277,23 @@ public class BorrowingServiceImpl implements BorrowingService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Wrap blocking call and convert to Flux
+
         return Mono.fromCallable(() -> borrowingRepository.findOverdueBorrowings(now, pageable))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMapMany(page -> {
                     List<Borrowing> borrowings = page.getContent();
 
-                    // Update overdue status if needed
+
                     List<Borrowing> borrowingsToUpdate = borrowings.stream()
                             .filter(b -> b.getStatus() == BorrowStatus.ACTIVE)
                             .toList();
 
                     if (!borrowingsToUpdate.isEmpty()) {
                         borrowingsToUpdate.forEach(b -> b.setStatus(BorrowStatus.OVERDUE));
-                        // Note: This saveAll is still blocking but wrapped in reactive call
+
                         Mono.fromCallable(() -> borrowingRepository.saveAll(borrowingsToUpdate))
                                 .subscribeOn(Schedulers.boundedElastic())
-                                .subscribe(); // Fire and forget the update
+                                .subscribe();
                         log.info("Updated {} borrowings to OVERDUE status", borrowingsToUpdate.size());
                     }
 
@@ -305,20 +307,18 @@ public class BorrowingServiceImpl implements BorrowingService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Assuming repository has a count method for overdue borrowings
-        // If not, you might need to add it to the repository
+
         return Mono.fromCallable(() -> borrowingRepository.countOverdueBorrowings(now))
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
-    // Note: @Scheduled is not reactive and remains blocking
-    // You might need to reconsider this in a fully reactive context
+
     @Scheduled(cron = "0 0 6 * * ?")
     public void updateOverdueBorrowings() {
         log.debug("Running scheduled task to update overdue borrowings");
         LocalDateTime now = LocalDateTime.now();
 
-        // This remains a blocking operation
+
         List<Borrowing> activeBorrowings = borrowingRepository.findAll()
                 .stream()
                 .filter(b -> b.getStatus() == BorrowStatus.ACTIVE

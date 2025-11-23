@@ -7,13 +7,12 @@ import org.springframework.context.annotation.Configuration;
 
 import reactivefeign.cloud2.ReactiveFeignCircuitBreakerFactory;
 
-// Example Configuration Class
 @Configuration
 public class FeignConfig {
 
     @Bean
     public ReactiveFeignCircuitBreakerFactory reactiveFeignCircuitBreakerFactory(
-            ReactiveCircuitBreakerFactory springCloudCircuitBreakerFactory // This is injected by Spring
+            ReactiveCircuitBreakerFactory springCloudCircuitBreakerFactory
     ) {
         return springCloudCircuitBreakerFactory::create;
     }

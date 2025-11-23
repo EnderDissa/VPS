@@ -43,6 +43,32 @@ public class ItemController {
         this.mapper = mapper;
     }
 
+
+    @PostMapping
+    @Operation(summary = "Create item")
+    public Mono<ItemDTO> create(@Valid @RequestBody ItemDTO dto) {
+        Mono<Item> created = service.create(mapper.toEntity(dto));
+        return created.map(mapper::toDTO);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get item by id")
+    public Mono<ItemDTO> getById(@PathVariable Long id) {
+        return service.getById(id).map(mapper::toDTO);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update item by id")
+    public Mono<Void> update(@PathVariable Long id, @Valid @RequestBody ItemDTO dto) {
+        return service.update(id, mapper.toEntity(dto));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete item by id")
+    public Mono<Void> delete(@PathVariable Long id) {
+        return service.delete(id);
+    }
+
     @GetMapping
     @Operation(summary = "List items with pagination and total count")
     public Mono<ResponseEntity<Page<ItemDTO>>> list(
@@ -53,29 +79,22 @@ public class ItemController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        // Assuming service.findPage returns a Flux<Item> for the specific page
-        // and service.countItems returns a Mono<Long> for the total count
-        // We need to adjust the service interface and implementation accordingly
-
-        Flux<Item> itemFlux = service.findItemsByFilters(type, condition, pageable); // New method returning Flux
-        Mono<Long> totalCountMono = service.countItemsByFilters(type, condition);    // New method returning count
+        Flux<Item> itemFlux = service.findItemsByFilters(type, condition, pageable);
+        Mono<Long> totalCountMono = service.countItemsByFilters(type, condition);
 
         return itemFlux
-                .collectList() // Collect Flux<Item> into List<Item>
-                .zipWith(totalCountMono) // Combine the list with the total count
+                .collectList()
+                .zipWith(totalCountMono)
                 .map(tuple -> {
                     List<Item> items = tuple.getT1();
                     Long totalCount = tuple.getT2();
 
-                    // Create the PageImpl manually
                     Page<Item> itemPage = new PageImpl<>(items, pageable, totalCount);
 
-                    // Map items to DTOs
                     List<ItemDTO> itemDtos = items.stream()
                             .map(mapper::toDTO)
-                            .toList(); // Use List.of() or List.copyOf() if JDK 10+
+                            .toList();
 
-                    // Create the PageImpl for DTOs
                     Page<ItemDTO> itemDtoPage = new PageImpl<>(itemDtos, pageable, totalCount);
 
                     HttpHeaders headers = new HttpHeaders();
@@ -85,7 +104,6 @@ public class ItemController {
                 });
     }
 
-    // Example availability endpoint remains the same as it returns Flux<ItemDTO>
     @GetMapping("/availability")
     @Operation(summary = "Availability infinite feed")
     public Flux<ItemDTO> availability(
