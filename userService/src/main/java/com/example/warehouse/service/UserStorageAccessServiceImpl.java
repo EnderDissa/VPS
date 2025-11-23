@@ -1,316 +1,410 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.dto.UserStorageAccessDTO;
+import com.example.warehouse.client.StorageServiceClient;
 import com.example.warehouse.entity.UserStorageAccess;
-import com.example.warehouse.entity.User;
-import com.example.warehouse.entity.Storage;
 import com.example.warehouse.enumeration.AccessLevel;
-import com.example.warehouse.exception.UserStorageAccessNotFoundException;
-import com.example.warehouse.exception.UserNotFoundException;
-import com.example.warehouse.exception.StorageNotFoundException;
 import com.example.warehouse.exception.DuplicateUserStorageAccessException;
 import com.example.warehouse.exception.OperationNotAllowedException;
-import com.example.warehouse.mapper.UserStorageAccessMapper;
+import com.example.warehouse.exception.UserStorageAccessNotFoundException;
 import com.example.warehouse.repository.UserStorageAccessRepository;
-import com.example.warehouse.repository.UserRepository;
-import com.example.warehouse.repository.StorageRepository;
-import com.example.warehouse.service.interfaces.StorageService;
 import com.example.warehouse.service.interfaces.UserService;
 import com.example.warehouse.service.interfaces.UserStorageAccessService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Service
-
 @RequiredArgsConstructor
 public class UserStorageAccessServiceImpl implements UserStorageAccessService {
 
     private final UserStorageAccessRepository userStorageAccessRepository;
     private final UserService userService;
-    private final StorageService storageService;
+    private final StorageServiceClient storageService;
 
     @Override
-    public UserStorageAccess create(UserStorageAccess userStorageAccess) {
+    public Mono<UserStorageAccess> create(UserStorageAccess userStorageAccess) {
+        log.info("Creating new user storage access for user ID: {} and storage ID: {}", userStorageAccess.getUser().getId(), userStorageAccess.getStorage().getId());
 
-        User user = userService.getUserById(userStorageAccess.getUser().getId());
+        return userService.getUserById(userStorageAccess.getUser().getId())
+                .flatMap(user -> storageService.getById(userStorageAccess.getStorage().getId())
+                        .flatMap(storage -> userService.getUserById(userStorageAccess.getGrantedBy().getId())
+                                .flatMap(grantedBy -> {
+                                    if (userStorageAccess.getExpiresAt() != null && userStorageAccess.getExpiresAt().isBefore(LocalDateTime.now())) {
+                                        return Mono.error(new OperationNotAllowedException("Expiration date must be in the future"));
+                                    }
 
-        Storage storage = storageService.getById(userStorageAccess.getStorage().getId());
+                                    // Check for duplicate using repository method (assuming it exists and returns Mono<Boolean>)
+                                    // If not, you might need to use findById or similar and check the result
+                                    return Mono.fromCallable(() -> userStorageAccessRepository.existsByUserIdAndStorageId(
+                                                    userStorageAccess.getUser().getId(), userStorageAccess.getStorage().getId()))
+                                            .subscribeOn(Schedulers.boundedElastic())
+                                            .flatMap(exists -> {
+                                                if (exists) {
+                                                    return Mono.error(new DuplicateUserStorageAccessException(
+                                                            "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
+                                                                    " and storage ID: " + userStorageAccess.getStorage().getId()));
+                                                }
 
-        User grantedBy = userService.getUserById(userStorageAccess.getGrantedBy().getId());
+                                                userStorageAccess.setUser(user);
+                                                userStorageAccess.setStorage(storage);
+                                                userStorageAccess.setGrantedBy(grantedBy);
+                                                userStorageAccess.setGrantedAt(LocalDateTime.now());
 
-        if (userStorageAccessRepository.existsByUserIdAndStorageId(userStorageAccess.getUser().getId(), userStorageAccess.getStorage().getId())) {
-            throw new DuplicateUserStorageAccessException(
-                    "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
-                            " and storage ID: " + userStorageAccess.getStorage().getId());
-        }
-
-        if (userStorageAccess.getExpiresAt() != null && userStorageAccess.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new OperationNotAllowedException("Expiration date must be in the future");
-        }
-
-
-        userStorageAccess.setUser(user);
-        userStorageAccess.setStorage(storage);
-        userStorageAccess.setGrantedBy(grantedBy);
-        userStorageAccess.setGrantedAt(LocalDateTime.now());
-
-        UserStorageAccess savedAccess = userStorageAccessRepository.save(userStorageAccess);
-        log.info("User storage access created successfully with ID: {}", savedAccess.getId());
-
-        return savedAccess;
+                                                return Mono.fromCallable(() -> userStorageAccessRepository.save(userStorageAccess))
+                                                        .subscribeOn(Schedulers.boundedElastic());
+                                            });
+                                })));
     }
 
     @Override
-    public UserStorageAccess getById(Long id) {
+    public Mono<UserStorageAccess> getById(Long id) {
         log.debug("Fetching user storage access by ID: {}", id);
 
-        return userStorageAccessRepository.findById(id)
-                .orElseThrow(() -> new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
+        return Mono.fromCallable(() -> userStorageAccessRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> optional.map(Mono::just)
+                        .orElse(Mono.error(new UserStorageAccessNotFoundException("User storage access not found with ID: " + id))));
     }
 
     @Override
-    public void update(Long id, UserStorageAccess userStorageAccess) {
+    public Mono<Void> update(Long id, UserStorageAccess userStorageAccess) {
         log.info("Updating user storage access with ID: {}", id);
 
-        try {
-            UserStorageAccess existingAccess = userStorageAccessRepository.findById(id)
-                    .orElseThrow(() -> new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
+        return Mono.fromCallable(() -> userStorageAccessRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> {
+                    if (optional.isEmpty()) {
+                        return Mono.error(new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
+                    }
 
-            if (userStorageAccess.getExpiresAt() != null && userStorageAccess.getExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new OperationNotAllowedException("Expiration date must be in the future");
-            }
+                    UserStorageAccess existingAccess = optional.get();
 
-            updateRelatedEntities(existingAccess, userStorageAccess);
+                    if (userStorageAccess.getExpiresAt() != null && userStorageAccess.getExpiresAt().isBefore(LocalDateTime.now())) {
+                        return Mono.error(new OperationNotAllowedException("Expiration date must be in the future"));
+                    }
 
-            existingAccess.setAccessLevel(userStorageAccess.getAccessLevel());
-            existingAccess.setExpiresAt(userStorageAccess.getExpiresAt());
-            existingAccess.setIsActive(userStorageAccess.getIsActive());
-
-            userStorageAccessRepository.save(existingAccess);
-            log.info("User storage access with ID: {} updated successfully", id);
-
-        } catch (DataIntegrityViolationException e) {
-            if (e.getMessage() != null && e.getMessage().contains("uk_user_storage_access")) {
-                throw new DuplicateUserStorageAccessException(
-                        "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
-                                " and storage ID: " + userStorageAccess.getStorage().getId());
-            }
-            throw e;
-        }
+                    return updateRelatedEntities(existingAccess, userStorageAccess)
+                            .doOnNext(v -> {
+                                existingAccess.setAccessLevel(userStorageAccess.getAccessLevel());
+                                existingAccess.setExpiresAt(userStorageAccess.getExpiresAt());
+                                existingAccess.setIsActive(userStorageAccess.getIsActive());
+                            })
+                            .then(Mono.fromCallable(() -> userStorageAccessRepository.save(existingAccess))
+                                    .subscribeOn(Schedulers.boundedElastic()));
+                })
+                .onErrorResume(DataIntegrityViolationException.class, ex -> {
+                    if (ex.getMessage() != null && ex.getMessage().contains("uk_user_storage_access")) {
+                        return Mono.error(new DuplicateUserStorageAccessException(
+                                "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
+                                        " and storage ID: " + userStorageAccess.getStorage().getId()));
+                    }
+                    return Mono.error(ex);
+                })
+                .doOnSuccess(v -> log.info("User storage access with ID: {} updated successfully", id))
+                .then();
     }
 
     @Override
-    
-    public void delete(Long id) {
+    public Mono<Void> delete(Long id) {
         log.info("Deleting user storage access with ID: {}", id);
 
-        if (!userStorageAccessRepository.existsById(id)) {
-            throw new UserStorageAccessNotFoundException("User storage access not found with ID: " + id);
-        }
+        return Mono.fromCallable(() -> userStorageAccessRepository.existsById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(exists -> {
+                    if (!exists) {
+                        return Mono.error(new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
+                    }
+                    return Mono.fromCallable(() -> {
+                        userStorageAccessRepository.deleteById(id);
+                        return null;
+                    }).subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(v -> log.info("User storage access with ID: {} deleted successfully", id))
+                .then();
+    }
 
-        userStorageAccessRepository.deleteById(id);
-        log.info("User storage access with ID: {} deleted successfully", id);
+    // New methods for reactive pagination
+    @Override
+    public Flux<UserStorageAccess> findAccessByFilters(Long userId, Long storageId, AccessLevel accessLevel, Boolean active, Pageable pageable) {
+        log.debug("Fetching user storage access page - pageable: {}, userId: {}, storageId: {}, accessLevel: {}, active: {}",
+                pageable, userId, storageId, accessLevel, active);
+
+        return Mono.fromCallable(() -> {
+                    if (userId != null && storageId != null && accessLevel != null && active != null) {
+                        return userStorageAccessRepository.findByUserIdAndStorageIdAndAccessLevelAndIsActive(
+                                userId, storageId, accessLevel, active, pageable);
+                    } else if (userId != null && storageId != null && accessLevel != null) {
+                        return userStorageAccessRepository.findByUserIdAndStorageIdAndAccessLevel(
+                                userId, storageId, accessLevel, pageable);
+                    } else if (userId != null && storageId != null && active != null) {
+                        return userStorageAccessRepository.findByUserIdAndStorageIdAndIsActive(
+                                userId, storageId, active, pageable);
+                    } else if (userId != null && accessLevel != null && active != null) {
+                        return userStorageAccessRepository.findByUserIdAndAccessLevelAndIsActive(
+                                userId, accessLevel, active, pageable);
+                    } else if (storageId != null && accessLevel != null && active != null) {
+                        return userStorageAccessRepository.findByStorageIdAndAccessLevelAndIsActive(
+                                storageId, accessLevel, active, pageable);
+                    } else if (userId != null && storageId != null) {
+                        return userStorageAccessRepository.findByUserIdAndStorageId(userId, storageId, pageable);
+                    } else if (userId != null && accessLevel != null) {
+                        return userStorageAccessRepository.findByUserIdAndAccessLevel(userId, accessLevel, pageable);
+                    } else if (userId != null && active != null) {
+                        return userStorageAccessRepository.findByUserIdAndIsActive(userId, active, pageable);
+                    } else if (storageId != null && accessLevel != null) {
+                        return userStorageAccessRepository.findByStorageIdAndAccessLevel(storageId, accessLevel, pageable);
+                    } else if (storageId != null && active != null) {
+                        return userStorageAccessRepository.findByStorageIdAndIsActive(storageId, active, pageable);
+                    } else if (accessLevel != null && active != null) {
+                        return userStorageAccessRepository.findByAccessLevelAndIsActive(accessLevel, active, pageable);
+                    } else if (userId != null) {
+                        return userStorageAccessRepository.findByUserId(userId, pageable);
+                    } else if (storageId != null) {
+                        return userStorageAccessRepository.findByStorageId(storageId, pageable);
+                    } else if (accessLevel != null) {
+                        return userStorageAccessRepository.findByAccessLevel(accessLevel, pageable);
+                    } else if (active != null) {
+                        return userStorageAccessRepository.findByIsActive(active, pageable);
+                    } else {
+                        return userStorageAccessRepository.findAll(pageable);
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMapMany(page -> Flux.fromIterable(page.getContent()));
     }
 
     @Override
-    public Page<UserStorageAccess> findPage(int page, int size, Long userId, Long storageId,
-                                               AccessLevel accessLevel, Boolean active) {
-        log.debug("Fetching user storage access page - page: {}, size: {}, userId: {}, storageId: {}, accessLevel: {}, active: {}",
-                page, size, userId, storageId, accessLevel, active);
+    public Mono<Long> countAccessByFilters(Long userId, Long storageId, AccessLevel accessLevel, Boolean active) {
+        log.debug("Counting user storage access - userId: {}, storageId: {}, accessLevel: {}, active: {}",
+                userId, storageId, accessLevel, active);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "grantedAt"));
-
-        Page<UserStorageAccess> accessPage;
-
-        if (userId != null && storageId != null && accessLevel != null && active != null) {
-            accessPage = userStorageAccessRepository.findByUserIdAndStorageIdAndAccessLevelAndIsActive(
-                    userId, storageId, accessLevel, active, pageable);
-        } else if (userId != null && storageId != null && accessLevel != null) {
-            accessPage = userStorageAccessRepository.findByUserIdAndStorageIdAndAccessLevel(
-                    userId, storageId, accessLevel, pageable);
-        } else if (userId != null && storageId != null && active != null) {
-            accessPage = userStorageAccessRepository.findByUserIdAndStorageIdAndIsActive(
-                    userId, storageId, active, pageable);
-        } else if (userId != null && accessLevel != null && active != null) {
-            accessPage = userStorageAccessRepository.findByUserIdAndAccessLevelAndIsActive(
-                    userId, accessLevel, active, pageable);
-        } else if (storageId != null && accessLevel != null && active != null) {
-            accessPage = userStorageAccessRepository.findByStorageIdAndAccessLevelAndIsActive(
-                    storageId, accessLevel, active, pageable);
-        } else if (userId != null && storageId != null) {
-            accessPage = userStorageAccessRepository.findByUserIdAndStorageId(userId, storageId, pageable);
-        } else if (userId != null && accessLevel != null) {
-            accessPage = userStorageAccessRepository.findByUserIdAndAccessLevel(userId, accessLevel, pageable);
-        } else if (userId != null && active != null) {
-            accessPage = userStorageAccessRepository.findByUserIdAndIsActive(userId, active, pageable);
-        } else if (storageId != null && accessLevel != null) {
-            accessPage = userStorageAccessRepository.findByStorageIdAndAccessLevel(storageId, accessLevel, pageable);
-        } else if (storageId != null && active != null) {
-            accessPage = userStorageAccessRepository.findByStorageIdAndIsActive(storageId, active, pageable);
-        } else if (accessLevel != null && active != null) {
-            accessPage = userStorageAccessRepository.findByAccessLevelAndIsActive(accessLevel, active, pageable);
-        } else if (userId != null) {
-            accessPage = userStorageAccessRepository.findByUserId(userId, pageable);
-        } else if (storageId != null) {
-            accessPage = userStorageAccessRepository.findByStorageId(storageId, pageable);
-        } else if (accessLevel != null) {
-            accessPage = userStorageAccessRepository.findByAccessLevel(accessLevel, pageable);
-        } else if (active != null) {
-            accessPage = userStorageAccessRepository.findByIsActive(active, pageable);
-        } else {
-            accessPage = userStorageAccessRepository.findAll(pageable);
-        }
-
-        return accessPage;
+        return Mono.fromCallable(() -> {
+                    if (userId != null && storageId != null && accessLevel != null && active != null) {
+                        return userStorageAccessRepository.countByUserIdAndStorageIdAndAccessLevelAndIsActive(userId, storageId, accessLevel, active);
+                    } else if (userId != null && storageId != null && accessLevel != null) {
+                        return userStorageAccessRepository.countByUserIdAndStorageIdAndAccessLevel(userId, storageId, accessLevel);
+                    } else if (userId != null && storageId != null && active != null) {
+                        return userStorageAccessRepository.countByUserIdAndStorageIdAndIsActive(userId, storageId, active);
+                    } else if (userId != null && accessLevel != null && active != null) {
+                        return userStorageAccessRepository.countByUserIdAndAccessLevelAndIsActive(userId, accessLevel, active);
+                    } else if (storageId != null && accessLevel != null && active != null) {
+                        return userStorageAccessRepository.countByStorageIdAndAccessLevelAndIsActive(storageId, accessLevel, active);
+                    } else if (userId != null && storageId != null) {
+                        return userStorageAccessRepository.countByUserIdAndStorageId(userId, storageId);
+                    } else if (userId != null && accessLevel != null) {
+                        return userStorageAccessRepository.countByUserIdAndAccessLevel(userId, accessLevel);
+                    } else if (userId != null && active != null) {
+                        return userStorageAccessRepository.countByUserIdAndIsActive(userId, active);
+                    } else if (storageId != null && accessLevel != null) {
+                        return userStorageAccessRepository.countByStorageIdAndAccessLevel(storageId, accessLevel);
+                    } else if (storageId != null && active != null) {
+                        return userStorageAccessRepository.countByStorageIdAndIsActive(storageId, active);
+                    } else if (accessLevel != null && active != null) {
+                        return userStorageAccessRepository.countByAccessLevelAndIsActive(accessLevel, active);
+                    } else if (userId != null) {
+                        return userStorageAccessRepository.countByUserId(userId);
+                    } else if (storageId != null) {
+                        return userStorageAccessRepository.countByStorageId(storageId);
+                    } else if (accessLevel != null) {
+                        return userStorageAccessRepository.countByAccessLevel(accessLevel);
+                    } else if (active != null) {
+                        return userStorageAccessRepository.countByIsActive(active);
+                    } else {
+                        return userStorageAccessRepository.count();
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
-    private void updateRelatedEntities(UserStorageAccess access, UserStorageAccess userStorageAccess) {
+    // Helper method for updating related entities
+    private Mono<Void> updateRelatedEntities(UserStorageAccess access, UserStorageAccess userStorageAccess) {
+        Mono<Void> userUpdate = Mono.empty();
         if (!access.getUser().getId().equals(userStorageAccess.getUser().getId())) {
-            User user = userService.getUserById(userStorageAccess.getUser().getId());
-            access.setUser(user);
+            userUpdate = userService.getUserById(userStorageAccess.getUser().getId())
+                    .doOnNext(user -> {
+                        access.setUser(user);
 
-            if (userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
-                    userStorageAccess.getUser().getId(), userStorageAccess.getStorage().getId(), access.getId())) {
-                throw new DuplicateUserStorageAccessException(
-                        "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
-                                " and storage ID: " + userStorageAccess.getStorage().getId());
-            }
+                        // Check for duplicate again after user change
+                        if (userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
+                                userStorageAccess.getUser().getId(), userStorageAccess.getStorage().getId(), access.getId())) {
+                            throw new DuplicateUserStorageAccessException(
+                                    "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
+                                            " and storage ID: " + userStorageAccess.getStorage().getId());
+                        }
+                    })
+                    .then();
         }
 
+        Mono<Void> storageUpdate = Mono.empty();
         if (!access.getStorage().getId().equals(userStorageAccess.getStorage().getId())) {
-            Storage storage = storageService.getById(userStorageAccess.getStorage().getId());
-            access.setStorage(storage);
+            storageUpdate = storageService.getById(userStorageAccess.getStorage().getId())
+                    .doOnNext(storage -> {
+                        access.setStorage(storage);
 
-            if (userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
-                    userStorageAccess.getUser().getId(), userStorageAccess.getStorage().getId(), access.getId())) {
-                throw new DuplicateUserStorageAccessException(
-                        "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
-                                " and storage ID: " + userStorageAccess.getStorage().getId());
-            }
+                        // Check for duplicate again after storage change
+                        if (userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
+                                userStorageAccess.getUser().getId(), userStorageAccess.getStorage().getId(), access.getId())) {
+                            throw new DuplicateUserStorageAccessException(
+                                    "User storage access already exists for user ID: " + userStorageAccess.getUser().getId() +
+                                            " and storage ID: " + userStorageAccess.getStorage().getId());
+                        }
+                    })
+                    .then();
         }
 
+        Mono<Void> grantedByUpdate = Mono.empty();
         if (!access.getGrantedBy().getId().equals(userStorageAccess.getGrantedBy().getId())) {
-            User grantedBy = userService.getUserById(userStorageAccess.getGrantedBy().getId());
-            access.setGrantedBy(grantedBy);
+            grantedByUpdate = userService.getUserById(userStorageAccess.getGrantedBy().getId())
+                    .doOnNext(grantedBy -> access.setGrantedBy(grantedBy))
+                    .then();
         }
+
+        return userUpdate.then(storageUpdate).then(grantedByUpdate);
     }
 
-
-    public UserStorageAccess findByUserAndStorage(Long userId, Long storageId) {
+    @Override
+    public Mono<UserStorageAccess> findByUserAndStorage(Long userId, Long storageId) {
         log.debug("Finding user storage access by userId: {} and storageId: {}", userId, storageId);
 
-        return userStorageAccessRepository.findByUserIdAndStorageId(userId, storageId)
-                .orElseThrow(() -> new UserStorageAccessNotFoundException(
-                        "User storage access not found for user ID: " + userId + " and storage ID: " + storageId));
+        return Mono.fromCallable(() -> userStorageAccessRepository.findByUserIdAndStorageId(userId, storageId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> optional.map(Mono::just)
+                        .orElse(Mono.error(new UserStorageAccessNotFoundException(
+                                "User storage access not found for user ID: " + userId + " and storage ID: " + storageId))));
     }
 
-
-    public boolean hasAccess(Long userId, Long storageId, AccessLevel requiredLevel) {
+    @Override
+    public Mono<Boolean> hasAccess(Long userId, Long storageId, AccessLevel requiredLevel) {
         log.debug("Checking access for userId: {}, storageId: {}, requiredLevel: {}", userId, storageId, requiredLevel);
 
-        UserStorageAccess access = userStorageAccessRepository.findByUserIdAndStorageId(userId, storageId)
-                .orElse(null);
+        return findByUserAndStorage(userId, storageId)
+                .map(access -> {
+                    if (!access.getIsActive()) {
+                        return false;
+                    }
 
-        if (access == null || !access.getIsActive()) {
-            return false;
-        }
+                    if (access.getExpiresAt() != null && access.getExpiresAt().isBefore(LocalDateTime.now())) {
+                        return false;
+                    }
 
-        if (access.getExpiresAt() != null && access.getExpiresAt().isBefore(LocalDateTime.now())) {
-            return false;
-        }
-
-        return isAccessLevelSufficient(access.getAccessLevel(), requiredLevel);
+                    return isAccessLevelSufficient(access.getAccessLevel(), requiredLevel);
+                })
+                .defaultIfEmpty(false);
     }
 
-
-    public UserStorageAccess deactivate(Long id) {
+    @Override
+    public Mono<UserStorageAccess> deactivate(Long id) {
         log.info("Deactivating user storage access with ID: {}", id);
 
-        UserStorageAccess access = userStorageAccessRepository.findById(id)
-                .orElseThrow(() -> new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
+        return Mono.fromCallable(() -> userStorageAccessRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> {
+                    if (optional.isEmpty()) {
+                        return Mono.error(new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
+                    }
 
-        access.setIsActive(false);
-        UserStorageAccess updatedAccess = userStorageAccessRepository.save(access);
+                    UserStorageAccess access = optional.get();
+                    access.setIsActive(false);
 
-        log.info("User storage access with ID: {} deactivated successfully", id);
-        return updatedAccess;
+                    return Mono.fromCallable(() -> userStorageAccessRepository.save(access))
+                            .subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(updated -> log.info("User storage access with ID: {} deactivated successfully", id));
     }
 
-
-    public UserStorageAccess activate(Long id) {
+    @Override
+    public Mono<UserStorageAccess> activate(Long id) {
         log.info("Activating user storage access with ID: {}", id);
 
-        UserStorageAccess access = userStorageAccessRepository.findById(id)
-                .orElseThrow(() -> new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
+        return Mono.fromCallable(() -> userStorageAccessRepository.findById(id))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(optional -> {
+                    if (optional.isEmpty()) {
+                        return Mono.error(new UserStorageAccessNotFoundException("User storage access not found with ID: " + id));
+                    }
 
-        access.setIsActive(true);
-        UserStorageAccess updatedAccess = userStorageAccessRepository.save(access);
+                    UserStorageAccess access = optional.get();
+                    access.setIsActive(true);
 
-        log.info("User storage access with ID: {} activated successfully", id);
-        return updatedAccess;
+                    return Mono.fromCallable(() -> userStorageAccessRepository.save(access))
+                            .subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(updated -> log.info("User storage access with ID: {} activated successfully", id));
     }
 
-
-    public List<UserStorageAccess> findByUser(Long userId) {
+    @Override
+    public Flux<UserStorageAccess> findByUser(Long userId) {
         log.debug("Finding all user storage accesses for userId: {}", userId);
 
-        return userStorageAccessRepository.findByUserId(userId);
+        return Flux.fromIterable(userStorageAccessRepository.findByUserId(userId))
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
-
-    public List<UserStorageAccess> findByStorage(Long storageId) {
+    @Override
+    public Flux<UserStorageAccess> findByStorage(Long storageId) {
         log.debug("Finding all user storage accesses for storageId: {}", storageId);
 
-        return userStorageAccessRepository.findByStorageId(storageId);
+        return Flux.fromIterable(userStorageAccessRepository.findByStorageId(storageId))
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
-
-    public List<UserStorageAccess> findExpiredAccesses() {
+    @Override
+    public Flux<UserStorageAccess> findExpiredAccesses() {
         log.debug("Finding all expired user storage accesses");
 
-        return userStorageAccessRepository.findExpiredAccesses(LocalDateTime.now());
+        return Flux.fromIterable(userStorageAccessRepository.findExpiredAccesses(LocalDateTime.now()))
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
-
-    public void deactivateExpiredAccesses() {
+    @Override
+    public Mono<Void> deactivateExpiredAccesses() {
         log.info("Deactivating expired user storage accesses");
 
-        List<UserStorageAccess> expiredAccesses = userStorageAccessRepository.findExpiredAccesses(LocalDateTime.now());
+        return findExpiredAccesses()
+                .collectList()
+                .flatMap(expiredAccesses -> {
+                    for (UserStorageAccess access : expiredAccesses) {
+                        if (access.getIsActive()) {
+                            access.setIsActive(false);
+                            log.debug("Deactivated expired access with ID: {}", access.getId());
+                        }
+                    }
 
-        for (UserStorageAccess access : expiredAccesses) {
-            if (access.getIsActive()) {
-                access.setIsActive(false);
-                log.debug("Deactivated expired access with ID: {}", access.getId());
-            }
-        }
-
-        userStorageAccessRepository.saveAll(expiredAccesses);
-        log.info("Deactivated {} expired user storage accesses", expiredAccesses.size());
+                    return Mono.fromCallable(() -> {
+                        if (!expiredAccesses.isEmpty()) {
+                            userStorageAccessRepository.saveAll(expiredAccesses);
+                        }
+                        return null;
+                    }).subscribeOn(Schedulers.boundedElastic());
+                })
+                .doOnSuccess(v -> log.info("Deactivated {} expired user storage accesses", "count unknown without a separate step")).then();
     }
 
     private boolean isAccessLevelSufficient(AccessLevel userLevel, AccessLevel requiredLevel) {
         return userLevel.ordinal() >= requiredLevel.ordinal();
     }
 
-    public long countActiveAccessesByUser(Long userId) {
+    @Override
+    public Mono<Long> countActiveAccessesByUser(Long userId) {
         log.debug("Counting active accesses for userId: {}", userId);
-        return userStorageAccessRepository.countByUserIdAndIsActive(userId, true);
+        return Mono.fromCallable(() -> userStorageAccessRepository.countByUserIdAndIsActive(userId, true))
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
-    public long countActiveAccessesByStorage(Long storageId) {
+    @Override
+    public Mono<Long> countActiveAccessesByStorage(Long storageId) {
         log.debug("Counting active accesses for storageId: {}", storageId);
-        return userStorageAccessRepository.countByStorageIdAndIsActive(storageId, true);
+        return Mono.fromCallable(() -> userStorageAccessRepository.countByStorageIdAndIsActive(storageId, true))
+                .subscribeOn(Schedulers.boundedElastic());
     }
 }

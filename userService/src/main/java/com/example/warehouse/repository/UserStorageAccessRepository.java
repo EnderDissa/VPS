@@ -63,4 +63,19 @@ public interface UserStorageAccessRepository extends JpaRepository<UserStorageAc
     long countByUserIdAndIsActive(Long userId, Boolean isActive);
 
     long countByStorageIdAndIsActive(Long storageId, Boolean isActive);
+
+    long countByUserId(Long userId);
+    long countByStorageId(Long storageId);
+    long countByAccessLevel(AccessLevel accessLevel);
+    long countByIsActive(Boolean isActive);
+    long countByUserIdAndStorageId(Long userId, Long storageId);
+    long countByUserIdAndAccessLevel(Long userId, AccessLevel accessLevel);
+    long countByStorageIdAndAccessLevel(Long storageId, AccessLevel accessLevel);
+    long countByAccessLevelAndIsActive(AccessLevel accessLevel, Boolean isActive);
+    long countByUserIdAndStorageIdAndAccessLevel(Long userId, Long storageId, AccessLevel accessLevel);
+    long countByUserIdAndStorageIdAndIsActive(Long userId, Long storageId, Boolean isActive);
+    long countByUserIdAndAccessLevelAndIsActive(Long userId, AccessLevel accessLevel, Boolean isActive);
+    long countByStorageIdAndAccessLevelAndIsActive(Long storageId, AccessLevel accessLevel, Boolean isActive);
+    long countByUserIdAndStorageIdAndAccessLevelAndIsActive(Long userId, Long storageId, AccessLevel accessLevel, Boolean isActive);
+
 }

@@ -1,8 +1,8 @@
 spring:
   application:
-    name: service1
+    name: userService
   config:
-    import: 'optional:eureka:,optional:configserver:'
+    import: 'optional:eureka:,configserver:'
   cloud:
     config:
       uri: http://localhost:8761
@@ -17,3 +17,9 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+logging:
+  level:
+    org.springframework.web.reactive: DEBUG
+    org.springframework.http.codec: DEBUG
+    com.example.warehouse: DEBUG

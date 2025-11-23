@@ -6,7 +6,6 @@ import com.example.warehouse.entity.User;
 import com.example.warehouse.enumeration.RoleType;
 import com.example.warehouse.mapper.UserMapper;
 import com.example.warehouse.service.interfaces.UserService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,7 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Validated
@@ -37,42 +39,81 @@ public class UserController {
 
     @PostMapping
     @Operation(summary = "Create user")
-    public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserRequestDTO dto) {
-        User user = service.createUser(mapper.toEntity(dto));
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponseDTO(user));
+    public Mono<ResponseEntity<UserResponseDTO>> create(@Valid @RequestBody UserRequestDTO dto) {
+        return service.createUser(mapper.toEntity(dto))
+                .map(mapper::toResponseDTO)
+                .map(created -> ResponseEntity.status(HttpStatus.CREATED).body(created));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get user by id")
-    public UserResponseDTO getById(@PathVariable Long id) {
-        return mapper.toResponseDTO(service.getUserById(id));
+    public Mono<UserResponseDTO> getById(@PathVariable Long id) {
+        return service.getUserById(id)
+                .map(mapper::toResponseDTO);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update user by id")
-    public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody UserRequestDTO dto) {
-        service.updateUser(id, mapper.toEntity(dto));
-        return ResponseEntity.noContent().build();
+    public Mono<ResponseEntity<Void>> update(@PathVariable Long id, @Valid @RequestBody UserRequestDTO dto) {
+        return service.updateUser(id, mapper.toEntity(dto))
+                .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete user by id")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.deleteUser(id);
-        return ResponseEntity.noContent().build();
+    public Mono<ResponseEntity<Void>> delete(@PathVariable Long id) {
+        return service.deleteUser(id)
+                .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
-//     @GetMapping
-//     @Operation(summary = "List users with pagination and total count")
-//     public ResponseEntity<List<UserResponseDTO>> list(
-//             @RequestParam(defaultValue = "0") @Min(0) int page,
-//             @RequestParam(defaultValue = "20") @Min(1) @Max(50) int size,
-//             @RequestParam(required = false) RoleType role,
-//             @RequestParam(required = false) String emailLike
-//     ) {
-//         var result = service.findPage(page, size, role, emailLike);
-//         var headers = new HttpHeaders();
-//         headers.add("X-Total-Count", String.valueOf(result.getTotalElements()));
-//         return new ResponseEntity<>(result.getContent(), headers, HttpStatus.OK);
-//     }
+    // Additional endpoints that were in the original service
+    @GetMapping
+    @Operation(summary = "Get all users")
+    public Flux<UserResponseDTO> getAll() {
+        return service.getAllUsers()
+                .map(mapper::toResponseDTO);
+    }
+
+    @GetMapping("/role/{role}")
+    @Operation(summary = "Get users by role")
+    public Flux<UserResponseDTO> getByRole(@PathVariable RoleType role) {
+        return service.getUsersByRole(role)
+                .map(mapper::toResponseDTO);
+    }
+
+    @GetMapping("/search/lastName/{lastName}")
+    @Operation(summary = "Search users by last name")
+    public Flux<UserResponseDTO> searchByLastName(@PathVariable String lastName) {
+        return service.searchUsersByLastName(lastName)
+                .map(mapper::toResponseDTO);
+    }
+
+    @GetMapping("/email/{email}")
+    @Operation(summary = "Get user by email")
+    public Mono<UserResponseDTO> getByEmail(@PathVariable String email) {
+        return service.getUserByEmail(email)
+                .map(mapper::toResponseDTO);
+    }
+
+    @GetMapping("/exists/{email}")
+    @Operation(summary = "Check if user exists by email")
+    public Mono<Boolean> existsByEmail(@PathVariable String email) {
+        return service.existsByEmail(email);
+    }
+
+    @GetMapping("/created-between")
+    @Operation(summary = "Get users created between dates")
+    public Flux<UserResponseDTO> getUsersCreatedBetween(
+            @RequestParam("start") LocalDateTime start,
+            @RequestParam("end") LocalDateTime end
+    ) {
+        return service.getUsersCreatedBetween(start, end)
+                .map(mapper::toResponseDTO);
+    }
+
+    @GetMapping("/count/role/{role}")
+    @Operation(summary = "Count users by role")
+    public Mono<Long> countByRole(@PathVariable RoleType role) {
+        return service.countUsersByRole(role);
+    }
 }
