@@ -9,13 +9,13 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    
+
     UserResponseDTO toResponseDTO(User user);
-    
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     User toEntity(UserRequestDTO userRequestDTO);
-    
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     void updateUserFromDTO(UserRequestDTO userRequestDTO, @MappingTarget User user);

@@ -10,8 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -48,8 +46,9 @@ public class UserStorageAccessController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get access by id")
-    public Mono<UserStorageAccess> getById(@PathVariable Long id) {
-        return service.getById(id);
+    public Mono<UserStorageAccessDTO> getById(@PathVariable Long id) {
+        return service.getById(id)
+                .map(mapper::toDTO);
     }
 
     @PutMapping("/{id}")
@@ -73,13 +72,13 @@ public class UserStorageAccessController {
             @RequestParam(defaultValue = "20") @Min(1) @Max(50) int size,
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) Long storageId,
-            @RequestParam(required = false) AccessLevel accessLevel,
+            @RequestParam(required = false) String accessLevel,
             @RequestParam(required = false) Boolean active
     ) {
         PageRequest pageable = PageRequest.of(page, size);
 
-        Flux<UserStorageAccess> accessesFlux = service.findAccessByFilters(userId, storageId, accessLevel, active, pageable);
-        Mono<Long> totalCountMono = service.countAccessByFilters(userId, storageId, accessLevel, active);
+        Flux<UserStorageAccess> accessesFlux = service.findUserStorageAccessesByFilters(userId, storageId, accessLevel, active, pageable);
+        Mono<Long> totalCountMono = service.countUserStorageAccessesByFilters(userId, storageId, accessLevel, active);
 
         return accessesFlux
                 .collectList()
@@ -88,7 +87,6 @@ public class UserStorageAccessController {
                     List<UserStorageAccess> accesses = tuple.getT1();
                     Long totalCount = tuple.getT2();
 
-                    // Map to DTOs
                     List<UserStorageAccessDTO> accessDtos = accesses.stream()
                             .map(mapper::toDTO)
                             .toList();
@@ -98,34 +96,5 @@ public class UserStorageAccessController {
 
                     return new ResponseEntity<>(accessDtos, headers, HttpStatus.OK);
                 });
-    }
-
-    // Optional: Add other endpoints that were in the service but missing in the controller
-    @GetMapping("/user/{userId}")
-    @Operation(summary = "Get all accesses for a user")
-    public Flux<UserStorageAccessDTO> getByUser(@PathVariable Long userId) {
-        return service.findByUser(userId)
-                .map(mapper::toDTO);
-    }
-
-    @GetMapping("/storage/{storageId}")
-    @Operation(summary = "Get all accesses for a storage")
-    public Flux<UserStorageAccessDTO> getByStorage(@PathVariable Long storageId) {
-        return service.findByStorage(storageId)
-                .map(mapper::toDTO);
-    }
-
-    @PutMapping("/{id}/activate")
-    @Operation(summary = "Activate access by id")
-    public Mono<UserStorageAccessDTO> activate(@PathVariable Long id) {
-        return service.activate(id)
-                .map(mapper::toDTO);
-    }
-
-    @PutMapping("/{id}/deactivate")
-    @Operation(summary = "Deactivate access by id")
-    public Mono<UserStorageAccessDTO> deactivate(@PathVariable Long id) {
-        return service.deactivate(id)
-                .map(mapper::toDTO);
     }
 }

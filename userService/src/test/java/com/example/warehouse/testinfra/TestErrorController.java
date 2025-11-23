@@ -1,6 +1,5 @@
 package com.example.warehouse.testinfra;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -26,10 +25,6 @@ public class TestErrorController {
         return "OK";
     }
 
-    @GetMapping("/not-found")
-    public void notFound() {
-        throw new EntityNotFoundException("Entity was not found");
-    }
 
     @PostMapping("/conflict")
     public void conflict() {

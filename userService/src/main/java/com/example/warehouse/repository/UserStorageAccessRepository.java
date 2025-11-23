@@ -1,81 +1,54 @@
 package com.example.warehouse.repository;
 
 import com.example.warehouse.entity.UserStorageAccess;
-import com.example.warehouse.enumeration.AccessLevel;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.data.repository.reactive.ReactiveSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
-public interface UserStorageAccessRepository extends JpaRepository<UserStorageAccess, Long> {
+public interface UserStorageAccessRepository extends ReactiveSortingRepository<UserStorageAccess, Long>, ReactiveCrudRepository<UserStorageAccess, Long> {
 
-    boolean existsByUserIdAndStorageId(Long userId, Long storageId);
+    @Query("SELECT * FROM user_storage_access WHERE user_id = :userId AND storage_id = :storageId")
+    Mono<UserStorageAccess> findByUserIdAndStorageId(Long userId, Long storageId);
 
-    boolean existsByUserIdAndStorageIdAndIdNot(Long userId, Long storageId, Long id);
+    @Query("SELECT * FROM user_storage_access WHERE user_id = :userId")
+    Flux<UserStorageAccess> findByUserId(Long userId);
 
-    Optional<UserStorageAccess> findByUserIdAndStorageId(Long userId, Long storageId);
+    @Query("SELECT * FROM user_storage_access WHERE storage_id = :storageId")
+    Flux<UserStorageAccess> findByStorageId(Long storageId);
 
-    Page<UserStorageAccess> findByUserId(Long userId, Pageable pageable);
+    @Query("SELECT * FROM user_storage_access WHERE expires_at IS NOT NULL AND expires_at < :now AND is_active = true")
+    Flux<UserStorageAccess> findExpiredAccesses(LocalDateTime now);
 
-    Page<UserStorageAccess> findByStorageId(Long storageId, Pageable pageable);
+    @Query("SELECT EXISTS(SELECT 1 FROM user_storage_access WHERE user_id = :userId AND storage_id = :storageId AND id != :id)")
+    Mono<Boolean> existsByUserIdAndStorageIdAndIdNot(Long userId, Long storageId, Long id);
 
-    Page<UserStorageAccess> findByAccessLevel(AccessLevel accessLevel, Pageable pageable);
+    @Query("SELECT * FROM user_storage_access WHERE (:userId IS NULL OR user_id = :userId) " +
+            "AND (:storageId IS NULL OR storage_id = :storageId) " +
+            "AND (:accessLevel IS NULL OR access_level = :accessLevel) " +
+            "AND (:active IS NULL OR is_active = :active) " +
+            "LIMIT :#{#pageable.pageSize} OFFSET :#{#pageable.offset}")
+    Flux<UserStorageAccess> findByUserIdAndStorageIdAndAccessLevel(Long userId, Long storageId, String accessLevel, Boolean active, Pageable pageable);
 
-    Page<UserStorageAccess> findByIsActive(Boolean isActive, Pageable pageable);
+    @Query("SELECT COUNT(*) FROM user_storage_access WHERE (:userId IS NULL OR user_id = :userId) " +
+            "AND (:storageId IS NULL OR storage_id = :storageId) " +
+            "AND (:accessLevel IS NULL OR access_level = :accessLevel) " +
+            "AND (:active IS NULL OR is_active = :active)")
+    Mono<Long> countByFilters(Long userId, Long storageId, String accessLevel, Boolean active);
 
-    Page<UserStorageAccess> findByUserIdAndStorageId(Long userId, Long storageId, Pageable pageable);
+    @Query("SELECT COUNT(*) FROM user_storage_access WHERE user_id = :userId AND is_active = :isActive")
+    Mono<Long> countByUserIdAndIsActive(Long userId, Boolean isActive);
 
-    Page<UserStorageAccess> findByUserIdAndAccessLevel(Long userId, AccessLevel accessLevel, Pageable pageable);
+    @Query("SELECT COUNT(*) FROM user_storage_access WHERE storage_id = :storageId AND is_active = :isActive")
+    Mono<Long> countByStorageIdAndIsActive(Long storageId, Boolean isActive);
 
-    Page<UserStorageAccess> findByUserIdAndIsActive(Long userId, Boolean isActive, Pageable pageable);
-
-    Page<UserStorageAccess> findByStorageIdAndAccessLevel(Long storageId, AccessLevel accessLevel, Pageable pageable);
-
-    Page<UserStorageAccess> findByStorageIdAndIsActive(Long storageId, Boolean isActive, Pageable pageable);
-
-    Page<UserStorageAccess> findByAccessLevelAndIsActive(AccessLevel accessLevel, Boolean isActive, Pageable pageable);
-
-    Page<UserStorageAccess> findByUserIdAndStorageIdAndAccessLevel(Long userId, Long storageId, AccessLevel accessLevel, Pageable pageable);
-
-    Page<UserStorageAccess> findByUserIdAndStorageIdAndIsActive(Long userId, Long storageId, Boolean isActive, Pageable pageable);
-
-    Page<UserStorageAccess> findByUserIdAndAccessLevelAndIsActive(Long userId, AccessLevel accessLevel, Boolean isActive, Pageable pageable);
-
-    Page<UserStorageAccess> findByStorageIdAndAccessLevelAndIsActive(Long storageId, AccessLevel accessLevel, Boolean isActive, Pageable pageable);
-
-    Page<UserStorageAccess> findByUserIdAndStorageIdAndAccessLevelAndIsActive(
-            Long userId, Long storageId, AccessLevel accessLevel, Boolean isActive, Pageable pageable);
-
-    List<UserStorageAccess> findByUserId(Long userId);
-
-    List<UserStorageAccess> findByStorageId(Long storageId);
-
-    @Query("SELECT usa FROM UserStorageAccess usa WHERE usa.expiresAt < :now AND usa.isActive = true")
-    List<UserStorageAccess> findExpiredAccesses(@Param("now") LocalDateTime now);
-
-    long countByUserIdAndIsActive(Long userId, Boolean isActive);
-
-    long countByStorageIdAndIsActive(Long storageId, Boolean isActive);
-
-    long countByUserId(Long userId);
-    long countByStorageId(Long storageId);
-    long countByAccessLevel(AccessLevel accessLevel);
-    long countByIsActive(Boolean isActive);
-    long countByUserIdAndStorageId(Long userId, Long storageId);
-    long countByUserIdAndAccessLevel(Long userId, AccessLevel accessLevel);
-    long countByStorageIdAndAccessLevel(Long storageId, AccessLevel accessLevel);
-    long countByAccessLevelAndIsActive(AccessLevel accessLevel, Boolean isActive);
-    long countByUserIdAndStorageIdAndAccessLevel(Long userId, Long storageId, AccessLevel accessLevel);
-    long countByUserIdAndStorageIdAndIsActive(Long userId, Long storageId, Boolean isActive);
-    long countByUserIdAndAccessLevelAndIsActive(Long userId, AccessLevel accessLevel, Boolean isActive);
-    long countByStorageIdAndAccessLevelAndIsActive(Long storageId, AccessLevel accessLevel, Boolean isActive);
-    long countByUserIdAndStorageIdAndAccessLevelAndIsActive(Long userId, Long storageId, AccessLevel accessLevel, Boolean isActive);
-
+    @Query("SELECT COUNT(*) FROM user_storage_access")
+    Mono<Long> count();
 }

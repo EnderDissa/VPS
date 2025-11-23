@@ -11,7 +11,7 @@ public class FeignConfig {
 
     @Bean
     public ReactiveFeignCircuitBreakerFactory reactiveFeignCircuitBreakerFactory(
-            ReactiveCircuitBreakerFactory springCloudCircuitBreakerFactory // This is injected by Spring
+            ReactiveCircuitBreakerFactory springCloudCircuitBreakerFactory
     ) {
         return springCloudCircuitBreakerFactory::create;
     }

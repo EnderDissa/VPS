@@ -38,9 +38,9 @@ public class MapperToEntityTest {
         assertThat(entity.getExpiresAt()).isEqualTo(LocalDateTime.of(2026, 1, 1, 0, 0));
         assertThat(entity.getIsActive()).isTrue();
 
-        assertThat(entity.getUser()).isNotNull();
-        assertThat(entity.getStorage()).isNotNull();
-        assertThat(entity.getGrantedBy()).isNotNull();
+        assertThat(entity.getUserId()).isNotNull();
+        assertThat(entity.getStorageId()).isNotNull();
+        assertThat(entity.getGrantedById()).isNotNull();
     }
 
     @Test

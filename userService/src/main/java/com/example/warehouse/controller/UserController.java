@@ -66,7 +66,6 @@ public class UserController {
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
-    // Additional endpoints that were in the original service
     @GetMapping
     @Operation(summary = "Get all users")
     public Flux<UserResponseDTO> getAll() {
@@ -77,7 +76,7 @@ public class UserController {
     @GetMapping("/role/{role}")
     @Operation(summary = "Get users by role")
     public Flux<UserResponseDTO> getByRole(@PathVariable RoleType role) {
-        return service.getUsersByRole(role)
+        return service.getUsersByRole(role.toString())
                 .map(mapper::toResponseDTO);
     }
 
@@ -114,6 +113,6 @@ public class UserController {
     @GetMapping("/count/role/{role}")
     @Operation(summary = "Count users by role")
     public Mono<Long> countByRole(@PathVariable RoleType role) {
-        return service.countUsersByRole(role);
+        return service.countUsersByRole(role.toString());
     }
 }

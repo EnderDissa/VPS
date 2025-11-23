@@ -40,7 +40,6 @@ import org.springframework.web.reactive.result.method.annotation.ResponseEntityE
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
-import jakarta.persistence.EntityNotFoundException;
 import reactor.core.publisher.Mono;
 
 @RestControllerAdvice
@@ -271,14 +270,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
             body.addValidationError(fe.getField(), fe.getRejectedValue(), fe.getDefaultMessage());
         }
-        return Mono.just(ResponseEntity.status(s).body(body));
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public Mono<ResponseEntity<ApiError>> handleNotFound(EntityNotFoundException ex, ServerWebExchange exchange) {
-        HttpStatus s = HttpStatus.NOT_FOUND;
-        String requestUri = exchange.getRequest().getURI().toString();
-        ApiError body = ApiError.of(s.value(), s.getReasonPhrase(), ErrorCode.NOT_FOUND, ex.getMessage() != null ? ex.getMessage() : "Entity not found", requestUri);
         return Mono.just(ResponseEntity.status(s).body(body));
     }
 

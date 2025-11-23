@@ -43,16 +43,4 @@ public record UserStorageAccessDTO(
         }
     }
 
-    public UserStorageAccessDTO(UserStorageAccess access) {
-        this(
-                access != null ? access.getId() : null,
-                access != null && access.getUser() != null ? access.getUser().getId() : null,
-                access != null && access.getStorage() != null ? access.getStorage().getId() : null,
-                access != null ? access.getAccessLevel() : AccessLevel.BASIC,
-                access != null && access.getGrantedBy() != null ? access.getGrantedBy().getId() : null,
-                access != null ? access.getGrantedAt() : null,
-                access != null ? access.getExpiresAt() : null,
-                access != null ? access.getIsActive() : true
-        );
-    }
 }
