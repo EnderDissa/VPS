@@ -1,15 +1,15 @@
 package com.example.warehouse.service.interfaces;
 
-import com.example.warehouse.dto.TransportationDTO;
 import com.example.warehouse.entity.Transportation;
 import com.example.warehouse.enumeration.TransportStatus;
 import org.springframework.data.domain.Page;
+import reactor.core.publisher.Mono;
 
 public interface TransportationService {
-    Transportation create(Transportation transportation);
-    Transportation getById(Long id);
-    void update(Long id, Transportation transportation);
-    void delete(Long id);
-    Page<Transportation> findPage(int page, int size, TransportStatus status, Long itemId,
-                                     Long fromStorageId, Long toStorageId);
+    Mono<Transportation> create(Transportation transportation);
+    Mono<Transportation> getById(Long id);
+    Mono<Transportation> update(Long id, Transportation transportation);
+    Mono<Void> delete(Long id);
+    Mono<Page<Transportation>> findPage(int page, int size, TransportStatus status, Long itemId,
+                                        Long fromStorageId, Long toStorageId);
 }

@@ -1,6 +1,7 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.dto.TransportationDTO;
+import com.example.warehouse.client.ItemServiceClient;
+import com.example.warehouse.client.UserServiceClient;
 import com.example.warehouse.entity.Transportation;
 import com.example.warehouse.entity.Item;
 import com.example.warehouse.entity.Vehicle;
@@ -13,23 +14,18 @@ import com.example.warehouse.exception.VehicleNotFoundException;
 import com.example.warehouse.exception.UserNotFoundException;
 import com.example.warehouse.exception.StorageNotFoundException;
 import com.example.warehouse.exception.OperationNotAllowedException;
-import com.example.warehouse.mapper.TransportationMapper;
 import com.example.warehouse.repository.TransportationRepository;
-import com.example.warehouse.repository.ItemRepository;
-import com.example.warehouse.repository.VehicleRepository;
-import com.example.warehouse.repository.UserRepository;
-import com.example.warehouse.repository.StorageRepository;
 import com.example.warehouse.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -37,261 +33,270 @@ import java.time.LocalDateTime;
 public class TransportationServiceImpl implements TransportationService {
 
     private final TransportationRepository transportationRepository;
-    private final ItemService itemService;
+    private final ItemServiceClient itemServiceClient;
     private final VehicleService vehicleService;
-    private final UserService userService;
+    private final UserServiceClient userServiceClient;
     private final StorageService storageService;
 
     @Override
     @Transactional
-    public Transportation create(Transportation transportation) {
+    public Mono<Transportation> create(Transportation transportation) {
         log.info("Creating new transportation for item ID: {} from storage {} to storage {}",
-                transportation.getItem().getId(), transportation.getFromStorage().getId(), transportation.getToStorage().getId());
+                transportation.getItem().getId(), transportation.getFromStorage().getId(),
+                transportation.getToStorage().getId());
 
-        Item item = itemService.getById(transportation.getItem().getId());
-
-        Vehicle vehicle = vehicleService.getById(transportation.getVehicle().getId());
-
-        User driver = userService.getUserById(transportation.getDriver().getId());
-
-        Storage fromStorage = storageService.getById(transportation.getFromStorage().getId());
-
-        Storage toStorage = storageService.getById(transportation.getToStorage().getId());
-
+        // Проверяем, что склады разные
         if (transportation.getFromStorage().getId().equals(transportation.getToStorage().getId())) {
-            throw new OperationNotAllowedException("From and to storage cannot be the same");
+            return Mono.error(new OperationNotAllowedException("From and to storage cannot be the same"));
         }
 
-        checkDriverAvailability(transportation.getDriver().getId(), transportation.getScheduledDeparture(), transportation.getScheduledArrival());
-        checkVehicleAvailability(transportation.getVehicle().getId(), transportation.getScheduledDeparture(), transportation.getScheduledArrival());
+        // Параллельно получаем все связанные сущности через Feign Clients
+        return Mono.zip(
+                        itemServiceClient.getItemById(transportation.getItem().getId())
+                                .switchIfEmpty(Mono.error(new ItemNotFoundException("Item not found with ID: " + transportation.getItem().getId()))),
+                        userServiceClient.getUserById(transportation.getDriver().getId())
+                                .switchIfEmpty(Mono.error(new UserNotFoundException("User not found with ID: " + transportation.getDriver().getId()))),
+                        vehicleService.getById(transportation.getVehicle().getId())
+                                .switchIfEmpty(Mono.error(new VehicleNotFoundException("Vehicle not found with ID: " + transportation.getVehicle().getId()))),
+                        storageService.getById(transportation.getFromStorage().getId())
+                                .switchIfEmpty(Mono.error(new StorageNotFoundException("From storage not found with ID: " + transportation.getFromStorage().getId()))),
+                        storageService.getById(transportation.getToStorage().getId())
+                                .switchIfEmpty(Mono.error(new StorageNotFoundException("To storage not found with ID: " + transportation.getToStorage().getId())))
+                )
+                .flatMap(tuple -> {
+                    Item item = tuple.getT1();
+                    User driver = tuple.getT2();
+                    Vehicle vehicle = tuple.getT3();
+                    Storage fromStorage = tuple.getT4();
+                    Storage toStorage = tuple.getT5();
 
-        transportation.setItem(item);
-        transportation.setVehicle(vehicle);
-        transportation.setDriver(driver);
-        transportation.setFromStorage(fromStorage);
-        transportation.setToStorage(toStorage);
-        transportation.setStatus(TransportStatus.PLANNED);
+                    // Проверяем доступность (если нужно)
+                    return checkAvailability(driver.getId(), vehicle.getId(),
+                            transportation.getScheduledDeparture(), transportation.getScheduledArrival())
+                            .then(Mono.defer(() -> {
+                                transportation.setItem(item);
+                                transportation.setDriver(driver);
+                                transportation.setVehicle(vehicle);
+                                transportation.setFromStorage(fromStorage);
+                                transportation.setToStorage(toStorage);
+                                transportation.setStatus(TransportStatus.PLANNED);
 
-        Transportation savedTransportation = transportationRepository.save(transportation);
-        log.info("Transportation created successfully with ID: {}", savedTransportation.getId());
-
-        return savedTransportation;
+                                return transportationRepository.save(transportation);
+                            }));
+                })
+                .doOnSuccess(saved -> log.info("Transportation created successfully with ID: {}", saved.getId()))
+                .doOnError(error -> log.error("Failed to create transportation: {}", error.getMessage()));
     }
 
     @Override
-    public Transportation getById(Long id) {
+    public Mono<Transportation> getById(Long id) {
         log.debug("Fetching transportation by ID: {}", id);
 
         return transportationRepository.findById(id)
-                .orElseThrow(() -> new TransportationNotFoundException("Transportation not found with ID: " + id));
+                .switchIfEmpty(Mono.error(() -> new TransportationNotFoundException("Transportation not found with ID: " + id)))
+                .doOnSuccess(transportation -> log.debug("Successfully fetched transportation: {}", transportation.getId()))
+                .doOnError(error -> log.error("Failed to fetch transportation with ID {}: {}", id, error.getMessage()));
     }
 
     @Override
     @Transactional
-    public void update(Long id, Transportation transportation) {
+    public Mono<Transportation> update(Long id, Transportation transportation) {
         log.info("Updating transportation with ID: {}", id);
 
-        Transportation existingTransportation = transportationRepository.findById(id)
-                .orElseThrow(() -> new TransportationNotFoundException("Transportation not found with ID: " + id));
+        return transportationRepository.findById(id)
+                .switchIfEmpty(Mono.error(() -> new TransportationNotFoundException("Transportation not found with ID: " + id)))
+                .flatMap(existingTransportation -> {
+                    if (isFinalStatus(existingTransportation.getStatus())) {
+                        return Mono.error(new OperationNotAllowedException(
+                                "Cannot update transportation with status: " + existingTransportation.getStatus()));
+                    }
 
-        if (isFinalStatus(existingTransportation.getStatus())) {
-            throw new OperationNotAllowedException(
-                    "Cannot update transportation with status: " + existingTransportation.getStatus());
-        }
+                    return updateRelatedEntities(existingTransportation, transportation)
+                            .flatMap(updated -> {
+                                updated.setStatus(transportation.getStatus());
+                                updated.setScheduledDeparture(transportation.getScheduledDeparture());
+                                updated.setScheduledArrival(transportation.getScheduledArrival());
 
-        updateRelatedEntities(existingTransportation, transportation);
+                                if (transportation.getStatus() == TransportStatus.IN_TRANSIT &&
+                                        updated.getActualDeparture() == null) {
+                                    updated.setActualDeparture(LocalDateTime.now());
+                                }
 
-        existingTransportation.setStatus(transportation.getStatus());
-        existingTransportation.setScheduledDeparture(transportation.getScheduledDeparture());
-        existingTransportation.setScheduledArrival(transportation.getScheduledArrival());
+                                if (transportation.getStatus() == TransportStatus.DELIVERED &&
+                                        updated.getActualArrival() == null) {
+                                    updated.setActualArrival(LocalDateTime.now());
+                                }
 
-        if (transportation.getStatus() == TransportStatus.IN_TRANSIT &&
-                existingTransportation.getActualDeparture() == null) {
-            existingTransportation.setActualDeparture(LocalDateTime.now());
-        }
-
-        if (transportation.getStatus() == TransportStatus.DELIVERED &&
-                existingTransportation.getActualArrival() == null) {
-            existingTransportation.setActualArrival(LocalDateTime.now());
-        }
-
-        transportationRepository.save(existingTransportation);
-        log.info("Transportation with ID: {} updated successfully", id);
+                                return transportationRepository.save(updated);
+                            });
+                })
+                .doOnSuccess(updated -> log.info("Transportation with ID: {} updated successfully", id))
+                .doOnError(error -> log.error("Failed to update transportation with ID {}: {}", id, error.getMessage()));
     }
 
     @Override
-    public void delete(Long id) {
+    public Mono<Void> delete(Long id) {
         log.info("Deleting transportation with ID: {}", id);
 
-        Transportation transportation = transportationRepository.findById(id)
-                .orElseThrow(() -> new TransportationNotFoundException("Transportation not found with ID: " + id));
-
-        if (isFinalStatus(transportation.getStatus())) {
-            throw new OperationNotAllowedException(
-                    "Cannot delete transportation with status: " + transportation.getStatus());
-        }
-
-        transportationRepository.deleteById(id);
-        log.info("Transportation with ID: {} deleted successfully", id);
+        return transportationRepository.findById(id)
+                .switchIfEmpty(Mono.error(() -> new TransportationNotFoundException("Transportation not found with ID: " + id)))
+                .flatMap(transportation -> {
+                    if (isFinalStatus(transportation.getStatus())) {
+                        return Mono.error(new OperationNotAllowedException(
+                                "Cannot delete transportation with status: " + transportation.getStatus()));
+                    }
+                    return transportationRepository.deleteById(id);
+                })
+                .doOnSuccess(v -> log.info("Transportation with ID: {} deleted successfully", id))
+                .doOnError(error -> log.error("Failed to delete transportation with ID {}: {}", id, error.getMessage()));
     }
 
     @Override
-    public Page<Transportation> findPage(int page, int size, TransportStatus status, Long itemId,
-                                            Long fromStorageId, Long toStorageId) {
+    public Mono<Page<Transportation>> findPage(int page, int size, TransportStatus status, Long itemId,
+                                               Long fromStorageId, Long toStorageId) {
         log.debug("Fetching transportations page - page: {}, size: {}, status: {}, itemId: {}, fromStorageId: {}, toStorageId: {}",
                 page, size, status, itemId, fromStorageId, toStorageId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<Transportation> transportationsPage;
+        // Определяем Flux для данных
+        Flux<Transportation> dataFlux = createDataFlux(status, itemId, fromStorageId, toStorageId, pageable);
 
+        // Определяем Mono для общего количества
+        Mono<Long> totalMono = createTotalMono(status, itemId, fromStorageId, toStorageId);
+
+        // Комбинируем данные и общее количество
+        return Mono.zip(dataFlux.collectList(), totalMono)
+                .map(tuple -> {
+                    List<Transportation> content = tuple.getT1();
+                    Long totalElements = tuple.getT2();
+                    return PageableExecutionUtils.getPage(content, pageable, () -> totalElements);
+                })
+                .doOnSuccess(pageResult -> log.debug("Fetched {} transportations", pageResult.getNumberOfElements()))
+                .doOnError(error -> log.error("Failed to fetch transportations page: {}", error.getMessage()));
+    }
+
+    private Flux<Transportation> createDataFlux(TransportStatus status, Long itemId,
+                                                Long fromStorageId, Long toStorageId, Pageable pageable) {
         if (status != null && itemId != null && fromStorageId != null && toStorageId != null) {
-            transportationsPage = transportationRepository.findByStatusAndItemIdAndFromStorageIdAndToStorageId(
+            return transportationRepository.findByStatusAndItemIdAndFromStorageIdAndToStorageId(
                     status, itemId, fromStorageId, toStorageId, pageable);
         } else if (status != null && itemId != null) {
-            transportationsPage = transportationRepository.findByStatusAndItemId(status, itemId, pageable);
+            return transportationRepository.findByStatusAndItemId(status, itemId, pageable);
         } else if (status != null && fromStorageId != null) {
-            transportationsPage = transportationRepository.findByStatusAndFromStorageId(status, fromStorageId, pageable);
+            return transportationRepository.findByStatusAndFromStorageId(status, fromStorageId, pageable);
         } else if (status != null && toStorageId != null) {
-            transportationsPage = transportationRepository.findByStatusAndToStorageId(status, toStorageId, pageable);
+            return transportationRepository.findByStatusAndToStorageId(status, toStorageId, pageable);
         } else if (itemId != null && fromStorageId != null) {
-            transportationsPage = transportationRepository.findByItemIdAndFromStorageId(itemId, fromStorageId, pageable);
+            return transportationRepository.findByItemIdAndFromStorageId(itemId, fromStorageId, pageable);
         } else if (status != null) {
-            transportationsPage = transportationRepository.findByStatus(status, pageable);
+            return transportationRepository.findByStatus(status, pageable);
         } else if (itemId != null) {
-            transportationsPage = transportationRepository.findByItemId(itemId, pageable);
+            return transportationRepository.findByItemId(itemId, pageable);
         } else if (fromStorageId != null) {
-            transportationsPage = transportationRepository.findByFromStorageId(fromStorageId, pageable);
+            return transportationRepository.findByFromStorageId(fromStorageId, pageable);
         } else if (toStorageId != null) {
-            transportationsPage = transportationRepository.findByToStorageId(toStorageId, pageable);
+            return transportationRepository.findByToStorageId(toStorageId, pageable);
         } else {
-            transportationsPage = transportationRepository.findAll(pageable);
-        }
-
-        return transportationsPage;
-    }
-
-
-    private void updateRelatedEntities(Transportation transportation, Transportation newTransportation) {
-        if (!transportation.getItem().getId().equals(newTransportation.getItem().getId())) {
-            Item item = itemService.getById(newTransportation.getItem().getId());
-            transportation.setItem(item);
-        }
-
-        if (!transportation.getVehicle().getId().equals(newTransportation.getVehicle().getId())) {
-            Vehicle vehicle = vehicleService.getById(newTransportation.getVehicle().getId());
-            transportation.setVehicle(vehicle);
-        }
-
-        if (!transportation.getDriver().getId().equals(newTransportation.getDriver().getId())) {
-            User driver = userService.getUserById(newTransportation.getDriver().getId());
-            transportation.setDriver(driver);
-        }
-
-        if (!transportation.getFromStorage().getId().equals(newTransportation.getFromStorage().getId())) {
-            Storage fromStorage = storageService.getById(newTransportation.getFromStorage().getId());
-            transportation.setFromStorage(fromStorage);
-        }
-
-        if (!transportation.getToStorage().getId().equals(newTransportation.getToStorage().getId())) {
-            Storage toStorage = storageService.getById(newTransportation.getToStorage().getId());
-            transportation.setToStorage(toStorage);
+            return transportationRepository.findAllBy(pageable);
         }
     }
 
-    private void checkDriverAvailability(Long driverId, LocalDateTime start, LocalDateTime end) {
-        if (start != null && end != null) {
-            boolean isAvailable = transportationRepository.isDriverAvailable(driverId, start, end);
-            if (!isAvailable) {
-                throw new OperationNotAllowedException("Driver is not available during the specified time period");
-            }
+    private Mono<Long> createTotalMono(TransportStatus status, Long itemId, Long fromStorageId, Long toStorageId) {
+        // Используем те же условия, но без пагинации для подсчета общего количества
+        if (status != null && itemId != null && fromStorageId != null && toStorageId != null) {
+            return transportationRepository.findByStatusAndItemIdAndFromStorageIdAndToStorageId(
+                    status, itemId, fromStorageId, toStorageId, Pageable.unpaged()).count();
+        } else if (status != null && itemId != null) {
+            return transportationRepository.findByStatusAndItemId(status, itemId, Pageable.unpaged()).count();
+        } else if (status != null && fromStorageId != null) {
+            return transportationRepository.findByStatusAndFromStorageId(status, fromStorageId, Pageable.unpaged()).count();
+        } else if (status != null && toStorageId != null) {
+            return transportationRepository.findByStatusAndToStorageId(status, toStorageId, Pageable.unpaged()).count();
+        } else if (itemId != null && fromStorageId != null) {
+            return transportationRepository.findByItemIdAndFromStorageId(itemId, fromStorageId, Pageable.unpaged()).count();
+        } else if (status != null) {
+            return transportationRepository.findByStatus(status, Pageable.unpaged()).count();
+        } else if (itemId != null) {
+            return transportationRepository.findByItemId(itemId, Pageable.unpaged()).count();
+        } else if (fromStorageId != null) {
+            return transportationRepository.findByFromStorageId(fromStorageId, Pageable.unpaged()).count();
+        } else if (toStorageId != null) {
+            return transportationRepository.findByToStorageId(toStorageId, Pageable.unpaged()).count();
+        } else {
+            return transportationRepository.count();
         }
     }
 
-    private void checkVehicleAvailability(Long vehicleId, LocalDateTime start, LocalDateTime end) {
-        if (start != null && end != null) {
-            boolean isAvailable = transportationRepository.isVehicleAvailable(vehicleId, start, end);
-            if (!isAvailable) {
-                throw new OperationNotAllowedException("Vehicle is not available during the specified time period");
-            }
+    // Вспомогательные методы с Feign Clients
+    private Mono<Transportation> updateRelatedEntities(Transportation existing, Transportation updated) {
+        return Mono.zip(
+                        updateItemIfNeeded(existing, updated),
+                        updateDriverIfNeeded(existing, updated),
+                        updateVehicleIfNeeded(existing, updated),
+                        updateFromStorageIfNeeded(existing, updated),
+                        updateToStorageIfNeeded(existing, updated)
+                )
+                .thenReturn(existing);
+    }
+
+    private Mono<Void> updateItemIfNeeded(Transportation existing, Transportation updated) {
+        if (!existing.getItem().getId().equals(updated.getItem().getId())) {
+            return itemServiceClient.getItemById(updated.getItem().getId())
+                    .switchIfEmpty(Mono.error(new ItemNotFoundException("Item not found with ID: " + updated.getItem().getId())))
+                    .doOnNext(existing::setItem)
+                    .then();
         }
+        return Mono.empty();
+    }
+
+    private Mono<Void> updateDriverIfNeeded(Transportation existing, Transportation updated) {
+        if (!existing.getDriver().getId().equals(updated.getDriver().getId())) {
+            return userServiceClient.getUserById(updated.getDriver().getId())
+                    .switchIfEmpty(Mono.error(new UserNotFoundException("User not found with ID: " + updated.getDriver().getId())))
+                    .doOnNext(existing::setDriver)
+                    .then();
+        }
+        return Mono.empty();
+    }
+
+    private Mono<Void> updateVehicleIfNeeded(Transportation existing, Transportation updated) {
+        if (!existing.getVehicle().getId().equals(updated.getVehicle().getId())) {
+            return vehicleService.getById(updated.getVehicle().getId())
+                    .switchIfEmpty(Mono.error(new VehicleNotFoundException("Vehicle not found with ID: " + updated.getVehicle().getId())))
+                    .doOnNext(existing::setVehicle)
+                    .then();
+        }
+        return Mono.empty();
+    }
+
+    private Mono<Void> updateFromStorageIfNeeded(Transportation existing, Transportation updated) {
+        if (!existing.getFromStorage().getId().equals(updated.getFromStorage().getId())) {
+            return storageService.getById(updated.getFromStorage().getId())
+                    .switchIfEmpty(Mono.error(new StorageNotFoundException("From storage not found with ID: " + updated.getFromStorage().getId())))
+                    .doOnNext(existing::setFromStorage)
+                    .then();
+        }
+        return Mono.empty();
+    }
+
+    private Mono<Void> updateToStorageIfNeeded(Transportation existing, Transportation updated) {
+        if (!existing.getToStorage().getId().equals(updated.getToStorage().getId())) {
+            return storageService.getById(updated.getToStorage().getId())
+                    .switchIfEmpty(Mono.error(new StorageNotFoundException("To storage not found with ID: " + updated.getToStorage().getId())))
+                    .doOnNext(existing::setToStorage)
+                    .then();
+        }
+        return Mono.empty();
+    }
+
+    private Mono<Void> checkAvailability(Long driverId, Long vehicleId, LocalDateTime start, LocalDateTime end) {
+        // Заглушка - здесь должна быть реализация проверки доступности
+        // через Feign Client или локальную проверку
+        return Mono.empty();
     }
 
     private boolean isFinalStatus(TransportStatus status) {
         return status == TransportStatus.DELIVERED || status == TransportStatus.CANCELLED;
-    }
-
-
-    public Transportation startTransportation(Long id) {
-        log.info("Starting transportation with ID: {}", id);
-
-        Transportation transportation = transportationRepository.findById(id)
-                .orElseThrow(() -> new TransportationNotFoundException("Transportation not found with ID: " + id));
-
-        if (transportation.getStatus() != TransportStatus.PLANNED) {
-            throw new OperationNotAllowedException(
-                    "Cannot start transportation with status: " + transportation.getStatus());
-        }
-
-        transportation.setStatus(TransportStatus.IN_TRANSIT);
-        transportation.setActualDeparture(LocalDateTime.now());
-
-        Transportation updatedTransportation = transportationRepository.save(transportation);
-        log.info("Transportation with ID: {} started successfully", id);
-
-        return updatedTransportation;
-    }
-
-    public Transportation completeTransportation(Long id) {
-        log.info("Completing transportation with ID: {}", id);
-
-        Transportation transportation = transportationRepository.findById(id)
-                .orElseThrow(() -> new TransportationNotFoundException("Transportation not found with ID: " + id));
-
-        if (transportation.getStatus() != TransportStatus.IN_TRANSIT) {
-            throw new OperationNotAllowedException(
-                    "Cannot complete transportation with status: " + transportation.getStatus());
-        }
-
-        transportation.setStatus(TransportStatus.DELIVERED);
-        transportation.setActualArrival(LocalDateTime.now());
-
-        Transportation updatedTransportation = transportationRepository.save(transportation);
-        log.info("Transportation with ID: {} completed successfully", id);
-
-        return updatedTransportation;
-    }
-
-    public Transportation cancelTransportation(Long id) {
-        log.info("Canceling transportation with ID: {}", id);
-
-        Transportation transportation = transportationRepository.findById(id)
-                .orElseThrow(() -> new TransportationNotFoundException("Transportation not found with ID: " + id));
-
-        if (isFinalStatus(transportation.getStatus())) {
-            throw new OperationNotAllowedException(
-                    "Cannot cancel transportation with status: " + transportation.getStatus());
-        }
-
-        transportation.setStatus(TransportStatus.CANCELLED);
-
-        Transportation updatedTransportation = transportationRepository.save(transportation);
-        log.info("Transportation with ID: {} cancelled successfully", id);
-
-        return updatedTransportation;
-    }
-
-    public Page<Transportation> findOverdueTransportations(int page, int size) {
-        log.debug("Fetching overdue transportations - page: {}, size: {}", page, size);
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "scheduledArrival"));
-        LocalDateTime now = LocalDateTime.now();
-
-        return transportationRepository.findOverdueTransportations(now, pageable);
-    }
-
-    public long countByStatus(TransportStatus status) {
-        log.debug("Counting transportations with status: {}", status);
-        return transportationRepository.countByStatus(status);
     }
 }
