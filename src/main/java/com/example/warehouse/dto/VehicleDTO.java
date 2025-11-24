@@ -3,17 +3,15 @@ package com.example.warehouse.dto;
 import com.example.warehouse.entity.Vehicle;
 import com.example.warehouse.enumeration.VehicleStatus;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
-import org.springframework.boot.context.properties.bind.DefaultValue;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record VehicleDTO(
-        @Schema(hidden = true)
+        @Schema(accessMode = Schema.AccessMode.READ_ONLY)
         Long id,
 
         @NotBlank(message = "Brand is required")

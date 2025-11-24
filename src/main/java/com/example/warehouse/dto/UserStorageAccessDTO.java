@@ -2,6 +2,7 @@ package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.UserStorageAccess;
 import com.example.warehouse.enumeration.AccessLevel;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserStorageAccessDTO(
-        @Schema(hidden = true)
+        @Schema(accessMode = Schema.AccessMode.READ_ONLY)
         Long id,
 
         @NotNull(message = "User ID is required")
@@ -26,9 +27,13 @@ public record UserStorageAccessDTO(
         @NotNull(message = "Granted by user ID is required")
         Long grantedById,
 
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(example = "2025-11-24 03:29:34")
         LocalDateTime grantedAt,
 
         @Future(message = "Expiration date must be in the future")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(example = "2025-11-24 03:29:34")
         LocalDateTime expiresAt,
 
         @NotNull(message = "Active status is required")

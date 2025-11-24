@@ -1,6 +1,7 @@
 package com.example.warehouse.dto.UserDTO;
 
 import com.example.warehouse.enumeration.RoleType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,5 +35,7 @@ public record UserRequestDTO(
         @Email
         String email,
 
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(example = "2025-11-24 03:29:34")
         LocalDateTime createdAt
 ) {}

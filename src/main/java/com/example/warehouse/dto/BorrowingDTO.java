@@ -2,8 +2,9 @@ package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.Borrowing;
 import com.example.warehouse.enumeration.BorrowStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record BorrowingDTO(
-        @Schema(hidden = true)
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         Long id,
 
         @NotNull(message = "Item ID is required")
@@ -27,12 +28,18 @@ public record BorrowingDTO(
         Integer quantity,
 
         @NotNull(message = "Borrow date is required")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(example = "2025-11-24 03:29:34")
         LocalDateTime borrowDate,
 
         @NotNull(message = "Expected return date is required")
         @Future(message = "Expected return date must be in the future")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(example = "2025-11-24 03:29:34")
         LocalDateTime expectedReturnDate,
 
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(example = "2025-11-24 03:29:34")
         LocalDateTime actualReturnDate,
 
         @NotNull(message = "Status is required")

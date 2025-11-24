@@ -3,6 +3,7 @@ package com.example.warehouse.dto;
 import com.example.warehouse.entity.ItemMaintenance;
 import com.example.warehouse.enumeration.BorrowStatus;
 import com.example.warehouse.enumeration.MaintenanceStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +16,7 @@ import lombok.Data;
 
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record ItemMaintenanceDTO(
-        @Schema(hidden = true)
+        @Schema(accessMode = Schema.AccessMode.READ_ONLY)
         Long id,
 
         @NotNull(message = "Item ID is required")
@@ -25,8 +26,12 @@ public record ItemMaintenanceDTO(
         Long technicianId,
 
         @NotNull(message = "Maintenance date is required")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(example = "2025-11-24T03:29:34")
         LocalDateTime maintenanceDate,
 
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(example = "2025-11-24T03:29:34")
         LocalDateTime nextMaintenanceDate,
 
         @PositiveOrZero(message = "Cost must be positive or zero")
@@ -37,6 +42,8 @@ public record ItemMaintenanceDTO(
         @NotNull(message = "Status is required")
         MaintenanceStatus status,
 
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(example = "2025-11-24T03:29:34")
         LocalDateTime createdAt
 ) {
     public ItemMaintenanceDTO {

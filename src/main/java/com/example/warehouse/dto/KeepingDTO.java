@@ -1,6 +1,7 @@
 package com.example.warehouse.dto;
 
 import com.example.warehouse.entity.Keeping;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,7 +12,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record KeepingDTO(
-        @Schema(hidden = true)
+        @Schema(accessMode = Schema.AccessMode.READ_ONLY)
         Long id,
 
         @NotNull(message = "Storage ID is required")
@@ -27,6 +28,8 @@ public record KeepingDTO(
         @Size(max = 100, message = "Shelf must not exceed 100 characters")
         String shelf,
 
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(example = "2025-11-24 03:29:34")
         LocalDateTime lastUpdated
 ) {
 
