@@ -36,6 +36,6 @@ public record UserRequestDTO(
         String email,
 
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        @Schema(example = "2025-11-24 03:29:34")
+        @Schema(example = "2025-11-24 03:29:34", accessMode = Schema.AccessMode.READ_ONLY)
         LocalDateTime createdAt
 ) {}
