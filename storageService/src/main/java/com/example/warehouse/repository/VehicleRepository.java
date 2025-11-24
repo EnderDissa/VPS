@@ -14,30 +14,28 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 
 @Repository
-public interface VehicleRepository extends ReactiveCrudRepository<Vehicle, Long> {
+public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
-    Flux<Vehicle> findAllBy(Pageable pageable);
+    Page<Vehicle> findAllBy(Pageable pageable);
 
-    Flux<Vehicle> findByStatus(VehicleStatus status);
+    Page<Vehicle> findByStatus(VehicleStatus status, Pageable pageable);
 
-    Flux<Vehicle> findByStatus(VehicleStatus status, Pageable pageable);
+    Optional<Vehicle> findByLicensePlate(String licensePlate);
 
-    Mono<Vehicle> findByLicensePlate(String licensePlate);
+    boolean existsByLicensePlate(String licensePlate);
 
-    Mono<Boolean> existsByLicensePlate(String licensePlate);
+    boolean existsByLicensePlateAndIdNot(String licensePlate, Long id);
 
-    Mono<Boolean> existsByLicensePlateAndIdNot(String licensePlate, Long id);
+    Page<Vehicle> findByBrandContainingIgnoreCase(String brand, Pageable pageable);
 
-    Flux<Vehicle> findByBrandContainingIgnoreCase(String brand, Pageable pageable);
+    Page<Vehicle> findByModelContainingIgnoreCase(String model, Pageable pageable);
 
-    Flux<Vehicle> findByModelContainingIgnoreCase(String model, Pageable pageable);
+    Page<Vehicle> findByStatusAndBrandContainingIgnoreCase(VehicleStatus status, String brand, Pageable pageable);
 
-    Flux<Vehicle> findByStatusAndBrandContainingIgnoreCase(VehicleStatus status, String brand, Pageable pageable);
+    Page<Vehicle> findByStatusAndModelContainingIgnoreCase(VehicleStatus status, String model, Pageable pageable);
 
-    Flux<Vehicle> findByStatusAndModelContainingIgnoreCase(VehicleStatus status, String model, Pageable pageable);
+    Page<Vehicle> findByBrandContainingIgnoreCaseAndModelContainingIgnoreCase(String brand, String model, Pageable pageable);
 
-    Flux<Vehicle> findByBrandContainingIgnoreCaseAndModelContainingIgnoreCase(String brand, String model, Pageable pageable);
-
-    Flux<Vehicle> findByStatusAndBrandContainingIgnoreCaseAndModelContainingIgnoreCase(
+    Page<Vehicle> findByStatusAndBrandContainingIgnoreCaseAndModelContainingIgnoreCase(
             VehicleStatus status, String brand, String model, Pageable pageable);
 }

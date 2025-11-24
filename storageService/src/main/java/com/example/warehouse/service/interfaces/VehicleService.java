@@ -3,6 +3,7 @@ package com.example.warehouse.service.interfaces;
 import com.example.warehouse.entity.Vehicle;
 import com.example.warehouse.enumeration.VehicleStatus;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
