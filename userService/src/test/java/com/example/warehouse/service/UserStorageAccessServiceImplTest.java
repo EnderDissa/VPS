@@ -1,579 +1,682 @@
-//package com.example.warehouse.service;
-//
-//import com.example.warehouse.entity.UserStorageAccess;
-//import com.example.warehouse.entity.User;
-//import com.example.warehouse.entity.Storage;
-//import com.example.warehouse.enumeration.AccessLevel;
-//import com.example.warehouse.enumeration.RoleType;
-//import com.example.warehouse.exception.*;
-//import com.example.warehouse.repository.UserStorageAccessRepository;
-//import com.example.warehouse.repository.UserRepository;
-//import com.example.warehouse.repository.StorageRepository;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.data.domain.Page;
-//import org.springframework.test.context.DynamicPropertyRegistry;
-//import org.springframework.test.context.DynamicPropertySource;
-//import org.springframework.test.context.jdbc.Sql;
-//import org.testcontainers.containers.PostgreSQLContainer;
-//import org.testcontainers.junit.jupiter.Container;
-//import org.testcontainers.junit.jupiter.Testcontainers;
-//import java.time.LocalDateTime;
-//import java.util.List;
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//@Testcontainers
-//@SpringBootTest
-//@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-//class UserStorageAccessServiceImplIntegrationTest {
-//
-//    @Container
-//    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
-//            .withDatabaseName("testdb")
-//            .withUsername("test")
-//            .withPassword("test");
-//
-//    @DynamicPropertySource
-//    static void configureProperties(DynamicPropertyRegistry registry) {
-//        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-//        registry.add("spring.datasource.username", postgres::getUsername);
-//        registry.add("spring.datasource.password", postgres::getPassword);
-//    }
-//
-//    @Autowired
-//    private UserStorageAccessServiceImpl userStorageAccessService;
-//
-//    @Autowired
-//    private UserStorageAccessRepository userStorageAccessRepository;
-//
-//    @Autowired
-//    private UserRepository userRepository;
-//
-//    @Autowired
-//    private StorageRepository storageRepository;
-//
-//    private User testUser;
-//    private User nonExistentUser;
-//    private User testAdmin;
-//    private Storage testStorage;
-//    private Storage testStorage2;
-//    private Storage nonExistentStorage;
-//    private UserStorageAccess testAccess;
-//
-//    @BeforeEach
-//    void setUp() {
-//        testUser = User.builder()
-//                .firstName("John")
-//                .secondName("Michael")
-//                .lastName("Doe")
-//                .role(RoleType.STUDENT)
-//                .email("john.doe@example.com")
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//        testUser = userRepository.save(testUser);
-//
-//        nonExistentUser = User.builder()
-//                .id(999L)
-//                .firstName("John")
-//                .secondName("Michael")
-//                .lastName("Doe")
-//                .role(RoleType.STUDENT)
-//                .email("john.doe@example.com")
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//
-//        testAdmin = User.builder()
-//                .firstName("Admin")
-//                .secondName("User")
-//                .lastName("Smith")
-//                .role(RoleType.ADMIN)
-//                .email("admin@example.com")
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//        testAdmin = userRepository.save(testAdmin);
-//
-//        testStorage = Storage.builder()
-//                .name("Main Storage")
-//                .address("123 Main St, City")
-//                .capacity(1000)
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//        testStorage = storageRepository.save(testStorage);
-//
-//        testStorage2 = Storage.builder()
-//                .name("Secondary Storage")
-//                .address("456 Oak St, Town")
-//                .capacity(500)
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//        testStorage2 = storageRepository.save(testStorage2);
-//
-//        nonExistentStorage = Storage.builder()
-//                .id(999L)
-//                .name("Secondary Storage")
-//                .address("456 Oak St, Town")
-//                .capacity(500)
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//
-//        testAccess = UserStorageAccess.builder()
-//                .user(testUser)
-//                .storage(testStorage)
-//                .grantedBy(testAdmin)
-//                .accessLevel(AccessLevel.BASIC)
-//                .grantedAt(LocalDateTime.now().minusDays(1))
-//                .expiresAt(LocalDateTime.now().plusDays(30))
-//                .isActive(true)
-//                .build();
-//        testAccess = userStorageAccessRepository.save(testAccess);
-//    }
-//
-//    @Test
-//    void create_ShouldCreateUserStorageAccess_WhenValidData() {
-//        UserStorageAccess newAccess = new UserStorageAccess(
-//                null,
-//                testUser,
-//                testStorage2,
-//                AccessLevel.MANAGER,
-//                testAdmin,
-//                null,
-//                LocalDateTime.now().plusDays(60),
-//                true
-//        );
-//
-//        UserStorageAccess result = userStorageAccessService.create(newAccess);
-//
-//        assertNotNull(result);
-//        assertNotNull(result.getId());
-//        assertEquals(AccessLevel.MANAGER, result.getAccessLevel());
-//        assertEquals(testUser.getId(), result.getUser().getId());
-//        assertEquals(testStorage2.getId(), result.getStorage().getId());
-//        assertEquals(testAdmin.getId(), result.getGrantedBy().getId());
-//        assertTrue(result.getIsActive());
-//
-//        UserStorageAccess savedAccess = userStorageAccessRepository.findById(result.getId()).orElseThrow();
-//        assertEquals(AccessLevel.MANAGER, savedAccess.getAccessLevel());
-//        assertNotNull(savedAccess.getGrantedAt());
-//    }
-//
-//    @Test
-//    void create_ShouldThrowException_WhenUserNotFound() {
-//        Long nonExistentUserId = 999L;
-//        UserStorageAccess newAccess = new UserStorageAccess(
-//                null,
-//                nonExistentUser,
-//                testStorage,
-//                AccessLevel.BASIC,
-//                testAdmin,
-//                null,
-//                LocalDateTime.now().plusDays(30),
-//                true
-//        );
-//
-//        assertThrows(UserNotFoundException.class, () -> userStorageAccessService.create(newAccess));
-//    }
-//
-//    @Test
-//    void create_ShouldThrowException_WhenStorageNotFound() {
-//        Long nonExistentStorageId = 999L;
-//        UserStorageAccess newAccess = new UserStorageAccess(
-//                null,
-//                testUser,
-//                nonExistentStorage,
-//                AccessLevel.BASIC,
-//                testAdmin,
-//                null,
-//                LocalDateTime.now().plusDays(30),
-//                true
-//        );
-//
-//        assertThrows(StorageNotFoundException.class, () -> userStorageAccessService.create(newAccess));
-//    }
-//
-//    @Test
-//    void create_ShouldThrowException_WhenGrantedByUserNotFound() {
-//        Long nonExistentGrantedById = 999L;
-//        UserStorageAccess newAccess = new UserStorageAccess(
-//                null,
-//                testUser,
-//                testStorage,
-//                AccessLevel.BASIC,
-//                nonExistentUser,
-//                null,
-//                LocalDateTime.now().plusDays(30),
-//                true
-//        );
-//
-//        assertThrows(UserNotFoundException.class, () -> userStorageAccessService.create(newAccess));
-//    }
-//
-//    @Test
-//    void create_ShouldThrowException_WhenDuplicateUserStorageAccess() {
-//        UserStorageAccess duplicateAccess = new UserStorageAccess(
-//                null,
-//                testUser,
-//                testStorage,
-//                AccessLevel.MANAGER,
-//                testAdmin,
-//                null,
-//                LocalDateTime.now().plusDays(30),
-//                true
-//        );
-//
-//        assertThrows(DuplicateUserStorageAccessException.class,
-//                () -> userStorageAccessService.create(duplicateAccess));
-//    }
-//
-//    @Test
-//    void create_ShouldThrowException_WhenExpirationDateInPast() {
-//        UserStorageAccess expiredAccess = new UserStorageAccess(
-//                null,
-//                testUser,
-//                testStorage2,
-//                AccessLevel.BASIC,
-//                testAdmin,
-//                null,
-//                LocalDateTime.now().minusDays(1),
-//                true
-//        );
-//
-//        assertThrows(OperationNotAllowedException.class,
-//                () -> userStorageAccessService.create(expiredAccess));
-//    }
-//
-//    @Test
-//    void getById_ShouldReturnUserStorageAccess_WhenExists() {
-//        UserStorageAccess result = userStorageAccessService.getById(testAccess.getId());
-//
-//        assertNotNull(result);
-//        assertEquals(testAccess.getId(), result.getId());
-//        assertEquals(testAccess.getAccessLevel(), result.getAccessLevel());
-//        assertEquals(testUser.getId(), result.getUser().getId());
-//        assertEquals(testStorage.getId(), result.getStorage().getId());
-//    }
-//
-//    @Test
-//    void getById_ShouldThrowException_WhenNotFound() {
-//        Long nonExistentId = 999L;
-//
-//        assertThrows(UserStorageAccessNotFoundException.class,
-//                () -> userStorageAccessService.getById(nonExistentId));
-//    }
-//
-//    @Test
-//    void update_ShouldUpdateUserStorageAccess_WhenValidData() {
-//        UserStorageAccess update = new UserStorageAccess(
-//                testAccess.getId(),
-//                testUser,
-//                testStorage,
-//                AccessLevel.MANAGER,
-//                testAdmin,
-//                testAccess.getGrantedAt(),
-//                LocalDateTime.now().plusDays(90),
-//                false
-//        );
-//
-//        userStorageAccessService.update(testAccess.getId(), update);
-//
-//        UserStorageAccess updatedAccess = userStorageAccessRepository.findById(testAccess.getId()).orElseThrow();
-//        assertEquals(AccessLevel.MANAGER, updatedAccess.getAccessLevel());
-//        assertEquals(LocalDateTime.now().plusDays(90).toLocalDate(),
-//                updatedAccess.getExpiresAt().toLocalDate());
-//        assertFalse(updatedAccess.getIsActive());
-//    }
-//
-//    @Test
-//    void update_ShouldThrowException_WhenExpirationDateInPast() {
-//        UserStorageAccess update = new UserStorageAccess(
-//                testAccess.getId(),
-//                testUser,
-//                testStorage,
-//                AccessLevel.BASIC,
-//                testAdmin,
-//                testAccess.getGrantedAt(),
-//                LocalDateTime.now().minusDays(1),
-//                true
-//        );
-//
-//        assertThrows(OperationNotAllowedException.class,
-//                () -> userStorageAccessService.update(testAccess.getId(), update));
-//    }
-//
-//    @Test
-//    void update_ShouldThrowException_WhenDuplicateAfterUserChange() {
-//        final UserStorageAccess secondAccess = userStorageAccessRepository.save(
-//                UserStorageAccess.builder()
-//                        .user(testAdmin)
-//                        .storage(testStorage2)
-//                        .grantedBy(testAdmin)
-//                        .accessLevel(AccessLevel.BASIC)
-//                        .grantedAt(LocalDateTime.now())
-//                        .expiresAt(LocalDateTime.now().plusDays(30))
-//                        .isActive(true)
-//                        .build()
-//        );
-//
-//        UserStorageAccess update = new UserStorageAccess(
-//                secondAccess.getId(),
-//                testUser,
-//                testStorage,
-//                AccessLevel.BASIC,
-//                testAdmin,
-//                secondAccess.getGrantedAt(),
-//                LocalDateTime.now().plusDays(30),
-//                true
-//        );
-//
-//        assertThrows(DuplicateUserStorageAccessException.class,
-//                () -> userStorageAccessService.update(secondAccess.getId(), update));
-//    }
-//
-//    @Test
-//    void delete_ShouldDeleteUserStorageAccess_WhenExists() {
-//        Long accessId = testAccess.getId();
-//
-//        userStorageAccessService.delete(accessId);
-//
-//        assertFalse(userStorageAccessRepository.existsById(accessId));
-//    }
-//
-//    @Test
-//    void delete_ShouldThrowException_WhenNotFound() {
-//        Long nonExistentId = 999L;
-//
-//        assertThrows(UserStorageAccessNotFoundException.class,
-//                () -> userStorageAccessService.delete(nonExistentId));
-//    }
-//
-//    @Test
-//    void findPage_ShouldReturnFilteredResults_WithUserFilter() {
-//        Page<UserStorageAccess> result = userStorageAccessService.findPage(
-//                0, 10, testUser.getId(), null, null, null
-//        );
-//
-//        assertNotNull(result);
-//        assertTrue(result.getTotalElements() > 0);
-//        assertEquals(testUser.getId(), result.getContent().get(0).getUser().getId());
-//    }
-//
-//    @Test
-//    void findPage_ShouldReturnFilteredResults_WithStorageFilter() {
-//        Page<UserStorageAccess> result = userStorageAccessService.findPage(
-//                0, 10, null, testStorage.getId(), null, null
-//        );
-//
-//        assertNotNull(result);
-//        assertTrue(result.getTotalElements() > 0);
-//        assertEquals(testStorage.getId(), result.getContent().get(0).getStorage().getId());
-//    }
-//
-//    @Test
-//    void findPage_ShouldReturnFilteredResults_WithAccessLevelFilter() {
-//        Page<UserStorageAccess> result = userStorageAccessService.findPage(
-//                0, 10, null, null, AccessLevel.BASIC, null
-//        );
-//
-//        assertNotNull(result);
-//        assertTrue(result.getTotalElements() > 0);
-//        assertEquals(AccessLevel.BASIC, result.getContent().get(0).getAccessLevel());
-//    }
-//
-//    @Test
-//    void findPage_ShouldReturnFilteredResults_WithActiveFilter() {
-//        Page<UserStorageAccess> result = userStorageAccessService.findPage(
-//                0, 10, null, null, null, true
-//        );
-//
-//        assertNotNull(result);
-//        assertTrue(result.getTotalElements() > 0);
-//        assertTrue(result.getContent().get(0).getIsActive());
-//    }
-//
-//    @Test
-//    void findPage_ShouldReturnEmpty_WhenNoMatches() {
-//        Page<UserStorageAccess> result = userStorageAccessService.findPage(
-//                0, 10, 999L, null, null, null
-//        );
-//
-//        assertNotNull(result);
-//        assertEquals(0, result.getTotalElements());
-//    }
-//
-//    @Test
-//    void findByUserAndStorage_ShouldReturnAccess_WhenExists() {
-//        UserStorageAccess result = userStorageAccessService.findByUserAndStorage(
-//                testUser.getId(), testStorage.getId()
-//        );
-//
-//        assertNotNull(result);
-//        assertEquals(testUser.getId(), result.getUser().getId());
-//        assertEquals(testStorage.getId(), result.getStorage().getId());
-//    }
-//
-//    @Test
-//    void findByUserAndStorage_ShouldThrowException_WhenNotFound() {
-//        assertThrows(UserStorageAccessNotFoundException.class,
-//                () -> userStorageAccessService.findByUserAndStorage(999L, 999L));
-//    }
-//
-//    @Test
-//    void hasAccess_ShouldReturnTrue_WhenValidAccessExists() {
-//        boolean result = userStorageAccessService.hasAccess(
-//                testUser.getId(), testStorage.getId(), AccessLevel.BASIC
-//        );
-//
-//        assertTrue(result);
-//    }
-//
-//    @Test
-//    void hasAccess_ShouldReturnFalse_WhenAccessNotExists() {
-//        boolean result = userStorageAccessService.hasAccess(
-//                999L, 999L, AccessLevel.BASIC
-//        );
-//
-//        assertFalse(result);
-//    }
-//
-//    @Test
-//    void hasAccess_ShouldReturnFalse_WhenAccessInactive() {
-//        testAccess.setIsActive(false);
-//        userStorageAccessRepository.save(testAccess);
-//
-//        boolean result = userStorageAccessService.hasAccess(
-//                testUser.getId(), testStorage.getId(), AccessLevel.BASIC
-//        );
-//
-//        assertFalse(result);
-//    }
-//
-//    @Test
-//    void hasAccess_ShouldReturnFalse_WhenAccessExpired() {
-//        testAccess.setExpiresAt(LocalDateTime.now().minusDays(1));
-//        userStorageAccessRepository.save(testAccess);
-//
-//        boolean result = userStorageAccessService.hasAccess(
-//                testUser.getId(), testStorage.getId(), AccessLevel.BASIC
-//        );
-//
-//        assertFalse(result);
-//    }
-//
-//    @Test
-//    void hasAccess_ShouldReturnTrue_WhenHigherAccessLevel() {
-//        testAccess.setAccessLevel(AccessLevel.MANAGER);
-//        userStorageAccessRepository.save(testAccess);
-//
-//        boolean result = userStorageAccessService.hasAccess(
-//                testUser.getId(), testStorage.getId(), AccessLevel.BASIC
-//        );
-//
-//        assertTrue(result);
-//    }
-//
-//    @Test
-//    void hasAccess_ShouldReturnFalse_WhenLowerAccessLevel() {
-//        testAccess.setAccessLevel(AccessLevel.BASIC);
-//        userStorageAccessRepository.save(testAccess);
-//
-//        boolean result = userStorageAccessService.hasAccess(
-//                testUser.getId(), testStorage.getId(), AccessLevel.MANAGER
-//        );
-//
-//        assertFalse(result);
-//    }
-//
-//    @Test
-//    void deactivate_ShouldDeactivateAccess() {
-//        UserStorageAccess result = userStorageAccessService.deactivate(testAccess.getId());
-//
-//        assertFalse(result.getIsActive());
-//
-//        UserStorageAccess deactivatedAccess = userStorageAccessRepository.findById(testAccess.getId()).orElseThrow();
-//        assertFalse(deactivatedAccess.getIsActive());
-//    }
-//
-//    @Test
-//    void activate_ShouldActivateAccess() {
-//        testAccess.setIsActive(false);
-//        userStorageAccessRepository.save(testAccess);
-//
-//        UserStorageAccess result = userStorageAccessService.activate(testAccess.getId());
-//
-//        assertTrue(result.getIsActive());
-//
-//        UserStorageAccess activatedAccess = userStorageAccessRepository.findById(testAccess.getId()).orElseThrow();
-//        assertTrue(activatedAccess.getIsActive());
-//    }
-//
-//    @Test
-//    void findByUser_ShouldReturnUserAccesses() {
-//        List<UserStorageAccess> result = userStorageAccessService.findByUser(testUser.getId());
-//
-//        assertNotNull(result);
-//        assertFalse(result.isEmpty());
-//        assertEquals(testUser.getId(), result.get(0).getUser().getId());
-//    }
-//
-//    @Test
-//    void findByStorage_ShouldReturnStorageAccesses() {
-//        List<UserStorageAccess> result = userStorageAccessService.findByStorage(testStorage.getId());
-//
-//        assertNotNull(result);
-//        assertFalse(result.isEmpty());
-//        assertEquals(testStorage.getId(), result.get(0).getStorage().getId());
-//    }
-//
-//    @Test
-//    void findExpiredAccesses_ShouldReturnExpiredAccesses() {
-//        testAccess.setExpiresAt(LocalDateTime.now().minusDays(1));
-//        userStorageAccessRepository.save(testAccess);
-//
-//        List<UserStorageAccess> result = userStorageAccessService.findExpiredAccesses();
-//
-//        assertNotNull(result);
-//        assertFalse(result.isEmpty());
-//    }
-//
-//    @Test
-//    void deactivateExpiredAccesses_ShouldDeactivateAllExpired() {
-//        testAccess.setExpiresAt(LocalDateTime.now().minusDays(1));
-//        testAccess.setIsActive(true);
-//        userStorageAccessRepository.save(testAccess);
-//
-//        userStorageAccessService.deactivateExpiredAccesses();
-//
-//        UserStorageAccess updatedAccess = userStorageAccessRepository.findById(testAccess.getId()).orElseThrow();
-//        assertFalse(updatedAccess.getIsActive());
-//    }
-//
-//    @Test
-//    void countActiveAccessesByUser_ShouldReturnCorrectCount() {
-//        long count = userStorageAccessService.countActiveAccessesByUser(testUser.getId());
-//
-//        assertEquals(1, count);
-//    }
-//
-//    @Test
-//    void countActiveAccessesByStorage_ShouldReturnCorrectCount() {
-//        long count = userStorageAccessService.countActiveAccessesByStorage(testStorage.getId());
-//
-//        assertEquals(1, count);
-//    }
-//
-//    @Test
-//    void findPage_ShouldReturnAllCombinations_WithMultipleFilters() {
-//        Page<UserStorageAccess> result1 = userStorageAccessService.findPage(0, 10, testUser.getId(), testStorage.getId(), null, null);
-//        assertNotNull(result1);
-//
-//        Page<UserStorageAccess> result2 = userStorageAccessService.findPage(0, 10, testUser.getId(), null, AccessLevel.BASIC, null);
-//        assertNotNull(result2);
-//
-//        Page<UserStorageAccess> result3 = userStorageAccessService.findPage(0, 10, null, testStorage.getId(), AccessLevel.BASIC, true);
-//        assertNotNull(result3);
-//
-//        Page<UserStorageAccess> result4 = userStorageAccessService.findPage(0, 10, null, null, null, null);
-//        assertNotNull(result4);
-//    }
-//}
+package com.example.warehouse.service;
+
+import com.example.warehouse.entity.UserStorageAccess;
+import com.example.warehouse.enumeration.AccessLevel;
+import com.example.warehouse.exception.DuplicateUserStorageAccessException;
+import com.example.warehouse.exception.OperationNotAllowedException;
+import com.example.warehouse.exception.UserStorageAccessNotFoundException;
+import com.example.warehouse.repository.UserStorageAccessRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+import java.time.LocalDateTime;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class UserStorageAccessServiceImplTest {
+
+    @Mock
+    private UserStorageAccessRepository userStorageAccessRepository;
+
+    @InjectMocks
+    private UserStorageAccessServiceImpl userStorageAccessService;
+
+    private UserStorageAccess testAccess;
+    private UserStorageAccess testAccess2;
+    private UserStorageAccess expiredAccess;
+    private UserStorageAccess inactiveAccess;
+
+    @BeforeEach
+    void setUp() {
+        testAccess = UserStorageAccess.builder()
+                .id(1L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.MANAGER)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(1))
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .isActive(true)
+                .build();
+
+        testAccess2 = UserStorageAccess.builder()
+                .id(2L)
+                .userId(101L)
+                .storageId(201L)
+                .accessLevel(AccessLevel.BASIC)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(2))
+                .expiresAt(LocalDateTime.now().plusDays(15))
+                .isActive(true)
+                .build();
+
+        expiredAccess = UserStorageAccess.builder()
+                .id(3L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.BASIC)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(10))
+                .expiresAt(LocalDateTime.now().minusDays(1))
+                .isActive(true)
+                .build();
+
+        inactiveAccess = UserStorageAccess.builder()
+                .id(4L)
+                .userId(102L)
+                .storageId(202L)
+                .accessLevel(AccessLevel.ADMIN)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(5))
+                .expiresAt(LocalDateTime.now().plusDays(25))
+                .isActive(false)
+                .build();
+    }
+
+    @Test
+    void create_ShouldCreateUserStorageAccess_WhenValidData() {
+        UserStorageAccess newAccess = UserStorageAccess.builder()
+                .userId(103L)
+                .storageId(203L)
+                .accessLevel(AccessLevel.BASIC)
+                .grantedById(300L)
+                .expiresAt(LocalDateTime.now().plusDays(60))
+                .isActive(true)
+                .build();
+
+        UserStorageAccess savedAccess = UserStorageAccess.builder()
+                .id(5L)
+                .userId(103L)
+                .storageId(203L)
+                .accessLevel(AccessLevel.BASIC)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusDays(60))
+                .isActive(true)
+                .build();
+
+        when(userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(103L, 203L, -1L))
+                .thenReturn(Mono.just(false));
+        when(userStorageAccessRepository.save(any(UserStorageAccess.class)))
+                .thenReturn(Mono.just(savedAccess));
+
+        StepVerifier.create(userStorageAccessService.create(newAccess))
+                .assertNext(access -> {
+                    assertNotNull(access.getId());
+                    assertEquals(103L, access.getUserId());
+                    assertEquals(203L, access.getStorageId());
+                    assertEquals(AccessLevel.BASIC, access.getAccessLevel());
+                    assertNotNull(access.getGrantedAt());
+                    assertTrue(access.getIsActive());
+                })
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).existsByUserIdAndStorageIdAndIdNot(103L, 203L, -1L);
+        verify(userStorageAccessRepository).save(any(UserStorageAccess.class));
+    }
+
+    @Test
+    void create_ShouldThrowOperationNotAllowedException_WhenExpirationDateInPast() {
+        UserStorageAccess newAccess = UserStorageAccess.builder()
+                .userId(103L)
+                .storageId(203L)
+                .accessLevel(AccessLevel.BASIC)
+                .grantedById(300L)
+                .expiresAt(LocalDateTime.now().minusDays(1))
+                .isActive(true)
+                .build();
+
+        StepVerifier.create(userStorageAccessService.create(newAccess))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof OperationNotAllowedException &&
+                                throwable.getMessage().contains("Expiration date must be in the future")
+                )
+                .verify();
+
+        verify(userStorageAccessRepository, never()).existsByUserIdAndStorageIdAndIdNot(anyLong(), anyLong(), anyLong());
+        verify(userStorageAccessRepository, never()).save(any());
+    }
+
+    @Test
+    void create_ShouldThrowDuplicateUserStorageAccessException_WhenAccessAlreadyExists() {
+        UserStorageAccess newAccess = UserStorageAccess.builder()
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.ADMIN)
+                .grantedById(300L)
+                .expiresAt(LocalDateTime.now().plusDays(60))
+                .isActive(true)
+                .build();
+
+        when(userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(100L, 200L, -1L))
+                .thenReturn(Mono.just(true));
+
+        StepVerifier.create(userStorageAccessService.create(newAccess))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof DuplicateUserStorageAccessException &&
+                                throwable.getMessage().contains("User storage access already exists")
+                )
+                .verify();
+
+        verify(userStorageAccessRepository).existsByUserIdAndStorageIdAndIdNot(100L, 200L, -1L);
+        verify(userStorageAccessRepository, never()).save(any());
+    }
+
+    @Test
+    void getById_ShouldReturnUserStorageAccess_WhenExists() {
+        when(userStorageAccessRepository.findById(1L))
+                .thenReturn(Mono.just(testAccess));
+
+        StepVerifier.create(userStorageAccessService.getById(1L))
+                .assertNext(access -> {
+                    assertEquals(testAccess.getId(), access.getId());
+                    assertEquals(testAccess.getUserId(), access.getUserId());
+                    assertEquals(testAccess.getStorageId(), access.getStorageId());
+                    assertEquals(testAccess.getAccessLevel(), access.getAccessLevel());
+                })
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).findById(1L);
+    }
+
+    @Test
+    void getById_ShouldThrowUserStorageAccessNotFoundException_WhenNotFound() {
+        Long nonExistentId = 999L;
+        when(userStorageAccessRepository.findById(nonExistentId))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(userStorageAccessService.getById(nonExistentId))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof UserStorageAccessNotFoundException &&
+                                throwable.getMessage().contains("User storage access not found with ID: " + nonExistentId)
+                )
+                .verify();
+
+        verify(userStorageAccessRepository).findById(nonExistentId);
+    }
+
+    @Test
+    void update_ShouldThrowOperationNotAllowedException_WhenExpirationDateInPast() {
+        UserStorageAccess update = UserStorageAccess.builder()
+                .id(1L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.BASIC)
+                .grantedById(300L)
+                .expiresAt(LocalDateTime.now().minusDays(1))
+                .isActive(true)
+                .build();
+
+        when(userStorageAccessRepository.findById(1L))
+                .thenReturn(Mono.just(testAccess));
+
+        StepVerifier.create(userStorageAccessService.update(1L, update))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof OperationNotAllowedException &&
+                                throwable.getMessage().contains("Expiration date must be in the future")
+                )
+                .verify();
+
+        verify(userStorageAccessRepository).findById(1L);
+        verify(userStorageAccessRepository, never()).save(any());
+    }
+
+    @Test
+    void update_ShouldThrowDuplicateUserStorageAccessException_WhenUserAndStorageChangedToExisting() {
+        UserStorageAccess update = UserStorageAccess.builder()
+                .id(1L)
+                .userId(101L)
+                .storageId(201L)
+                .accessLevel(AccessLevel.BASIC)
+                .grantedById(300L)
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .isActive(true)
+                .build();
+
+        when(userStorageAccessRepository.findById(1L))
+                .thenReturn(Mono.just(testAccess));
+        when(userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(101L, 201L, 1L))
+                .thenReturn(Mono.just(true));
+
+        StepVerifier.create(userStorageAccessService.update(1L, update))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof DuplicateUserStorageAccessException &&
+                                throwable.getMessage().contains("User storage access already exists")
+                )
+                .verify();
+
+        verify(userStorageAccessRepository).findById(1L);
+        verify(userStorageAccessRepository).existsByUserIdAndStorageIdAndIdNot(101L, 201L, 1L);
+        verify(userStorageAccessRepository, never()).save(any());
+    }
+
+    @Test
+    void update_ShouldNotCheckDuplicate_WhenUserAndStorageNotChanged() {
+        UserStorageAccess update = UserStorageAccess.builder()
+                .id(1L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.ADMIN)
+                .grantedById(300L)
+                .expiresAt(LocalDateTime.now().plusDays(90))
+                .isActive(false)
+                .build();
+
+        when(userStorageAccessRepository.findById(1L))
+                .thenReturn(Mono.just(testAccess));
+        when(userStorageAccessRepository.save(any(UserStorageAccess.class)))
+                .thenReturn(Mono.just(update));
+
+        StepVerifier.create(userStorageAccessService.update(1L, update))
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).findById(1L);
+        verify(userStorageAccessRepository, never()).existsByUserIdAndStorageIdAndIdNot(anyLong(), anyLong(), anyLong());
+        verify(userStorageAccessRepository).save(any(UserStorageAccess.class));
+    }
+
+    @Test
+    void delete_ShouldDeleteUserStorageAccess() {
+        when(userStorageAccessRepository.deleteById(1L))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(userStorageAccessService.delete(1L))
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).deleteById(1L);
+    }
+
+    @Test
+    void countUserStorageAccessesByFilters_ShouldReturnCorrectCount() {
+        when(userStorageAccessRepository.countByFilters(100L, 200L, "MANAGER", true))
+                .thenReturn(Mono.just(1L));
+
+        StepVerifier.create(userStorageAccessService.countUserStorageAccessesByFilters(100L, 200L, "MANAGER", true))
+                .expectNext(1L)
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).countByFilters(100L, 200L, "MANAGER", true);
+    }
+
+    @Test
+    void findByUserAndStorage_ShouldReturnAccess_WhenExists() {
+        when(userStorageAccessRepository.findByUserIdAndStorageId(100L, 200L))
+                .thenReturn(Mono.just(testAccess));
+
+        StepVerifier.create(userStorageAccessService.findByUserAndStorage(100L, 200L))
+                .assertNext(access -> {
+                    assertEquals(testAccess.getId(), access.getId());
+                    assertEquals(100L, access.getUserId());
+                    assertEquals(200L, access.getStorageId());
+                })
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).findByUserIdAndStorageId(100L, 200L);
+    }
+
+    @Test
+    void findByUserAndStorage_ShouldThrowUserStorageAccessNotFoundException_WhenNotFound() {
+        when(userStorageAccessRepository.findByUserIdAndStorageId(999L, 999L))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(userStorageAccessService.findByUserAndStorage(999L, 999L))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof UserStorageAccessNotFoundException &&
+                                throwable.getMessage().contains("User storage access not found")
+                )
+                .verify();
+
+        verify(userStorageAccessRepository).findByUserIdAndStorageId(999L, 999L);
+    }
+
+    @Test
+    void hasAccess_ShouldReturnTrue_WhenValidAccessExists() {
+        when(userStorageAccessRepository.findByUserIdAndStorageId(100L, 200L))
+                .thenReturn(Mono.just(testAccess));
+
+        StepVerifier.create(userStorageAccessService.hasAccess(100L, 200L, AccessLevel.BASIC))
+                .expectNext(true)
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).findByUserIdAndStorageId(100L, 200L);
+    }
+
+
+
+    @Test
+    void hasAccess_ShouldReturnFalse_WhenAccessInactive() {
+        UserStorageAccess inactive = UserStorageAccess.builder()
+                .id(4L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.ADMIN)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(5))
+                .expiresAt(LocalDateTime.now().plusDays(25))
+                .isActive(false)
+                .build();
+
+        when(userStorageAccessRepository.findByUserIdAndStorageId(100L, 200L))
+                .thenReturn(Mono.just(inactive));
+
+        StepVerifier.create(userStorageAccessService.hasAccess(100L, 200L, AccessLevel.BASIC))
+                .expectNext(false)
+                .verifyComplete();
+    }
+
+    @Test
+    void hasAccess_ShouldReturnFalse_WhenAccessExpired() {
+        UserStorageAccess expired = UserStorageAccess.builder()
+                .id(3L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.ADMIN)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(10))
+                .expiresAt(LocalDateTime.now().minusDays(1))
+                .isActive(true)
+                .build();
+
+        when(userStorageAccessRepository.findByUserIdAndStorageId(100L, 200L))
+                .thenReturn(Mono.just(expired));
+
+        StepVerifier.create(userStorageAccessService.hasAccess(100L, 200L, AccessLevel.BASIC))
+                .expectNext(false)
+                .verifyComplete();
+    }
+
+    @Test
+    void hasAccess_ShouldReturnTrue_WhenHigherAccessLevel() {
+        when(userStorageAccessRepository.findByUserIdAndStorageId(100L, 200L))
+                .thenReturn(Mono.just(testAccess));
+
+        StepVerifier.create(userStorageAccessService.hasAccess(100L, 200L, AccessLevel.BASIC))
+                .expectNext(true)
+                .verifyComplete();
+    }
+
+    @Test
+    void hasAccess_ShouldReturnFalse_WhenLowerAccessLevel() {
+        UserStorageAccess basicAccess = UserStorageAccess.builder()
+                .id(1L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.BASIC)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(1))
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .isActive(true)
+                .build();
+
+        when(userStorageAccessRepository.findByUserIdAndStorageId(100L, 200L))
+                .thenReturn(Mono.just(basicAccess));
+
+        StepVerifier.create(userStorageAccessService.hasAccess(100L, 200L, AccessLevel.MANAGER))
+                .expectNext(false)
+                .verifyComplete();
+    }
+
+    @Test
+    void deactivate_ShouldDeactivateAccess() {
+        UserStorageAccess activeAccess = UserStorageAccess.builder()
+                .id(1L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.MANAGER)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(1))
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .isActive(true)
+                .build();
+
+        UserStorageAccess deactivatedAccess = UserStorageAccess.builder()
+                .id(1L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.MANAGER)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(1))
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .isActive(false)
+                .build();
+
+        when(userStorageAccessRepository.findById(1L))
+                .thenReturn(Mono.just(activeAccess));
+        when(userStorageAccessRepository.save(any(UserStorageAccess.class)))
+                .thenReturn(Mono.just(deactivatedAccess));
+
+        StepVerifier.create(userStorageAccessService.deactivate(1L))
+                .assertNext(access -> {
+                    assertFalse(access.getIsActive());
+                    assertEquals(1L, access.getId());
+                })
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).findById(1L);
+        verify(userStorageAccessRepository).save(argThat(savedAccess -> !savedAccess.getIsActive()));
+    }
+
+    @Test
+    void activate_ShouldActivateAccess() {
+        UserStorageAccess inactiveAccess = UserStorageAccess.builder()
+                .id(4L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.MANAGER)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(1))
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .isActive(false)
+                .build();
+
+        UserStorageAccess activatedAccess = UserStorageAccess.builder()
+                .id(4L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.MANAGER)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(1))
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .isActive(true)
+                .build();
+
+        when(userStorageAccessRepository.findById(4L))
+                .thenReturn(Mono.just(inactiveAccess));
+        when(userStorageAccessRepository.save(any(UserStorageAccess.class)))
+                .thenReturn(Mono.just(activatedAccess));
+
+        StepVerifier.create(userStorageAccessService.activate(4L))
+                .assertNext(access -> {
+                    assertTrue(access.getIsActive());
+                    assertEquals(4L, access.getId());
+                })
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).findById(4L);
+        verify(userStorageAccessRepository).save(argThat(savedAccess -> savedAccess.getIsActive()));
+    }
+
+
+    @Test
+    void deactivateExpiredAccesses_ShouldDeactivateAllExpired() {
+        List<UserStorageAccess> expiredAccesses = List.of(expiredAccess);
+        when(userStorageAccessRepository.findExpiredAccesses(any(LocalDateTime.class)))
+                .thenReturn(Flux.fromIterable(expiredAccesses));
+        when(userStorageAccessRepository.save(any(UserStorageAccess.class)))
+                .thenReturn(Mono.just(expiredAccess));
+
+        StepVerifier.create(userStorageAccessService.deactivateExpiredAccesses())
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).findExpiredAccesses(any(LocalDateTime.class));
+        verify(userStorageAccessRepository).save(argThat(access -> !access.getIsActive()));
+    }
+
+    @Test
+    void countActiveAccessesByUser_ShouldReturnCorrectCount() {
+        when(userStorageAccessRepository.countByUserIdAndIsActive(100L, true))
+                .thenReturn(Mono.just(2L));
+
+        StepVerifier.create(userStorageAccessService.countActiveAccessesByUser(100L))
+                .expectNext(2L)
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).countByUserIdAndIsActive(100L, true);
+    }
+
+    @Test
+    void countActiveAccessesByStorage_ShouldReturnCorrectCount() {
+        when(userStorageAccessRepository.countByStorageIdAndIsActive(200L, true))
+                .thenReturn(Mono.just(1L));
+
+        StepVerifier.create(userStorageAccessService.countActiveAccessesByStorage(200L))
+                .expectNext(1L)
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).countByStorageIdAndIsActive(200L, true);
+    }
+
+    @Test
+    void findByUserAndStorage_ShouldThrowException_WhenNotFound() {
+        when(userStorageAccessRepository.findByUserIdAndStorageId(999L, 999L))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(userStorageAccessService.findByUserAndStorage(999L, 999L))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof UserStorageAccessNotFoundException &&
+                                throwable.getMessage().contains("User storage access not found for user ID: 999")
+                )
+                .verify();
+
+        verify(userStorageAccessRepository).findByUserIdAndStorageId(999L, 999L);
+    }
+
+    @Test
+    void activate_ShouldThrowException_WhenNotFound() {
+        Long nonExistentId = 999L;
+        when(userStorageAccessRepository.findById(nonExistentId))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(userStorageAccessService.activate(nonExistentId))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof UserStorageAccessNotFoundException &&
+                                throwable.getMessage().contains("User storage access not found with ID: " + nonExistentId)
+                )
+                .verify();
+
+        verify(userStorageAccessRepository).findById(nonExistentId);
+    }
+
+    @Test
+    void deactivate_ShouldThrowException_WhenNotFound() {
+        Long nonExistentId = 999L;
+        when(userStorageAccessRepository.findById(nonExistentId))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(userStorageAccessService.deactivate(nonExistentId))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof UserStorageAccessNotFoundException &&
+                                throwable.getMessage().contains("User storage access not found with ID: " + nonExistentId)
+                )
+                .verify();
+
+        verify(userStorageAccessRepository).findById(nonExistentId);
+    }
+
+    @Test
+    void update_ShouldThrowException_WhenNotFound() {
+        Long nonExistentId = 999L;
+        UserStorageAccess update = UserStorageAccess.builder()
+                .id(nonExistentId)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.BASIC)
+                .grantedById(300L)
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .isActive(true)
+                .build();
+
+        when(userStorageAccessRepository.findById(nonExistentId))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(userStorageAccessService.update(nonExistentId, update))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof UserStorageAccessNotFoundException &&
+                                throwable.getMessage().contains("User storage access not found with ID: " + nonExistentId)
+                )
+                .verify();
+
+        verify(userStorageAccessRepository).findById(nonExistentId);
+    }
+
+    @Test
+    void findUserStorageAccessesByFilters_ShouldHandleNullFilters() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<UserStorageAccess> allAccesses = List.of(testAccess, testAccess2, expiredAccess, inactiveAccess);
+
+        when(userStorageAccessRepository.findByUserIdAndStorageIdAndAccessLevel(null, null, null, null, pageable))
+                .thenReturn(Flux.fromIterable(allAccesses));
+
+        StepVerifier.create(userStorageAccessService.findUserStorageAccessesByFilters(null, null, null, null, pageable))
+                .expectNextCount(4)
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).findByUserIdAndStorageIdAndAccessLevel(null, null, null, null, pageable);
+    }
+
+    @Test
+    void countUserStorageAccessesByFilters_ShouldHandleNullFilters() {
+        when(userStorageAccessRepository.countByFilters(null, null, null, null))
+                .thenReturn(Mono.just(4L));
+
+        StepVerifier.create(userStorageAccessService.countUserStorageAccessesByFilters(null, null, null, null))
+                .expectNext(4L)
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).countByFilters(null, null, null, null);
+    }
+
+    @Test
+    void hasAccess_ShouldReturnTrue_WhenEqualAccessLevel() {
+        UserStorageAccess accessWithExactLevel = UserStorageAccess.builder()
+                .id(1L)
+                .userId(100L)
+                .storageId(200L)
+                .accessLevel(AccessLevel.MANAGER)
+                .grantedById(300L)
+                .grantedAt(LocalDateTime.now().minusDays(1))
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .isActive(true)
+                .build();
+
+        when(userStorageAccessRepository.findByUserIdAndStorageId(100L, 200L))
+                .thenReturn(Mono.just(accessWithExactLevel));
+
+        StepVerifier.create(userStorageAccessService.hasAccess(100L, 200L, AccessLevel.MANAGER))
+                .expectNext(true)
+                .verifyComplete();
+    }
+
+    @Test
+    void deactivateExpiredAccesses_ShouldNotSave_WhenNoExpiredAccesses() {
+        when(userStorageAccessRepository.findExpiredAccesses(any(LocalDateTime.class)))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(userStorageAccessService.deactivateExpiredAccesses())
+                .verifyComplete();
+
+        verify(userStorageAccessRepository).findExpiredAccesses(any(LocalDateTime.class));
+        verify(userStorageAccessRepository, never()).save(any());
+    }
+}

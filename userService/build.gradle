@@ -33,6 +33,7 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.7.0'
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
+	implementation 'io.projectreactor:reactor-test:3.6.0'
 
 	implementation 'com.playtika.reactivefeign:feign-reactor-spring-cloud-starter:4.2.1'
 
