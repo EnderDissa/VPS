@@ -4,5 +4,6 @@ public enum BorrowStatus {
     ACTIVE,
     RETURNED,
     OVERDUE,
-    CANCELLED
+    CANCELLED,
+    PENDING
 }
