@@ -3,7 +3,7 @@ server:
 
 spring:
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/warehouse
+    url: r2dbc:postgresql://postgres:5432/warehouse
     username: liquibase
     password: securepassword
   liquibase:

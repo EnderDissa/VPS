@@ -22,6 +22,8 @@ eureka:
     fetch-registry: false
     service-url:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+    healthcheck:
+      enabled: true
   server:
     # Disable self-preservation for development (not recommended for production)
     enable-self-preservation: false

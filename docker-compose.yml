@@ -1,0 +1,94 @@
+services:
+  # Database service shared by all microservices
+  postgres:
+    image: postgres:15
+    container_name: warehouse-postgres
+    environment:
+      POSTGRES_DB: warehouse
+      POSTGRES_USER: liquibase
+      POSTGRES_PASSWORD: securepassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liquibase -d warehouse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Eureka Service Registry
+  eureka:
+    build: ./eureka
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - SERVER_PORT=8761
+
+  # API Gateway
+  gateway:
+    build: ./gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8080
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+      - SPRING_CLOUD_CONFIG_URI=http://eureka:8761
+    depends_on:
+      - eureka
+
+  # Item Service
+  item-service:
+    build: ./itemService
+    container_name: item-service
+    ports:
+      - "8081:8080"
+    environment:
+      - SERVER_PORT=8080
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+      - SPRING_CLOUD_CONFIG_URI=http://eureka:8761
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
+      - SPRING_DATASOURCE_USERNAME=liquibase
+      - SPRING_DATASOURCE_PASSWORD=securepassword
+    depends_on:
+      - postgres
+      - eureka
+
+  # Storage Service
+  storage-service:
+    build: ./storageService
+    container_name: storage-service
+    ports:
+      - "8082:8080"
+    environment:
+      - SERVER_PORT=8080
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+      - SPRING_CLOUD_CONFIG_URI=http://eureka:8761
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
+      - SPRING_DATASOURCE_USERNAME=liquibase
+      - SPRING_DATASOURCE_PASSWORD=securepassword
+    depends_on:
+      - postgres
+      - eureka
+
+  # User Service
+  user-service:
+    build: ./userService
+    container_name: user-service
+    ports:
+      - "8083:8080"
+    environment:
+      - SERVER_PORT=8080
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+      - SPRING_CLOUD_CONFIG_URI=http://eureka:8761
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
+      - SPRING_DATASOURCE_USERNAME=liquibase
+      - SPRING_DATASOURCE_PASSWORD=securepassword
+    depends_on:
+      - postgres
+      - eureka
+
+volumes:
+  postgres_data:
