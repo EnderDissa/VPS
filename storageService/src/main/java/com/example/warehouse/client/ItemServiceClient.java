@@ -12,4 +12,7 @@ public interface ItemServiceClient {
 
     @GetMapping("/api/v1/items/{id}")
     Mono<Item> getItemById(@PathVariable("id") Long id);
+
+    @GetMapping("/api/v1/keeping/countByStorage/{id}")
+    Mono<Long> countKeepingsByStorageId(@PathVariable("id") Long id);
 }

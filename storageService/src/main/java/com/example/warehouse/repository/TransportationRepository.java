@@ -44,7 +44,7 @@ public interface TransportationRepository extends JpaRepository<Transportation, 
     Page<Transportation> findOverdueTransportations(@Param("now") LocalDateTime now, Pageable pageable);
 
     @Query("SELECT CASE WHEN COUNT(t) = 0 THEN true ELSE false END FROM Transportation t " +
-            "WHERE t.driver.id = :driverId AND t.status IN ('PLANNED', 'IN_PROGRESS') " +
+            "WHERE t.driverId = :driverId AND t.status IN ('PLANNED', 'IN_PROGRESS') " +
             "AND ((t.scheduledDeparture BETWEEN :start AND :end) OR (t.scheduledArrival BETWEEN :start AND :end))")
     boolean isDriverAvailable(@Param("driverId") Long driverId,
                               @Param("start") LocalDateTime start,

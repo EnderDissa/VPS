@@ -1,44 +1,62 @@
 databaseChangeLog:
   - changeSet:
-      id: 1
-      author: warehouse
+      id: storage-1
+      author: storage
       changes:
         - createTable:
             tableName: storages
             columns:
-              - column: {name: id, type: BIGINT, autoIncrement: true, constraints: {primaryKey: true, nullable: false}}
-              - column: {name: name, type: VARCHAR(255), constraints: {nullable: false}}
-              - column: {name: address, type: TEXT, constraints: {nullable: false}}
-              - column: {name: capacity, type: INT}
-              - column: {name: created_at, type: TIMESTAMP, defaultValueComputed: "CURRENT_TIMESTAMP"}
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: name, type: VARCHAR(255), constraints: { nullable: false } }
+              - column: { name: address, type: TEXT, constraints: { nullable: false } }
+              - column: { name: capacity, type: INT }
+              - column: { name: created_at, type: TIMESTAMP, defaultValueComputed: "CURRENT_TIMESTAMP" }
 
         - createTable:
             tableName: vehicles
             columns:
-              - column: {name: id, type: BIGINT, autoIncrement: true, constraints: {primaryKey: true, nullable: false}}
-              - column: {name: brand, type: VARCHAR(100), constraints: {nullable: false}}
-              - column: {name: model, type: VARCHAR(100), constraints: {nullable: false}}
-              - column: {name: license_plate, type: VARCHAR(20), constraints: {nullable: false, unique: true}}
-              - column: {name: year, type: INT}
-              - column: {name: capacity, type: INT}
-              - column: {name: status, type: VARCHAR(20), constraints: {nullable: false}, defaultValue: "AVAILABLE"}
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: brand, type: VARCHAR(100), constraints: { nullable: false } }
+              - column: { name: model, type: VARCHAR(100), constraints: { nullable: false } }
+              - column: { name: license_plate, type: VARCHAR(20), constraints: { nullable: false, unique: true } }
+              - column: { name: year, type: INT }
+              - column: { name: capacity, type: INT }
+              - column: { name: status, type: VARCHAR(20), constraints: { nullable: false }, defaultValue: "AVAILABLE" }
 
         - createTable:
             tableName: transportations
             columns:
-              - column: {name: id, type: BIGINT, autoIncrement: true, constraints: {primaryKey: true, nullable: false}}
-              - column: {name: item_id, type: BIGINT, constraints: {nullable: false}}
-              - column: {name: vehicle_id, type: BIGINT, constraints: {nullable: false}}
-              - column: {name: driver_id, type: BIGINT, constraints: {nullable: false}}
-              - column: {name: from_storage_id, type: BIGINT, constraints: {nullable: false}}
-              - column: {name: to_storage_id, type: BIGINT, constraints: {nullable: false}}
-              - column: {name: status, type: VARCHAR(20), constraints: {nullable: false}, defaultValue: "PLANNED"}
-              - column: {name: scheduled_departure, type: TIMESTAMP}
-              - column: {name: actual_departure, type: TIMESTAMP}
-              - column: {name: scheduled_arrival, type: TIMESTAMP}
-              - column: {name: actual_arrival, type: TIMESTAMP}
-              - column: {name: created_at, type: TIMESTAMP, defaultValueComputed: "CURRENT_TIMESTAMP"}
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: item_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: vehicle_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: driver_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: from_storage_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: to_storage_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: status, type: VARCHAR(20), constraints: { nullable: false }, defaultValue: "PLANNED" }
+              - column: { name: scheduled_departure, type: TIMESTAMP }
+              - column: { name: actual_departure, type: TIMESTAMP }
+              - column: { name: scheduled_arrival, type: TIMESTAMP }
+              - column: { name: actual_arrival, type: TIMESTAMP }
+              - column: { name: created_at, type: TIMESTAMP, defaultValueComputed: "CURRENT_TIMESTAMP" }
 
+        - createIndex:
+            indexName: idx_transportation_status
+            tableName: transportations
+            columns:
+              - column: { name: status }
+
+  - changeSet:
+      id: storage-1.1
+      author: storage
+      preConditions:
+        onFail: MARK_RAN
+        onFailMessage: "Skipping FK - storages table not ready yet"
+        and:
+          - tableExists:
+            tableName: items
+          - tableExists:
+            tableName: users
+      changes:
         - addForeignKeyConstraint:
             baseTableName: transportations
             baseColumnNames: item_id
@@ -73,10 +91,3 @@ databaseChangeLog:
             referencedTableName: storages
             referencedColumnNames: id
             constraintName: fk_transportation_to_storage
-
-
-        - createIndex:
-            indexName: idx_transportation_status
-            tableName: transportations
-            columns:
-              - column: {name: status}

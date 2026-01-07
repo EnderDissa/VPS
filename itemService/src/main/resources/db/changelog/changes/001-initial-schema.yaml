@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
-      id: 1
-      author: warehouse
+      id: item-1
+      author: item
       changes:
         - createTable:
             tableName: users
@@ -73,7 +73,20 @@ databaseChangeLog:
               - column: {name: expires_at, type: TIMESTAMP}
               - column: {name: is_active, type: BOOLEAN, constraints: {nullable: false}, defaultValue: "true"}
 
+        - createIndex:
+            indexName: idx_keeping_storage_item
+            tableName: keeping
+            columns:
+              - column: {name: storage_id}
+              - column: {name: item_id}
 
+        - createIndex:
+            indexName: idx_borrowing_status
+            tableName: borrowings
+            columns:
+              - column: {name: status}
+  - changeSet:
+      changes:
         - addForeignKeyConstraint:
             baseTableName: keeping
             baseColumnNames: storage_id
@@ -115,7 +128,7 @@ databaseChangeLog:
             referencedTableName: users
             referencedColumnNames: id
             constraintName: fk_maintenance_technician
-            
+
         - addForeignKeyConstraint:
             baseTableName: user_storage_access
             baseColumnNames: user_id
@@ -141,16 +154,3 @@ databaseChangeLog:
             tableName: user_storage_access
             columnNames: user_id, storage_id
             constraintName: uk_user_storage_access
-
-        - createIndex:
-            indexName: idx_keeping_storage_item
-            tableName: keeping
-            columns:
-              - column: {name: storage_id}
-              - column: {name: item_id}
-
-        - createIndex:
-            indexName: idx_borrowing_status
-            tableName: borrowings
-            columns:
-              - column: {name: status}

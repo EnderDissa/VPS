@@ -95,4 +95,9 @@ public class KeepingController {
                     return new ResponseEntity<>(keepingDtos, headers, HttpStatus.OK);
                 });
     }
+
+    @GetMapping("/countByStorage/{id}")
+    public Mono<Long> countByStorageId(@PathVariable Long id) {
+        return service.countKeepingsByFilters(id, null);
+    }
 }

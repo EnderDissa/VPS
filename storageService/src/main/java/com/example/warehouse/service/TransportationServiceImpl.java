@@ -38,7 +38,7 @@ public class TransportationServiceImpl implements TransportationService {
     @Override
     public Mono<Transportation> create(Transportation transportation) {
         log.info("Creating new transportation for item ID: {} from storage {} to storage {}",
-                transportation.getItem().getId(),
+                transportation.getItemId(),
                 transportation.getFromStorage().getId(),
                 transportation.getToStorage().getId());
 
@@ -49,10 +49,10 @@ public class TransportationServiceImpl implements TransportationService {
 
         // Получаем связанные сущности через клиенты (они уже реактивные)
         return Mono.zip(
-                        itemServiceClient.getItemById(transportation.getItem().getId())
-                                .switchIfEmpty(Mono.error(new ItemNotFoundException("Item not found with ID: " + transportation.getItem().getId()))),
-                        userServiceClient.getUserById(transportation.getDriver().getId())
-                                .switchIfEmpty(Mono.error(new UserNotFoundException("User not found with ID: " + transportation.getDriver().getId()))),
+                        itemServiceClient.getItemById(transportation.getItemId())
+                                .switchIfEmpty(Mono.error(new ItemNotFoundException("Item not found with ID: " + transportation.getItemId()))),
+                        userServiceClient.getUserById(transportation.getDriverId())
+                                .switchIfEmpty(Mono.error(new UserNotFoundException("User not found with ID: " + transportation.getDriverId()))),
                         vehicleService.getById(transportation.getVehicle().getId())
                                 .switchIfEmpty(Mono.error(new VehicleNotFoundException("Vehicle not found with ID: " + transportation.getVehicle().getId()))),
                         storageService.getById(transportation.getFromStorage().getId())
@@ -71,8 +71,8 @@ public class TransportationServiceImpl implements TransportationService {
                     return checkAvailability(driver.getId(), vehicle.getId(),
                             transportation.getScheduledDeparture(), transportation.getScheduledArrival())
                             .then(Mono.fromCallable(() -> {
-                                transportation.setItem(item);
-                                transportation.setDriver(driver);
+                                transportation.setItemId(item.getId());
+                                transportation.setDriverId(driver.getId());
                                 transportation.setVehicle(vehicle);
                                 transportation.setFromStorage(fromStorage);
                                 transportation.setToStorage(toStorage);
@@ -214,20 +214,20 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
     private Mono<Void> updateItemIfNeeded(Transportation existing, Transportation updated) {
-        if (!existing.getItem().getId().equals(updated.getItem().getId())) {
-            return itemServiceClient.getItemById(updated.getItem().getId())
-                    .switchIfEmpty(Mono.error(new ItemNotFoundException("Item not found with ID: " + updated.getItem().getId())))
-                    .doOnNext(existing::setItem)
+        if (!existing.getItemId().equals(updated.getItemId())) {
+            return itemServiceClient.getItemById(updated.getItemId())
+                    .switchIfEmpty(Mono.error(new ItemNotFoundException("Item not found with ID: " + updated.getItemId())))
+                    .doOnNext(item -> existing.setItemId(item.getId()))
                     .then();
         }
         return Mono.empty();
     }
 
     private Mono<Void> updateDriverIfNeeded(Transportation existing, Transportation updated) {
-        if (!existing.getDriver().getId().equals(updated.getDriver().getId())) {
-            return userServiceClient.getUserById(updated.getDriver().getId())
-                    .switchIfEmpty(Mono.error(new UserNotFoundException("User not found with ID: " + updated.getDriver().getId())))
-                    .doOnNext(existing::setDriver)
+        if (!existing.getDriverId().equals(updated.getDriverId())) {
+            return userServiceClient.getUserById(updated.getDriverId())
+                    .switchIfEmpty(Mono.error(new UserNotFoundException("User not found with ID: " + updated.getDriverId())))
+                    .doOnNext(user -> existing.setDriverId(user.getId()))
                     .then();
         }
         return Mono.empty();

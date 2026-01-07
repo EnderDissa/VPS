@@ -1,5 +1,6 @@
 package com.example.warehouse.service;
 
+import com.example.warehouse.client.ItemServiceClient;
 import com.example.warehouse.entity.Storage;
 import com.example.warehouse.exception.DuplicateStorageException;
 import com.example.warehouse.exception.StorageNotFoundException;
@@ -21,6 +22,7 @@ import reactor.core.scheduler.Schedulers;
 @RequiredArgsConstructor
 public class StorageServiceImpl implements StorageService {
 
+    private final ItemServiceClient itemServiceClient;
     private final StorageRepository storageRepository;
 
     @Override
@@ -83,14 +85,19 @@ public class StorageServiceImpl implements StorageService {
                     Storage storage = storageRepository.findById(id)
                             .orElseThrow(() -> new StorageNotFoundException("Storage not found with ID: " + id));
 
-                    long keepingCount = storageRepository.countKeepingsByStorageId(id);
-                    if (keepingCount > 0) {
-                        throw new StorageNotEmptyException(
-                                "Cannot delete storage with ID: " + id + ". It contains " + keepingCount + " items.");
-                    }
+                    return itemServiceClient.countKeepingsByStorageId(id)
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .flatMap(keepingCount -> Mono.fromCallable(() -> {
+                                if (keepingCount > 0) {
+                                    throw new StorageNotEmptyException(
+                                            "Cannot delete storage with ID: " + id + ". It contains " + keepingCount + " items.");
+                                }
 
-                    storageRepository.deleteById(id);
-                    return null;
+                                storageRepository.deleteById(id);
+                                return null;
+                            }))
+                            .subscribeOn(Schedulers.boundedElastic());
+
                 })
                 .subscribeOn(Schedulers.boundedElastic())
                 .then()

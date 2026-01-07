@@ -17,7 +17,4 @@ public interface StorageRepository extends JpaRepository<Storage, Long> {
     long countByNameContainingIgnoreCase(String name);
 
     Page<Storage> findAllBy(Pageable pageable);
-
-    @Query("SELECT COUNT(k) FROM Keeping k WHERE k.storage.id = :storageId")
-    long countKeepingsByStorageId(@Param("storageId") Long storageId);
 }

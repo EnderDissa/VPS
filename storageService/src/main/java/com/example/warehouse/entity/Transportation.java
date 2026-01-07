@@ -20,9 +20,7 @@ public class Transportation {
     private Long id;
 
     @NotNull(message = "Item is required")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id", nullable = false)
-    private Item item;
+    private Long itemId;
 
     @NotNull(message = "Vehicle is required")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,9 +28,7 @@ public class Transportation {
     private Vehicle vehicle;
 
     @NotNull(message = "Driver is required")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "driver_id", nullable = false)
-    private User driver;
+    private Long driverId;
 
     @NotNull(message = "From storage is required")
     @ManyToOne(fetch = FetchType.LAZY)

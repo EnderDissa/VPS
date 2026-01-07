@@ -1,5 +1,6 @@
 package com.example.warehouse.service;
 
+import com.example.warehouse.client.ItemServiceClient;
 import com.example.warehouse.entity.Storage;
 import com.example.warehouse.exception.DuplicateStorageException;
 import com.example.warehouse.exception.StorageNotFoundException;
@@ -33,6 +34,9 @@ class StorageServiceImplTest {
 
     @Mock
     private StorageRepository storageRepository;
+
+    @Mock
+    private ItemServiceClient itemServiceClient;
 
     @InjectMocks
     private StorageServiceImpl storageService;
@@ -306,7 +310,7 @@ class StorageServiceImplTest {
     void delete_ShouldDeleteStorage_WhenStorageExistsAndEmpty() {
         // Arrange
         when(storageRepository.findById(2L)).thenReturn(Optional.of(testStorage2));
-        when(storageRepository.countKeepingsByStorageId(2L)).thenReturn(0L);
+        when(itemServiceClient.countKeepingsByStorageId(2L).block()).thenReturn(0L);
         doNothing().when(storageRepository).deleteById(2L);
 
         // Act & Assert
@@ -314,7 +318,7 @@ class StorageServiceImplTest {
                 .verifyComplete();
 
         verify(storageRepository).findById(2L);
-        verify(storageRepository).countKeepingsByStorageId(2L);
+        verify(itemServiceClient).countKeepingsByStorageId(2L);
         verify(storageRepository).deleteById(2L);
     }
 
@@ -333,7 +337,7 @@ class StorageServiceImplTest {
                 .verify();
 
         verify(storageRepository).findById(nonExistentId);
-        verify(storageRepository, never()).countKeepingsByStorageId(anyLong());
+        verify(itemServiceClient, never()).countKeepingsByStorageId(anyLong());
         verify(storageRepository, never()).deleteById(anyLong());
     }
 
@@ -341,7 +345,7 @@ class StorageServiceImplTest {
     void delete_ShouldThrowStorageNotEmptyException_WhenStorageHasItems() {
         // Arrange
         when(storageRepository.findById(1L)).thenReturn(Optional.of(testStorage1));
-        when(storageRepository.countKeepingsByStorageId(1L)).thenReturn(1L);
+        when(itemServiceClient.countKeepingsByStorageId(1L).block()).thenReturn(1L);
 
         // Act & Assert
         StepVerifier.create(storageService.delete(1L))
@@ -353,7 +357,7 @@ class StorageServiceImplTest {
                 .verify();
 
         verify(storageRepository).findById(1L);
-        verify(storageRepository).countKeepingsByStorageId(1L);
+        verify(itemServiceClient).countKeepingsByStorageId(1L);
         verify(storageRepository, never()).deleteById(anyLong());
     }
 
@@ -565,7 +569,7 @@ class StorageServiceImplTest {
                 .build();
 
         when(storageRepository.findById(7L)).thenReturn(Optional.of(emptyStorage));
-        when(storageRepository.countKeepingsByStorageId(7L)).thenReturn(0L);
+        when(itemServiceClient.countKeepingsByStorageId(7L).block()).thenReturn(0L);
         doNothing().when(storageRepository).deleteById(7L);
 
         // Act & Assert

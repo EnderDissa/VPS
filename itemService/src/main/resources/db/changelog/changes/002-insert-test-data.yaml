@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
-      id: 2
-      author: warehouse
+      id: item-2
+      author: item
       changes:
         - insert:
             tableName: users

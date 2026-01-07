@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
-      id: 2
-      author: warehouse
+      id: storage-2
+      author: storage
       changes:
         - insert:
             tableName: storages

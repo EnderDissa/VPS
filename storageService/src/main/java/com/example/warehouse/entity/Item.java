@@ -15,37 +15,19 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "items")
 public class Item {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
 
-    @NotBlank(message = "Name is required")
-    @Size(max = 255, message = "Name must not exceed 255 characters")
-    @Column(nullable = false)
     private String name;
 
-    @NotNull(message = "Type is required")
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ItemType type;
 
-    @NotNull(message = "Condition is required")
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ItemCondition condition;
 
-    @Size(max = 100, message = "Serial number must not exceed 100 characters")
-    @Column(name = "serial_number", unique = true)
     private String serialNumber;
 
-    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 }

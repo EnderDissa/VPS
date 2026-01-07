@@ -49,9 +49,9 @@ public record TransportationDTO(
     public TransportationDTO(Transportation transportation) {
         this(
                 transportation != null ? transportation.getId() : null,
-                transportation != null && transportation.getItem() != null ? transportation.getItem().getId() : null,
+                transportation != null && transportation.getItemId() != null ? transportation.getItemId() : null,
                 transportation != null && transportation.getVehicle() != null ? transportation.getVehicle().getId() : null,
-                transportation != null && transportation.getDriver() != null ? transportation.getDriver().getId() : null,
+                transportation != null && transportation.getDriverId() != null ? transportation.getDriverId() : null,
                 transportation != null && transportation.getFromStorage() != null ? transportation.getFromStorage().getId() : null,
                 transportation != null && transportation.getToStorage() != null ? transportation.getToStorage().getId() : null,
                 transportation != null ? transportation.getStatus() : TransportStatus.PLANNED,

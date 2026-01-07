@@ -37,4 +37,10 @@ public class Fallback implements UserServiceClient, ItemServiceClient {
         log.warn("Fallback: Returning error for item id: {}", id);
         return Mono.error(new RuntimeException("ItemService is currently unavailable (fallback). Original cause: " + cause));
     }
+
+    @Override
+    public Mono<Long> countKeepingsByStorageId(Long id) {
+        log.warn("Fallback: Returning error for keeping count: {}", id);
+        return Mono.error(new RuntimeException("ItemService is currently unavailable (fallback). Original cause: " + cause));
+    }
 }
