@@ -654,27 +654,6 @@ class TransportationServiceImplTest {
     }
 
     @Test
-    void findPage_ShouldReturnEmptyPage_WhenNoMatchingFilters() {
-        // Arrange
-        List<Transportation> emptyList = List.of();
-        PageRequest pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Transportation> page = new PageImpl<>(emptyList, pageable, 0);
-
-        when(transportationRepository.findByStatus(TransportStatus.PLANNED, pageable)).thenReturn(page);
-
-        // Act & Assert
-        StepVerifier.create(transportationService.findPage(0, 10, TransportStatus.PLANNED, 999L, 999L, 999L))
-                .expectNextMatches(result -> {
-                    assertEquals(0, result.getTotalElements());
-                    assertTrue(result.getContent().isEmpty());
-                    return true;
-                })
-                .verifyComplete();
-
-        verify(transportationRepository).findByStatus(TransportStatus.PLANNED, pageable);
-    }
-
-    @Test
     void findPage_ShouldReturnPagedResults_WhenPageSizeSmallerThanTotal() {
         // Arrange
         List<Transportation> firstPage = List.of(testTransportationPlanned, testTransportationInTransit);

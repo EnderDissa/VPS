@@ -108,7 +108,6 @@ public class VehicleController {
                 .doOnError(error -> log.error("Error fetching vehicles page: {}", error.getMessage()));
     }
 
-    // Дополнительные endpoints для реактивных операций
     @GetMapping("/status/{status}")
     @Operation(summary = "Get vehicles by status")
     public Flux<VehicleDTO> getByStatus(@PathVariable VehicleStatus status) {

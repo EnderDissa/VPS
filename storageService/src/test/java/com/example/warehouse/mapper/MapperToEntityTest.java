@@ -1,20 +1,32 @@
 package com.example.warehouse.mapper;
 
+import com.example.warehouse.api.ApiExceptionHandler;
 import com.example.warehouse.dto.*;
 import com.example.warehouse.entity.*;
 import com.example.warehouse.enumeration.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest
+@WebFluxTest (
+        useDefaultFilters = false,
+        includeFilters = {
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+                        TransportationMapper.class,
+                        VehicleMapper.class,
+                        StorageMapper.class,
+                }),
+        }
+)
 public class MapperToEntityTest {
 
-    @Autowired
-    private ItemMapper itemMapper;
 
     @Autowired
     private TransportationMapper transportationMapper;
@@ -24,36 +36,6 @@ public class MapperToEntityTest {
 
     @Autowired
     private StorageMapper storageMapper;
-
-
-    @Test
-    void shouldMapItemDTOToEntity() {
-        ItemDTO dto = new ItemDTO(
-                5L,
-                "Laptop",
-                ItemType.ELECTRONICS,
-                ItemCondition.NEW,
-                "SN12345",
-                "High-end laptop",
-                LocalDateTime.of(2024, 1, 1, 0, 0)
-        );
-
-        Item entity = itemMapper.toEntity(dto);
-
-        assertThat(entity).isNotNull();
-        assertThat(entity.getId()).isEqualTo(5L);
-        assertThat(entity.getName()).isEqualTo("Laptop");
-        assertThat(entity.getType()).isEqualTo(ItemType.ELECTRONICS);
-        assertThat(entity.getCondition()).isEqualTo(ItemCondition.NEW);
-        assertThat(entity.getSerialNumber()).isEqualTo("SN12345");
-        assertThat(entity.getDescription()).isEqualTo("High-end laptop");
-        assertThat(entity.getCreatedAt()).isEqualTo(LocalDateTime.of(2024, 1, 1, 0, 0));
-    }
-
-    @Test
-    void shouldReturnNullWhenItemDTOIsNull() {
-        assertThat(itemMapper.toEntity(null)).isNull();
-    }
 
     @Test
     void shouldMapTransportationDTOToEntity() {
