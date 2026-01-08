@@ -9,7 +9,6 @@ import reactivefeign.spring.config.EnableReactiveFeignClients;
 
 @SpringBootApplication
 @EnableReactiveFeignClients
-@EnableR2dbcRepositories
 public class WarehouseApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(WarehouseApplication.class, args);

@@ -4,6 +4,11 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class ApiError {
     private OffsetDateTime timestamp;
     private int status;
@@ -30,70 +35,6 @@ public class ApiError {
 
     public static ApiError of(int status, String error, ErrorCode code, String message, String path) {
         return new ApiError(OffsetDateTime.now(), status, error, code, message, path, new ArrayList<>(), new ArrayList<>());
-    }
-
-    public OffsetDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public ErrorCode getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public List<String> getDetails() {
-        return details;
-    }
-
-    public List<ValidationError> getValidationErrors() {
-        return validationErrors;
-    }
-
-    public void setTimestamp(OffsetDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public void setCode(ErrorCode code) {
-        this.code = code;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public void setDetails(List<String> details) {
-        this.details = details;
-    }
-
-    public void setValidationErrors(List<ValidationError> validationErrors) {
-        this.validationErrors = validationErrors;
     }
 
     public void addDetail(String detail) {
