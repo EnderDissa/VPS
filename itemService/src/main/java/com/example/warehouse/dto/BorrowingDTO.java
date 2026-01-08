@@ -57,7 +57,7 @@ public record BorrowingDTO(
         this(
                 borrowing != null ? borrowing.getId() : null,
                 borrowing != null && borrowing.getItem() != null ? borrowing.getItem().getId() : null,
-                borrowing != null && borrowing.getUser() != null ? borrowing.getUser().getId() : null,
+                borrowing != null && borrowing.getUserId() != null ? borrowing.getUserId() : null,
                 borrowing != null ? borrowing.getQuantity() : 1,
                 borrowing != null ? borrowing.getBorrowDate() : LocalDateTime.now(),
                 borrowing != null ? borrowing.getExpectedReturnDate() : null,

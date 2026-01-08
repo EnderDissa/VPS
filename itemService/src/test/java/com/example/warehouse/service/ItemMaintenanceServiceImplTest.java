@@ -93,7 +93,7 @@ class ItemMaintenanceServiceImplTest {
         testMaintenance = ItemMaintenance.builder()
                 .id(1L)
                 .item(testItem)
-                .technician(testTechnician)
+                .technicianId(testTechnician.getId())
                 .maintenanceDate(LocalDateTime.now().minusDays(1))
                 .nextMaintenanceDate(LocalDateTime.now().plusMonths(6))
                 .cost(new BigDecimal("150.50"))
@@ -108,7 +108,7 @@ class ItemMaintenanceServiceImplTest {
         // Arrange
         ItemMaintenance newMaintenance = ItemMaintenance.builder()
                 .item(testItem2)
-                .technician(testTechnician2)
+                .technicianId(testTechnician2.getId())
                 .maintenanceDate(LocalDateTime.now().minusHours(2))
                 .nextMaintenanceDate(LocalDateTime.now().plusMonths(3))
                 .cost(new BigDecimal("75.25"))
@@ -119,7 +119,7 @@ class ItemMaintenanceServiceImplTest {
         ItemMaintenance savedMaintenance = ItemMaintenance.builder()
                 .id(2L)
                 .item(testItem2)
-                .technician(testTechnician2)
+                .technicianId(testTechnician2.getId())
                 .maintenanceDate(LocalDateTime.now().minusHours(2))
                 .nextMaintenanceDate(LocalDateTime.now().plusMonths(3))
                 .cost(new BigDecimal("75.25"))
@@ -137,7 +137,7 @@ class ItemMaintenanceServiceImplTest {
                 .expectNextMatches(maintenance -> {
                     assertNotNull(maintenance.getId());
                     assertEquals(testItem2.getId(), maintenance.getItem().getId());
-                    assertEquals(testTechnician2.getId(), maintenance.getTechnician().getId());
+                    assertEquals(testTechnician2.getId(), maintenance.getTechnicianId());
                     assertEquals(new BigDecimal("75.25"), maintenance.getCost());
                     assertEquals("Display calibration", maintenance.getDescription());
                     assertEquals(MaintenanceStatus.COMPLETED, maintenance.getStatus());
@@ -160,7 +160,7 @@ class ItemMaintenanceServiceImplTest {
                 .expectNextMatches(maintenance -> {
                     assertEquals(testMaintenance.getId(), maintenance.getId());
                     assertEquals(testItem.getId(), maintenance.getItem().getId());
-                    assertEquals(testTechnician.getId(), maintenance.getTechnician().getId());
+                    assertEquals(testTechnician.getId(), maintenance.getTechnicianId());
                     assertEquals(new BigDecimal("150.50"), maintenance.getCost());
                     assertEquals(MaintenanceStatus.COMPLETED, maintenance.getStatus());
                     return true;
@@ -190,7 +190,7 @@ class ItemMaintenanceServiceImplTest {
     void update_ShouldUpdateItem_WhenItemChanged() {
         ItemMaintenance updateData = ItemMaintenance.builder()
                 .item(testItem2)
-                .technician(testTechnician)
+                .technicianId(testTechnician.getId())
                 .maintenanceDate(LocalDateTime.now().minusDays(1))
                 .nextMaintenanceDate(LocalDateTime.now().plusMonths(6))
                 .cost(new BigDecimal("150.50"))
@@ -201,7 +201,7 @@ class ItemMaintenanceServiceImplTest {
         ItemMaintenance updatedMaintenance = ItemMaintenance.builder()
                 .id(1L)
                 .item(testItem2)
-                .technician(testTechnician)
+                .technicianId(testTechnician.getId())
                 .maintenanceDate(LocalDateTime.now().minusDays(1))
                 .nextMaintenanceDate(LocalDateTime.now().plusMonths(6))
                 .cost(new BigDecimal("150.50"))
@@ -226,7 +226,7 @@ class ItemMaintenanceServiceImplTest {
     void update_ShouldThrowItemMaintenanceNotFoundException_WhenNotFound() {
         ItemMaintenance updateData = ItemMaintenance.builder()
                 .item(testItem)
-                .technician(testTechnician)
+                .technicianId(testTechnician.getId())
                 .maintenanceDate(LocalDateTime.now())
                 .nextMaintenanceDate(LocalDateTime.now().plusMonths(6))
                 .cost(new BigDecimal("100.00"))
@@ -407,7 +407,7 @@ class ItemMaintenanceServiceImplTest {
 
         StepVerifier.create(itemMaintenanceService.findByTechnician(1L, pageable))
                 .expectNextMatches(maintenance -> {
-                    assertEquals(testTechnician.getId(), maintenance.getTechnician().getId());
+                    assertEquals(testTechnician.getId(), maintenance.getTechnicianId());
                     return true;
                 })
                 .verifyComplete();
@@ -431,7 +431,7 @@ class ItemMaintenanceServiceImplTest {
         ItemMaintenance updatedMaintenance = ItemMaintenance.builder()
                 .id(1L)
                 .item(testItem)
-                .technician(testTechnician)
+                .technicianId(testTechnician.getId())
                 .maintenanceDate(LocalDateTime.now().minusDays(1))
                 .nextMaintenanceDate(LocalDateTime.now().plusMonths(6))
                 .cost(new BigDecimal("150.50"))
@@ -471,7 +471,7 @@ class ItemMaintenanceServiceImplTest {
     void create_ShouldHandleZeroCost() {
         ItemMaintenance maintenanceWithZeroCost = ItemMaintenance.builder()
                 .item(testItem2)
-                .technician(testTechnician)
+                .technicianId(testTechnician.getId())
                 .maintenanceDate(LocalDateTime.now())
                 .nextMaintenanceDate(LocalDateTime.now().plusMonths(6))
                 .cost(BigDecimal.ZERO)
@@ -482,7 +482,7 @@ class ItemMaintenanceServiceImplTest {
         ItemMaintenance savedMaintenance = ItemMaintenance.builder()
                 .id(3L)
                 .item(testItem2)
-                .technician(testTechnician)
+                .technicianId(testTechnician.getId())
                 .maintenanceDate(LocalDateTime.now())
                 .nextMaintenanceDate(LocalDateTime.now().plusMonths(6))
                 .cost(BigDecimal.ZERO)
@@ -507,7 +507,7 @@ class ItemMaintenanceServiceImplTest {
     void create_ShouldHandleNullNextMaintenanceDate() {
         ItemMaintenance maintenanceWithoutNextDate = ItemMaintenance.builder()
                 .item(testItem2)
-                .technician(testTechnician)
+                .technicianId(testTechnician.getId())
                 .maintenanceDate(LocalDateTime.now())
                 .nextMaintenanceDate(null)
                 .cost(new BigDecimal("50.00"))
@@ -518,7 +518,7 @@ class ItemMaintenanceServiceImplTest {
         ItemMaintenance savedMaintenance = ItemMaintenance.builder()
                 .id(4L)
                 .item(testItem2)
-                .technician(testTechnician)
+                .technicianId(testTechnician.getId())
                 .maintenanceDate(LocalDateTime.now())
                 .nextMaintenanceDate(null)
                 .cost(new BigDecimal("50.00"))

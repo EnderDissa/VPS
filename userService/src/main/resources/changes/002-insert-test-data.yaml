@@ -1,0 +1,61 @@
+databaseChangeLog:
+  - changeSet:
+      id: user-2
+      author: user
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: first_name
+                  value: "Иван"
+              - column:
+                  name: last_name
+                  value: "Петров"
+              - column:
+                  name: role
+                  value: "ADMIN"
+              - column:
+                  name: email
+                  value: "admin@warehouse.com"
+
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  value: 2
+              - column:
+                  name: first_name
+                  value: "Мария"
+              - column:
+                  name: last_name
+                  value: "Сидорова"
+              - column:
+                  name: role
+                  value: "MANAGER"
+              - column:
+                  name: email
+                  value: "manager@warehouse.com"
+
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  value: 3
+              - column:
+                  name: first_name
+                  value: "Алексей"
+              - column:
+                  name: last_name
+                  value: "Козлов"
+              - column:
+                  name: role
+                  value: "DRIVER"
+              - column:
+                  name: email
+                  value: "driver@warehouse.com"

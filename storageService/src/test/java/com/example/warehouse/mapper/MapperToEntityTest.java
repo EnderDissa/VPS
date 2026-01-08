@@ -65,9 +65,9 @@ public class MapperToEntityTest {
         assertThat(entity.getActualArrival()).isEqualTo(LocalDateTime.of(2025, 11, 1, 11, 45));
         assertThat(entity.getCreatedAt()).isEqualTo(LocalDateTime.of(2025, 10, 27, 10, 0));
 
-        assertThat(entity.getItem()).isNotNull();
+        assertThat(entity.getItemId()).isNotNull();
         assertThat(entity.getVehicle()).isNotNull();
-        assertThat(entity.getDriver()).isNotNull();
+        assertThat(entity.getDriverId()).isNotNull();
         assertThat(entity.getFromStorage()).isNotNull();
         assertThat(entity.getToStorage()).isNotNull();
     }

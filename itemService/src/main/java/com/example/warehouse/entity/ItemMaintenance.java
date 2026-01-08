@@ -28,9 +28,7 @@ public class ItemMaintenance {
     private Item item;
 
     @NotNull(message = "Technician is required")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "technician_id", nullable = false)
-    private User technician;
+    private Long technicianId;
 
     @NotNull(message = "Maintenance date is required")
     @Column(name = "maintenance_date", nullable = false)

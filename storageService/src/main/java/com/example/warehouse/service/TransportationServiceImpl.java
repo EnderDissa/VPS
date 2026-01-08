@@ -204,13 +204,12 @@ public class TransportationServiceImpl implements TransportationService {
     // === Вспомогательные методы ===
 
     private Mono<Transportation> updateRelatedEntities(Transportation existing, Transportation updated) {
-        return Mono.zip(
-                updateItemIfNeeded(existing, updated),
-                updateDriverIfNeeded(existing, updated),
-                updateVehicleIfNeeded(existing, updated),
-                updateFromStorageIfNeeded(existing, updated),
-                updateToStorageIfNeeded(existing, updated)
-        ).thenReturn(existing);
+        return updateItemIfNeeded(existing, updated)
+                .then(updateDriverIfNeeded(existing, updated))
+                .then(updateVehicleIfNeeded(existing, updated))
+                .then(updateFromStorageIfNeeded(existing, updated))
+                .then(updateToStorageIfNeeded(existing, updated))
+        .thenReturn(existing);
     }
 
     private Mono<Void> updateItemIfNeeded(Transportation existing, Transportation updated) {

@@ -51,7 +51,7 @@ public class MapperToEntityTest {
         assertThat(entity.getPurpose()).isEqualTo("Project X");
 
         assertThat(entity.getItem()).isNull();
-        assertThat(entity.getUser()).isNull();
+        assertThat(entity.getUserId()).isNull();
     }
 
     @Test
@@ -115,7 +115,7 @@ public class MapperToEntityTest {
         assertThat(entity.getCreatedAt()).isEqualTo(LocalDateTime.of(2025, 9, 1, 10, 0));
 
         assertThat(entity.getItem()).isNotNull();
-        assertThat(entity.getTechnician()).isNotNull();
+        assertThat(entity.getTechnicianId()).isNotNull();
     }
 
     @Test
@@ -143,7 +143,7 @@ public class MapperToEntityTest {
         assertThat(entity.getShelf()).isEqualTo("A3-B2");
         assertThat(entity.getLastUpdated()).isEqualTo(LocalDateTime.of(2025, 10, 20, 14, 30));
 
-        assertThat(entity.getStorage()).isNotNull();
+        assertThat(entity.getStorageId()).isNotNull();
         assertThat(entity.getItem()).isNotNull();
     }
 

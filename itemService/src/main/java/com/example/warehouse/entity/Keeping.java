@@ -23,9 +23,7 @@ public class Keeping {
     private Long id;
 
     @NotNull(message = "Storage is required")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "storage_id", nullable = false)
-    private Storage storage;
+    private Long storageId;
 
     @NotNull(message = "Item is required")
     @ManyToOne(fetch = FetchType.LAZY)

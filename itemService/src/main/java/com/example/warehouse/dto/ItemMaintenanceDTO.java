@@ -49,7 +49,7 @@ public record ItemMaintenanceDTO(
         this(
                 maintenance != null ? maintenance.getId() : null,
                 maintenance != null && maintenance.getItem() != null ? maintenance.getItem().getId() : null,
-                maintenance != null && maintenance.getTechnician() != null ? maintenance.getTechnician().getId() : null,
+                maintenance != null && maintenance.getTechnicianId() != null ? maintenance.getTechnicianId() : null,
                 maintenance != null ? maintenance.getMaintenanceDate() : null,
                 maintenance != null ? maintenance.getNextMaintenanceDate() : null,
                 maintenance != null ? maintenance.getCost() : null,

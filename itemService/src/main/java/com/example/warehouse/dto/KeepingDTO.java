@@ -39,7 +39,7 @@ public record KeepingDTO(
     public KeepingDTO(Keeping keeping) {
         this(
                 keeping != null ? keeping.getId() : null,
-                keeping != null && keeping.getStorage() != null ? keeping.getStorage().getId() : null,
+                keeping != null && keeping.getStorageId() != null ? keeping.getStorageId() : null,
                 keeping != null && keeping.getItem() != null ? keeping.getItem().getId() : null,
                 keeping != null ? keeping.getQuantity() : 1,
                 keeping != null ? keeping.getShelf() : null,

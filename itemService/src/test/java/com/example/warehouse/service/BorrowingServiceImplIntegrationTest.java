@@ -105,7 +105,7 @@ class BorrowingServiceImplTest {
 
         testBorrowing = Borrowing.builder()
                 .id(1L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.ACTIVE)
                 .quantity(1)
@@ -117,7 +117,7 @@ class BorrowingServiceImplTest {
 
         testOverdueBorrowing = Borrowing.builder()
                 .id(2L)
-                .user(testUser2)
+                .userId(testUser2.getId())
                 .item(testItem)
                 .status(BorrowStatus.ACTIVE)
                 .quantity(1)
@@ -201,7 +201,7 @@ class BorrowingServiceImplTest {
 
         testBorrowing = Borrowing.builder()
                 .id(1L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.ACTIVE)
                 .quantity(1)
@@ -213,7 +213,7 @@ class BorrowingServiceImplTest {
 
         testBorrowingCancelled = Borrowing.builder()
                 .id(4L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.CANCELLED)
                 .quantity(1)
@@ -225,7 +225,7 @@ class BorrowingServiceImplTest {
 
         testOverdueBorrowing = Borrowing.builder()
                 .id(5L)
-                .user(testUser2)
+                .userId(testUser2.getId())
                 .item(testItem)
                 .status(BorrowStatus.ACTIVE)
                 .quantity(1)
@@ -241,7 +241,7 @@ class BorrowingServiceImplTest {
     void create_ShouldCreateBorrowing_WhenValidData() {
         Borrowing entity = Borrowing.builder()
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .borrowDate(LocalDateTime.now())
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
@@ -251,7 +251,7 @@ class BorrowingServiceImplTest {
         Borrowing savedBorrowing = Borrowing.builder()
                 .id(3L)
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .borrowDate(LocalDateTime.now())
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
@@ -269,7 +269,7 @@ class BorrowingServiceImplTest {
                 .expectNextMatches(borrowing -> {
                     assertNotNull(borrowing.getId());
                     assertEquals(BorrowStatus.ACTIVE, borrowing.getStatus());
-                    assertEquals(testUser.getId(), borrowing.getUser().getId());
+                    assertEquals(testUser.getId(), borrowing.getUserId());
                     assertEquals(testItem.getId(), borrowing.getItem().getId());
                     assertEquals(1, borrowing.getQuantity());
                     assertEquals("Test purpose", borrowing.getPurpose());
@@ -289,7 +289,7 @@ class BorrowingServiceImplTest {
     void create_ShouldThrowIllegalStateException_WhenUserExceedsBorrowingLimit() {
         Borrowing entity = Borrowing.builder()
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
                 .purpose("Test purpose")
@@ -330,7 +330,7 @@ class BorrowingServiceImplTest {
 
         Borrowing entity = Borrowing.builder()
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .borrowDate(LocalDateTime.now())
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
@@ -340,7 +340,7 @@ class BorrowingServiceImplTest {
         Borrowing savedBorrowing = Borrowing.builder()
                 .id(4L)
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .borrowDate(LocalDateTime.now())
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
@@ -372,7 +372,7 @@ class BorrowingServiceImplTest {
                 .expectNextMatches(borrowing -> {
                     assertEquals(testBorrowing.getId(), borrowing.getId());
                     assertEquals(testBorrowing.getStatus(), borrowing.getStatus());
-                    assertEquals(testUser.getId(), borrowing.getUser().getId());
+                    assertEquals(testUser.getId(), borrowing.getUserId());
                     assertEquals(testItem.getId(), borrowing.getItem().getId());
                     assertEquals(testBorrowing.getPurpose(), borrowing.getPurpose());
                     return true;
@@ -400,7 +400,7 @@ class BorrowingServiceImplTest {
     void activate_ShouldActivateBorrowing_WhenItemAvailable() {
         Borrowing pendingBorrowing = Borrowing.builder()
                 .id(3L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.PENDING)
                 .quantity(1)
@@ -410,7 +410,7 @@ class BorrowingServiceImplTest {
 
         Borrowing activatedBorrowing = Borrowing.builder()
                 .id(3L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.ACTIVE)
                 .quantity(1)
@@ -435,7 +435,7 @@ class BorrowingServiceImplTest {
     void activate_ShouldThrowIllegalStateException_WhenItemUnavailable() {
         Borrowing borrowingWithUnavailableItem = Borrowing.builder()
                 .id(3L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItemUnavailable)
                 .status(BorrowStatus.PENDING)
                 .quantity(1)
@@ -461,7 +461,7 @@ class BorrowingServiceImplTest {
         LocalDateTime newDueDate = LocalDateTime.now().plusDays(10);
         Borrowing updatedBorrowing = Borrowing.builder()
                 .id(1L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.ACTIVE)
                 .quantity(1)
@@ -524,7 +524,7 @@ class BorrowingServiceImplTest {
         LocalDateTime newDueDate = LocalDateTime.now().plusDays(10);
         Borrowing returnedBorrowing = Borrowing.builder()
                 .id(3L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.RETURNED)
                 .quantity(1)
@@ -550,7 +550,7 @@ class BorrowingServiceImplTest {
     void returnBorrowing_ShouldReturnBorrowing_WhenActive() {
         Borrowing returnedBorrowing = Borrowing.builder()
                 .id(1L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.RETURNED)
                 .quantity(1)
@@ -581,7 +581,7 @@ class BorrowingServiceImplTest {
         testOverdueBorrowing.setStatus(BorrowStatus.OVERDUE);
         Borrowing returnedBorrowing = Borrowing.builder()
                 .id(2L)
-                .user(testUser2)
+                .userId(testUser2.getId())
                 .item(testItem)
                 .status(BorrowStatus.RETURNED)
                 .quantity(1)
@@ -611,7 +611,7 @@ class BorrowingServiceImplTest {
     void returnBorrowing_ShouldThrowIllegalStateException_WhenBorrowingNotActiveOrOverdue() {
         Borrowing cancelledBorrowing = Borrowing.builder()
                 .id(3L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.CANCELLED)
                 .quantity(1)
@@ -636,7 +636,7 @@ class BorrowingServiceImplTest {
     void cancel_ShouldCancelBorrowing_WhenActive() {
         Borrowing cancelledBorrowing = Borrowing.builder()
                 .id(1L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.CANCELLED)
                 .quantity(1)
@@ -660,7 +660,7 @@ class BorrowingServiceImplTest {
     void cancel_ShouldThrowIllegalStateException_WhenBorrowingNotActive() {
         Borrowing returnedBorrowing = Borrowing.builder()
                 .id(3L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.RETURNED)
                 .quantity(1)
@@ -696,7 +696,7 @@ class BorrowingServiceImplTest {
                 ))
                 .expectNextMatches(borrowing -> {
                     assertEquals(BorrowStatus.ACTIVE, borrowing.getStatus());
-                    assertEquals(testUser.getId(), borrowing.getUser().getId());
+                    assertEquals(testUser.getId(), borrowing.getUserId());
                     assertEquals(testItem.getId(), borrowing.getItem().getId());
                     return true;
                 })
@@ -768,7 +768,7 @@ class BorrowingServiceImplTest {
 
         Borrowing entity = Borrowing.builder()
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .borrowDate(LocalDateTime.now())
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
@@ -778,7 +778,7 @@ class BorrowingServiceImplTest {
         Borrowing savedBorrowing = Borrowing.builder()
                 .id(5L)
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .borrowDate(LocalDateTime.now())
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
@@ -816,7 +816,7 @@ class BorrowingServiceImplTest {
 
         Borrowing entity = Borrowing.builder()
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .borrowDate(LocalDateTime.now())
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
@@ -826,7 +826,7 @@ class BorrowingServiceImplTest {
         Borrowing savedBorrowing = Borrowing.builder()
                 .id(6L)
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .borrowDate(LocalDateTime.now())
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
@@ -852,7 +852,7 @@ class BorrowingServiceImplTest {
     void create_ShouldThrowException_WhenItemServiceReturnsError() {
         Borrowing entity = Borrowing.builder()
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
                 .purpose("Test purpose")
@@ -879,7 +879,7 @@ class BorrowingServiceImplTest {
     void create_ShouldThrowException_WhenUserServiceReturnsError() {
         Borrowing entity = Borrowing.builder()
                 .item(testItem)
-                .user(testUser)
+                .userId(testUser.getId())
                 .quantity(1)
                 .expectedReturnDate(LocalDateTime.now().plusDays(7))
                 .purpose("Test purpose")
@@ -923,7 +923,7 @@ class BorrowingServiceImplTest {
     void activate_ShouldThrowIllegalStateException_WhenItemNeedsMaintenance() {
         Borrowing borrowingWithBadItem = Borrowing.builder()
                 .id(6L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItemNeedsMaintenance)
                 .status(BorrowStatus.PENDING)
                 .quantity(1)
@@ -948,7 +948,7 @@ class BorrowingServiceImplTest {
     void activate_ShouldThrowIllegalStateException_WhenItemDecommissioned() {
         Borrowing borrowingWithBadItem = Borrowing.builder()
                 .id(7L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItemDecommissioned)
                 .status(BorrowStatus.PENDING)
                 .quantity(1)
@@ -973,7 +973,7 @@ class BorrowingServiceImplTest {
     void activate_ShouldWork_WhenBorrowingAlreadyActive() {
         Borrowing alreadyActiveBorrowing = Borrowing.builder()
                 .id(8L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.ACTIVE)
                 .quantity(1)
@@ -1044,7 +1044,7 @@ class BorrowingServiceImplTest {
     void returnBorrowing_ShouldLogWarning_WhenReturnedLate() {
         Borrowing lateBorrowing = Borrowing.builder()
                 .id(9L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.ACTIVE)
                 .quantity(1)
@@ -1056,7 +1056,7 @@ class BorrowingServiceImplTest {
 
         Borrowing returnedBorrowing = Borrowing.builder()
                 .id(9L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.RETURNED)
                 .quantity(1)
@@ -1184,7 +1184,7 @@ class BorrowingServiceImplTest {
     void findOverdueBorrowings_ShouldNotSave_WhenAlreadyOverdue() {
         Borrowing alreadyOverdue = Borrowing.builder()
                 .id(10L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.OVERDUE)
                 .quantity(1)
@@ -1228,7 +1228,7 @@ class BorrowingServiceImplTest {
 
         Borrowing updatedBorrowing = Borrowing.builder()
                 .id(1L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.ACTIVE)
                 .quantity(1)
@@ -1257,7 +1257,7 @@ class BorrowingServiceImplTest {
         LocalDateTime existingReturnDate = LocalDateTime.now().minusHours(2);
         Borrowing borrowingWithReturnDate = Borrowing.builder()
                 .id(12L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.ACTIVE)
                 .quantity(1)
@@ -1269,7 +1269,7 @@ class BorrowingServiceImplTest {
 
         Borrowing returnedBorrowing = Borrowing.builder()
                 .id(12L)
-                .user(testUser)
+                .userId(testUser.getId())
                 .item(testItem)
                 .status(BorrowStatus.RETURNED)
                 .quantity(1)
@@ -1304,7 +1304,7 @@ class BorrowingServiceImplTest {
 
         assertEquals(borrowing.getId(), dto.id());
         assertEquals(borrowing.getItem().getId(), dto.itemId());
-        assertEquals(borrowing.getUser().getId(), dto.userId());
+        assertEquals(borrowing.getUserId(), dto.userId());
         assertEquals(borrowing.getQuantity(), dto.quantity());
         assertEquals(borrowing.getBorrowDate(), dto.borrowDate());
         assertEquals(borrowing.getExpectedReturnDate(), dto.expectedReturnDate());

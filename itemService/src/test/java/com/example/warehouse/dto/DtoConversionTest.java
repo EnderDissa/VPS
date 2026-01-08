@@ -14,12 +14,10 @@ public class DtoConversionTest {
     void shouldMapBorrowingEntityToBorrowingDTO() {
         Item item = new Item();
         item.setId(10L);
-        User user = new User();
-        user.setId(20L);
         Borrowing borrowing = Borrowing.builder()
             .id(1L)
             .item(item)
-            .user(user)
+            .userId(20L)
             .quantity(3)
             .borrowDate(LocalDateTime.of(2025, 10, 1, 10, 0))
             .expectedReturnDate(LocalDateTime.of(2025, 11, 1, 10, 0))
@@ -97,9 +95,7 @@ public class DtoConversionTest {
         Item item = new Item();
         item.setId(200L);
         m.setItem(item);
-        User technician = new User();
-        technician.setId(300L);
-        m.setTechnician(technician);
+        m.setTechnicianId(300L);
         m.setMaintenanceDate(LocalDateTime.of(2025, 9, 1, 9, 0));
         m.setNextMaintenanceDate(LocalDateTime.of(2026, 9, 1, 9, 0));
         m.setCost(BigDecimal.valueOf(150.50));
@@ -139,9 +135,7 @@ public class DtoConversionTest {
     void shouldMapKeepingEntityToDTO() {
         Keeping k = new Keeping();
         k.setId(77L);
-        Storage storage = new Storage();
-        storage.setId(88L);
-        k.setStorage(storage);
+        k.setStorageId(88L);
         Item item = new Item();
         item.setId(99L);
         k.setItem(item);
@@ -168,25 +162,5 @@ public class DtoConversionTest {
         assertThat(dto.quantity()).isEqualTo(1);
         assertThat(dto.shelf()).isNull();
         assertThat(dto.lastUpdated()).isNull();
-    }
-
-
-    @Test
-    void shouldMapStorageEntityToStorageDTO() {
-        Storage storage = new Storage();
-        storage.setId(1000L);
-        storage.setName("Main Warehouse");
-        storage.setAddress("123 Logistics Blvd, City");
-        storage.setCapacity(5000);
-        LocalDateTime created = LocalDateTime.of(2024, 3, 15, 9, 0);
-        storage.setCreatedAt(created);
-
-        StorageDTO dto = new StorageDTO(storage);
-
-        assertThat(dto.id()).isEqualTo(1000L);
-        assertThat(dto.name()).isEqualTo("Main Warehouse");
-        assertThat(dto.address()).isEqualTo("123 Logistics Blvd, City");
-        assertThat(dto.capacity()).isEqualTo(5000);
-        assertThat(dto.createdAt()).isEqualTo(created);
     }
 }

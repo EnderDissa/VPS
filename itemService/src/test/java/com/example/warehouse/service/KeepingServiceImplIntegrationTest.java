@@ -90,7 +90,7 @@ class KeepingServiceImplTest {
 
         testKeeping1 = Keeping.builder()
                 .id(1L)
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem1)
                 .quantity(5)
                 .shelf("A1")
@@ -99,7 +99,7 @@ class KeepingServiceImplTest {
 
         testKeeping2 = Keeping.builder()
                 .id(2L)
-                .storage(testStorage2)
+                .storageId(testStorage2.getId())
                 .item(testItem2)
                 .quantity(10)
                 .shelf("B2")
@@ -110,7 +110,7 @@ class KeepingServiceImplTest {
     @Test
     void create_ShouldCreateKeeping_WhenValidData() {
         Keeping newKeeping = Keeping.builder()
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem2)
                 .quantity(15)
                 .shelf("C3")
@@ -118,22 +118,22 @@ class KeepingServiceImplTest {
 
         Keeping savedKeeping = Keeping.builder()
                 .id(3L)
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem2)
                 .quantity(15)
                 .shelf("C3")
                 .lastUpdated(LocalDateTime.now())
                 .build();
 
-        when(storageService.getById(1L)).thenReturn(Mono.just(testStorage1));
         when(itemService.getById(2L)).thenReturn(Mono.just(testItem2));
         when(keepingRepository.existsByStorageIdAndItemId(1L, 2L)).thenReturn(false);
         when(keepingRepository.save(newKeeping)).thenReturn(savedKeeping);
+        when(storageService.getById(1L)).thenReturn(Mono.just(testStorage1));
 
         StepVerifier.create(keepingService.create(newKeeping))
                 .expectNextMatches(keeping -> {
                     assertNotNull(keeping.getId());
-                    assertEquals(testStorage1.getId(), keeping.getStorage().getId());
+                    assertEquals(testStorage1.getId(), keeping.getStorageId());
                     assertEquals(testItem2.getId(), keeping.getItem().getId());
                     assertEquals(15, keeping.getQuantity());
                     assertEquals("C3", keeping.getShelf());
@@ -151,7 +151,7 @@ class KeepingServiceImplTest {
     @Test
     void create_ShouldCreateKeeping_WhenShelfIsNull() {
         Keeping newKeeping = Keeping.builder()
-                .storage(testStorage2)
+                .storageId(testStorage2.getId())
                 .item(testItem1)
                 .quantity(8)
                 .shelf(null)
@@ -159,7 +159,7 @@ class KeepingServiceImplTest {
 
         Keeping savedKeeping = Keeping.builder()
                 .id(4L)
-                .storage(testStorage2)
+                .storageId(testStorage2.getId())
                 .item(testItem1)
                 .quantity(8)
                 .shelf(null)
@@ -183,15 +183,15 @@ class KeepingServiceImplTest {
     @Test
     void create_ShouldThrowDuplicateKeepingException_WhenKeepingExists() {
         Keeping duplicateKeeping = Keeping.builder()
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem1)
                 .quantity(3)
                 .shelf("Different Shelf")
                 .build();
 
-        when(storageService.getById(1L)).thenReturn(Mono.just(testStorage1));
         when(itemService.getById(1L)).thenReturn(Mono.just(testItem1));
         when(keepingRepository.existsByStorageIdAndItemId(1L, 1L)).thenReturn(true);
+        when(storageService.getById(1L)).thenReturn(Mono.just(testStorage1));
 
         StepVerifier.create(keepingService.create(duplicateKeeping))
                 .expectErrorMatches(throwable ->
@@ -213,7 +213,7 @@ class KeepingServiceImplTest {
         StepVerifier.create(keepingService.getById(1L))
                 .expectNextMatches(keeping -> {
                     assertEquals(testKeeping1.getId(), keeping.getId());
-                    assertEquals(testStorage1.getId(), keeping.getStorage().getId());
+                    assertEquals(testStorage1.getId(), keeping.getStorageId());
                     assertEquals(testItem1.getId(), keeping.getItem().getId());
                     assertEquals(testKeeping1.getQuantity(), keeping.getQuantity());
                     assertEquals(testKeeping1.getShelf(), keeping.getShelf());
@@ -241,7 +241,7 @@ class KeepingServiceImplTest {
     @Test
     void update_ShouldUpdateKeeping_WhenValidData() {
         Keeping updateData = Keeping.builder()
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem1)
                 .quantity(8)
                 .shelf("Updated Shelf")
@@ -249,7 +249,7 @@ class KeepingServiceImplTest {
 
         Keeping updatedKeeping = Keeping.builder()
                 .id(1L)
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem1)
                 .quantity(8)
                 .shelf("Updated Shelf")
@@ -272,7 +272,7 @@ class KeepingServiceImplTest {
     @Test
     void update_ShouldUpdateStorage_WhenStorageChanged() {
         Keeping updateData = Keeping.builder()
-                .storage(testStorage2)
+                .storageId(testStorage2.getId())
                 .item(testItem1)
                 .quantity(testKeeping1.getQuantity())
                 .shelf(testKeeping1.getShelf())
@@ -280,7 +280,7 @@ class KeepingServiceImplTest {
 
         Keeping updatedKeeping = Keeping.builder()
                 .id(1L)
-                .storage(testStorage2)
+                .storageId(testStorage2.getId())
                 .item(testItem1)
                 .quantity(testKeeping1.getQuantity())
                 .shelf(testKeeping1.getShelf())
@@ -303,7 +303,7 @@ class KeepingServiceImplTest {
     @Test
     void update_ShouldThrowKeepingNotFoundException_WhenKeepingNotFound() {
         Keeping updateData = Keeping.builder()
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem1)
                 .quantity(5)
                 .shelf("Shelf")
@@ -329,7 +329,7 @@ class KeepingServiceImplTest {
     @Test
     void update_ShouldNotCheckDuplicate_WhenOnlyQuantityChanged() {
         Keeping updateData = Keeping.builder()
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem1)
                 .quantity(25)
                 .shelf(testKeeping1.getShelf())
@@ -337,7 +337,7 @@ class KeepingServiceImplTest {
 
         Keeping updatedKeeping = Keeping.builder()
                 .id(1L)
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem1)
                 .quantity(25)
                 .shelf(testKeeping1.getShelf())
@@ -408,7 +408,7 @@ class KeepingServiceImplTest {
         when(keepingRepository.findByStorageId(1L, pageable)).thenReturn(page);
 
         StepVerifier.create(keepingService.findKeepingsByFilters(1L, null, pageable))
-                .expectNextMatches(keeping -> keeping.getStorage().getId().equals(1L))
+                .expectNextMatches(keeping -> keeping.getStorageId().equals(1L))
                 .verifyComplete();
 
         verify(keepingRepository).findByStorageId(1L, pageable);
@@ -439,7 +439,7 @@ class KeepingServiceImplTest {
 
         StepVerifier.create(keepingService.findKeepingsByFilters(1L, 1L, pageable))
                 .expectNextMatches(keeping ->
-                        keeping.getStorage().getId().equals(1L) && keeping.getItem().getId().equals(1L)
+                        keeping.getStorageId().equals(1L) && keeping.getItem().getId().equals(1L)
                 )
                 .verifyComplete();
 
@@ -493,7 +493,7 @@ class KeepingServiceImplTest {
     @Test
     void update_ShouldHandleMinimumQuantity() {
         Keeping updateData = Keeping.builder()
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem1)
                 .quantity(1)
                 .shelf(testKeeping1.getShelf())
@@ -501,7 +501,7 @@ class KeepingServiceImplTest {
 
         Keeping updatedKeeping = Keeping.builder()
                 .id(1L)
-                .storage(testStorage1)
+                .storageId(testStorage1.getId())
                 .item(testItem1)
                 .quantity(1)
                 .shelf(testKeeping1.getShelf())

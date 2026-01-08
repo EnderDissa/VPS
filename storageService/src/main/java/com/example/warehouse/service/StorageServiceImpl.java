@@ -87,16 +87,17 @@ public class StorageServiceImpl implements StorageService {
 
                     return itemServiceClient.countKeepingsByStorageId(id)
                             .subscribeOn(Schedulers.boundedElastic())
-                            .flatMap(keepingCount -> Mono.fromCallable(() -> {
+                            .flatMap(keepingCount -> {
                                 if (keepingCount > 0) {
                                     throw new StorageNotEmptyException(
                                             "Cannot delete storage with ID: " + id + ". It contains " + keepingCount + " items.");
                                 }
 
-                                storageRepository.deleteById(id);
-                                return null;
-                            }))
-                            .subscribeOn(Schedulers.boundedElastic());
+                                return Mono.fromRunnable(() -> storageRepository.deleteById(id))
+                                        .subscribeOn(Schedulers.boundedElastic());
+                            })
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .block();
 
                 })
                 .subscribeOn(Schedulers.boundedElastic())

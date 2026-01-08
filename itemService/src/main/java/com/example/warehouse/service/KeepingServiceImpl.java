@@ -6,6 +6,7 @@ import com.example.warehouse.entity.Keeping;
 import com.example.warehouse.entity.Storage;
 import com.example.warehouse.exception.DuplicateKeepingException;
 import com.example.warehouse.exception.KeepingNotFoundException;
+import com.example.warehouse.exception.StorageNotFoundException;
 import com.example.warehouse.repository.KeepingRepository;
 import com.example.warehouse.service.interfaces.ItemService;
 import com.example.warehouse.service.interfaces.KeepingService;
@@ -30,20 +31,20 @@ public class KeepingServiceImpl implements KeepingService {
 
     @Override
     public Mono<Keeping> create(Keeping keeping) {
-        log.info("Creating new keeping record - storageId: {}, itemId: {}", keeping.getStorage().getId(), keeping.getItem().getId());
+        log.info("Creating new keeping record - storageId: {}, itemId: {}", keeping.getStorageId(), keeping.getItem().getId());
 
-        return storageService.getById(keeping.getStorage().getId())
+        return storageService.getById(keeping.getStorageId())
                 .flatMap(storage -> itemService.getById(keeping.getItem().getId())
-                        .flatMap(item -> Mono.fromCallable(() -> keepingRepository.existsByStorageIdAndItemId(keeping.getStorage().getId(), keeping.getItem().getId()))
+                        .flatMap(item -> Mono.fromCallable(() -> keepingRepository.existsByStorageIdAndItemId(keeping.getStorageId(), keeping.getItem().getId()))
                                 .subscribeOn(Schedulers.boundedElastic())
                                 .flatMap(exists -> {
                                     if (exists) {
                                         return Mono.error(new DuplicateKeepingException(
-                                                "Keeping record already exists for storage ID: " + keeping.getStorage().getId() +
+                                                "Keeping record already exists for storage ID: " + keeping.getStorageId() +
                                                         " and item ID: " + keeping.getItem().getId()));
                                     }
 
-                                    keeping.setStorage(storage);
+                                    keeping.setStorageId(storage.getId());
                                     keeping.setItem(item);
 
                                     return Mono.fromCallable(() -> keepingRepository.save(keeping))
@@ -73,15 +74,18 @@ public class KeepingServiceImpl implements KeepingService {
 
                     Keeping existingKeeping = optional.get();
 
-                    Mono<Storage> storageMono = Mono.just(keeping.getStorage().getId())
-                            .filter(storageId -> !existingKeeping.getStorage().getId().equals(storageId))
-                            .flatMap(storageId -> storageService.getById(storageId))
-                            .switchIfEmpty(Mono.just(existingKeeping.getStorage()))
-                            .doOnNext(storage -> existingKeeping.setStorage(storage));
+                    Mono<Storage> storageMono = Mono.just(keeping.getStorageId())
+                            .filter(storageId -> !existingKeeping.getStorageId().equals(storageId))
+                            .flatMap(storageId -> storageService.getById(storageId)
+                                    .switchIfEmpty(Mono.error(
+                                            new StorageNotFoundException(storageId)
+                                    ))
+                            )
+                            .doOnNext(storage -> existingKeeping.setStorageId(storage.getId()));
 
                     Mono<Item> itemMono = Mono.just(keeping.getItem().getId())
                             .filter(itemId -> !existingKeeping.getItem().getId().equals(itemId))
-                            .flatMap(itemId -> itemService.getById(itemId))
+                            .flatMap(itemService::getById)
                             .switchIfEmpty(Mono.just(existingKeeping.getItem()))
                             .doOnNext(item -> {
                                 existingKeeping.setItem(item);
@@ -98,12 +102,12 @@ public class KeepingServiceImpl implements KeepingService {
 
                                 if (!existingKeeping.getItem().getId().equals(keeping.getItem().getId())) {
                                     return Mono.fromCallable(() -> keepingRepository.existsByStorageIdAndItemIdAndIdNot(
-                                                    keeping.getStorage().getId(), keeping.getItem().getId(), id))
+                                                    keeping.getStorageId(), keeping.getItem().getId(), id))
                                             .subscribeOn(Schedulers.boundedElastic())
                                             .flatMap(exists -> {
                                                 if (exists) {
                                                     return Mono.error(new DuplicateKeepingException(
-                                                            "Keeping record already exists for storage ID: " + keeping.getStorage().getId() +
+                                                            "Keeping record already exists for storage ID: " + keeping.getStorageId() +
                                                                     " and item ID: " + keeping.getItem().getId()));
                                                 }
                                                 return Mono.empty();

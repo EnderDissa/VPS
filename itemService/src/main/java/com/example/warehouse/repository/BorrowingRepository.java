@@ -19,7 +19,7 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long>, Jpa
     @Query("SELECT b FROM Borrowing b WHERE b.status = 'ACTIVE' AND b.expectedReturnDate < :now")
     Page<Borrowing> findOverdueBorrowings(@Param("now") LocalDateTime now, Pageable pageable);
 
-    @Query("SELECT COUNT(b) FROM Borrowing b WHERE b.user.id = :userId AND b.status IN ('ACTIVE', 'OVERDUE')")
+    @Query("SELECT COUNT(b) FROM Borrowing b WHERE b.userId = :userId AND b.status IN ('ACTIVE', 'OVERDUE')")
     long countActiveBorrowingsByUser(@Param("userId") Long userId);
 
     @Query("SELECT COUNT(b) FROM Borrowing b WHERE b.status = 'ACTIVE' AND b.expectedReturnDate < :now")

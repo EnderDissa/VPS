@@ -39,44 +39,12 @@ databaseChangeLog:
               - column: { name: actual_arrival, type: TIMESTAMP }
               - column: { name: created_at, type: TIMESTAMP, defaultValueComputed: "CURRENT_TIMESTAMP" }
 
-        - createIndex:
-            indexName: idx_transportation_status
-            tableName: transportations
-            columns:
-              - column: { name: status }
-
-  - changeSet:
-      id: storage-1.1
-      author: storage
-      preConditions:
-        onFail: MARK_RAN
-        onFailMessage: "Skipping FK - storages table not ready yet"
-        and:
-          - tableExists:
-            tableName: items
-          - tableExists:
-            tableName: users
-      changes:
-        - addForeignKeyConstraint:
-            baseTableName: transportations
-            baseColumnNames: item_id
-            referencedTableName: items
-            referencedColumnNames: id
-            constraintName: fk_transportation_item
-
         - addForeignKeyConstraint:
             baseTableName: transportations
             baseColumnNames: vehicle_id
             referencedTableName: vehicles
             referencedColumnNames: id
             constraintName: fk_transportation_vehicle
-
-        - addForeignKeyConstraint:
-            baseTableName: transportations
-            baseColumnNames: driver_id
-            referencedTableName: users
-            referencedColumnNames: id
-            constraintName: fk_transportation_driver
 
         - addForeignKeyConstraint:
             baseTableName: transportations
@@ -91,3 +59,44 @@ databaseChangeLog:
             referencedTableName: storages
             referencedColumnNames: id
             constraintName: fk_transportation_to_storage
+
+        - createIndex:
+            indexName: idx_transportation_status
+            tableName: transportations
+            columns:
+              - column: { name: status }
+
+  - changeSet:
+      id: storage-1.1
+      author: storage
+      preConditions:
+        onFail: MARK_RAN
+        onFailMessage: "Skipping FK - items table not ready yet"
+        tableExists:
+          tableName: items
+
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: transportations
+            baseColumnNames: item_id
+            referencedTableName: items
+            referencedColumnNames: id
+            constraintName: fk_transportation_item
+
+  - changeSet:
+      id: storage-1.2
+      author: storage
+      preConditions:
+        onFail: MARK_RAN
+        onFailMessage: "Skipping FK - users table not ready yet"
+        tableExists:
+          tableName: users
+
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: transportations
+            baseColumnNames: driver_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_transportation_driver
+

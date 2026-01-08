@@ -56,7 +56,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         log.debug("Creating new borrowing: {}", entity);
 
         return itemService.getById(entity.getItem().getId())
-                .flatMap(item -> userService.getUserById(entity.getUser().getId())
+                .flatMap(item -> userService.getUserById(entity.getUserId())
                         .flatMap(user -> {
                             if (item.getCondition() == ItemCondition.NEEDS_MAINTENANCE ||
                                     item.getCondition() == ItemCondition.UNDER_REPAIR ||
@@ -73,7 +73,7 @@ public class BorrowingServiceImpl implements BorrowingService {
 
                                         entity.setId(null);
                                         entity.setItem(item);
-                                        entity.setUser(user);
+                                        entity.setUserId(user.getId());
                                         entity.setStatus(BorrowStatus.ACTIVE);
 
                                         return Mono.fromCallable(() -> borrowingRepository.save(entity))

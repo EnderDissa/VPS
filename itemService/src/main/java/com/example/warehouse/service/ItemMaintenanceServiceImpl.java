@@ -6,6 +6,7 @@ import com.example.warehouse.entity.ItemMaintenance;
 import com.example.warehouse.entity.User;
 import com.example.warehouse.enumeration.MaintenanceStatus;
 import com.example.warehouse.exception.ItemMaintenanceNotFoundException;
+import com.example.warehouse.exception.UserNotFoundException;
 import com.example.warehouse.repository.ItemMaintenanceRepository;
 import com.example.warehouse.service.interfaces.ItemMaintenanceService;
 
@@ -35,10 +36,10 @@ public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
         log.info("Creating new item maintenance for item ID: {}", maintenance.getItem().getId());
 
         return itemService.getById(maintenance.getItem().getId())
-                .flatMap(item -> userService.getUserById(maintenance.getTechnician().getId())
+                .flatMap(item -> userService.getUserById(maintenance.getTechnicianId())
                         .map(technician -> {
                             maintenance.setItem(item);
-                            maintenance.setTechnician(technician);
+                            maintenance.setTechnicianId(technician.getId());
                             return maintenance;
                         }))
                 .flatMap(maint -> Mono.fromCallable(() -> itemMaintenanceRepository.save(maint))
@@ -69,15 +70,15 @@ public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
 
                     Mono<Item> itemMono = Mono.just(maintenance.getItem().getId())
                             .filter(itemId -> !existingMaintenance.getItem().getId().equals(itemId))
-                            .flatMap(itemId -> itemService.getById(itemId))
+                            .flatMap(itemService::getById)
                             .switchIfEmpty(Mono.just(existingMaintenance.getItem()))
-                            .doOnNext(item -> existingMaintenance.setItem(item));
+                            .doOnNext(existingMaintenance::setItem);
 
-                    Mono<User> technicianMono = Mono.just(maintenance.getTechnician().getId())
-                            .filter(techId -> !existingMaintenance.getTechnician().getId().equals(techId))
-                            .flatMap(techId -> userService.getUserById(techId))
-                            .switchIfEmpty(Mono.just(existingMaintenance.getTechnician()))
-                            .doOnNext(tech -> existingMaintenance.setTechnician(tech));
+                    Mono<User> technicianMono = Mono.just(maintenance.getTechnicianId())
+                            .filter(techId -> !existingMaintenance.getTechnicianId().equals(techId))
+                            .flatMap( technicianId -> userService.getUserById(technicianId)
+                                    .switchIfEmpty(Mono.error(new UserNotFoundException(maintenance.getTechnicianId()))))
+                            .doOnNext(tech -> existingMaintenance.setTechnicianId(tech.getId()));
 
                     return itemMono.then(technicianMono)
                             .doOnNext(v -> {

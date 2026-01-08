@@ -157,9 +157,9 @@ class TransportationServiceImplTest {
         // Создаем тестовые транспортировки
         testTransportationPlanned = Transportation.builder()
                 .id(1L)
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage1)
                 .toStorage(testStorage2)
                 .status(TransportStatus.PLANNED)
@@ -172,9 +172,9 @@ class TransportationServiceImplTest {
 
         testTransportationInTransit = Transportation.builder()
                 .id(2L)
-                .item(testItem2)
+                .itemId(testItem2.getId())
                 .vehicle(testVehicle2)
-                .driver(testDriver2)
+                .driverId(testDriver2.getId())
                 .fromStorage(testStorage2)
                 .toStorage(testStorage3)
                 .status(TransportStatus.IN_TRANSIT)
@@ -187,9 +187,9 @@ class TransportationServiceImplTest {
 
         testTransportationDelivered = Transportation.builder()
                 .id(3L)
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage3)
                 .toStorage(testStorage1)
                 .status(TransportStatus.DELIVERED)
@@ -205,9 +205,9 @@ class TransportationServiceImplTest {
     void create_ShouldCreateTransportation_WhenValidData() {
         // Arrange
         Transportation newTransportation = Transportation.builder()
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage1)
                 .toStorage(testStorage2)
                 .status(TransportStatus.PLANNED)
@@ -218,9 +218,9 @@ class TransportationServiceImplTest {
 
         Transportation savedTransportation = Transportation.builder()
                 .id(4L)
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage1)
                 .toStorage(testStorage2)
                 .status(TransportStatus.PLANNED)
@@ -241,9 +241,9 @@ class TransportationServiceImplTest {
                 .expectNextMatches(transportation -> {
                     assertEquals(4L, transportation.getId());
                     assertEquals(TransportStatus.PLANNED, transportation.getStatus());
-                    assertEquals(testItem1.getId(), transportation.getItem().getId());
+                    assertEquals(testItem1.getId(), transportation.getItemId());
                     assertEquals(testVehicle1.getId(), transportation.getVehicle().getId());
-                    assertEquals(testDriver1.getId(), transportation.getDriver().getId());
+                    assertEquals(testDriver1.getId(), transportation.getDriverId());
                     assertEquals(testStorage1.getId(), transportation.getFromStorage().getId());
                     assertEquals(testStorage2.getId(), transportation.getToStorage().getId());
                     return true;
@@ -262,9 +262,9 @@ class TransportationServiceImplTest {
     void create_ShouldThrowOperationNotAllowedException_WhenSameFromAndToStorage() {
         // Arrange
         Transportation newTransportation = Transportation.builder()
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage1)
                 .toStorage(testStorage1) // Тот же склад
                 .status(TransportStatus.PLANNED)
@@ -296,9 +296,9 @@ class TransportationServiceImplTest {
         StepVerifier.create(transportationService.getById(1L))
                 .expectNextMatches(transportation -> {
                     assertEquals(testTransportationPlanned.getId(), transportation.getId());
-                    assertEquals(testItem1.getId(), transportation.getItem().getId());
+                    assertEquals(testItem1.getId(), transportation.getItemId());
                     assertEquals(testVehicle1.getId(), transportation.getVehicle().getId());
-                    assertEquals(testDriver1.getId(), transportation.getDriver().getId());
+                    assertEquals(testDriver1.getId(), transportation.getDriverId());
                     assertEquals(testStorage1.getId(), transportation.getFromStorage().getId());
                     assertEquals(testStorage2.getId(), transportation.getToStorage().getId());
                     assertEquals(TransportStatus.PLANNED, transportation.getStatus());
@@ -329,9 +329,9 @@ class TransportationServiceImplTest {
     void update_ShouldUpdateTransportation_WhenValidData() {
         // Arrange
         Transportation updateData = Transportation.builder()
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage1)
                 .toStorage(testStorage2)
                 .status(TransportStatus.PLANNED)
@@ -363,9 +363,9 @@ class TransportationServiceImplTest {
     void update_ShouldUpdateRelatedEntities_WhenEntitiesChanged() {
         // Arrange
         Transportation updateData = Transportation.builder()
-                .item(testItem2)
+                .itemId(testItem2.getId())
                 .vehicle(testVehicle2)
-                .driver(testDriver2)
+                .driverId(testDriver2.getId())
                 .fromStorage(testStorage3)
                 .toStorage(testStorage1)
                 .status(TransportStatus.PLANNED)
@@ -384,9 +384,9 @@ class TransportationServiceImplTest {
         // Act & Assert
         StepVerifier.create(transportationService.update(1L, updateData))
                 .expectNextMatches(transportation -> {
-                    assertEquals(testItem2.getId(), transportation.getItem().getId());
+                    assertEquals(testItem2.getId(), transportation.getItemId());
                     assertEquals(testVehicle2.getId(), transportation.getVehicle().getId());
-                    assertEquals(testDriver2.getId(), transportation.getDriver().getId());
+                    assertEquals(testDriver2.getId(), transportation.getDriverId());
                     assertEquals(testStorage3.getId(), transportation.getFromStorage().getId());
                     assertEquals(testStorage1.getId(), transportation.getToStorage().getId());
                     return true;
@@ -406,9 +406,9 @@ class TransportationServiceImplTest {
     void update_ShouldSetActualDeparture_WhenStatusChangedToInTransit() {
         // Arrange
         Transportation updateData = Transportation.builder()
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage1)
                 .toStorage(testStorage2)
                 .status(TransportStatus.IN_TRANSIT)
@@ -436,9 +436,9 @@ class TransportationServiceImplTest {
     void update_ShouldSetActualArrival_WhenStatusChangedToDelivered() {
         // Arrange
         Transportation updateData = Transportation.builder()
-                .item(testItem2)
+                .itemId(testItem2.getId())
                 .vehicle(testVehicle2)
-                .driver(testDriver2)
+                .driverId(testDriver2.getId())
                 .fromStorage(testStorage2)
                 .toStorage(testStorage3)
                 .status(TransportStatus.DELIVERED)
@@ -466,9 +466,9 @@ class TransportationServiceImplTest {
     void update_ShouldThrowTransportationNotFoundException_WhenTransportationNotFound() {
         // Arrange
         Transportation updateData = Transportation.builder()
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage1)
                 .toStorage(testStorage2)
                 .status(TransportStatus.PLANNED)
@@ -492,9 +492,9 @@ class TransportationServiceImplTest {
     void update_ShouldThrowOperationNotAllowedException_WhenFinalStatus() {
         // Arrange
         Transportation updateData = Transportation.builder()
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage3)
                 .toStorage(testStorage1)
                 .status(TransportStatus.DELIVERED)
@@ -617,7 +617,7 @@ class TransportationServiceImplTest {
         StepVerifier.create(transportationService.findPage(0, 10, null, 1L, null, null))
                 .expectNextMatches(result -> {
                     assertEquals(2, result.getTotalElements());
-                    assertTrue(result.getContent().stream().allMatch(t -> t.getItem().getId().equals(1L)));
+                    assertTrue(result.getContent().stream().allMatch(t -> t.getItemId().equals(1L)));
                     return true;
                 })
                 .verifyComplete();
@@ -642,7 +642,7 @@ class TransportationServiceImplTest {
                     assertEquals(1, result.getTotalElements());
                     Transportation transportation = result.getContent().get(0);
                     assertEquals(TransportStatus.PLANNED, transportation.getStatus());
-                    assertEquals(1L, transportation.getItem().getId());
+                    assertEquals(1L, transportation.getItemId());
                     assertEquals(1L, transportation.getFromStorage().getId());
                     assertEquals(2L, transportation.getToStorage().getId());
                     return true;
@@ -696,9 +696,9 @@ class TransportationServiceImplTest {
     void create_ShouldCreateTransportation_WhenNoScheduledTimes() {
         // Arrange
         Transportation newTransportation = Transportation.builder()
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage1)
                 .toStorage(testStorage2)
                 .status(TransportStatus.PLANNED)
@@ -709,9 +709,9 @@ class TransportationServiceImplTest {
 
         Transportation savedTransportation = Transportation.builder()
                 .id(5L)
-                .item(testItem1)
+                .itemId(testItem1.getId())
                 .vehicle(testVehicle1)
-                .driver(testDriver1)
+                .driverId(testDriver1.getId())
                 .fromStorage(testStorage1)
                 .toStorage(testStorage2)
                 .status(TransportStatus.PLANNED)
@@ -744,9 +744,9 @@ class TransportationServiceImplTest {
         LocalDateTime existingActualDeparture = testTransportationInTransit.getActualDeparture();
 
         Transportation updateData = Transportation.builder()
-                .item(testItem2)
+                .itemId(testItem2.getId())
                 .vehicle(testVehicle2)
-                .driver(testDriver2)
+                .driverId(testDriver2.getId())
                 .fromStorage(testStorage2)
                 .toStorage(testStorage3)
                 .status(TransportStatus.IN_TRANSIT)

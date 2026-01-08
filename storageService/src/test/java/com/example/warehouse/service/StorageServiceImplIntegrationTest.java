@@ -17,6 +17,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
@@ -310,7 +312,7 @@ class StorageServiceImplTest {
     void delete_ShouldDeleteStorage_WhenStorageExistsAndEmpty() {
         // Arrange
         when(storageRepository.findById(2L)).thenReturn(Optional.of(testStorage2));
-        when(itemServiceClient.countKeepingsByStorageId(2L).block()).thenReturn(0L);
+        when(itemServiceClient.countKeepingsByStorageId(2L)).thenReturn(Mono.just(0L));
         doNothing().when(storageRepository).deleteById(2L);
 
         // Act & Assert
@@ -345,7 +347,7 @@ class StorageServiceImplTest {
     void delete_ShouldThrowStorageNotEmptyException_WhenStorageHasItems() {
         // Arrange
         when(storageRepository.findById(1L)).thenReturn(Optional.of(testStorage1));
-        when(itemServiceClient.countKeepingsByStorageId(1L).block()).thenReturn(1L);
+        when(itemServiceClient.countKeepingsByStorageId(1L)).thenReturn(Mono.just(1L));
 
         // Act & Assert
         StepVerifier.create(storageService.delete(1L))
@@ -569,7 +571,7 @@ class StorageServiceImplTest {
                 .build();
 
         when(storageRepository.findById(7L)).thenReturn(Optional.of(emptyStorage));
-        when(itemServiceClient.countKeepingsByStorageId(7L).block()).thenReturn(0L);
+        when(itemServiceClient.countKeepingsByStorageId(7L)).thenReturn(Mono.just(0L));
         doNothing().when(storageRepository).deleteById(7L);
 
         // Act & Assert

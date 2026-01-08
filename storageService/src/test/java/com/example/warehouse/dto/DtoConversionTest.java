@@ -48,15 +48,11 @@ public class DtoConversionTest {
     void shouldMapTransportationEntityToDTO() {
         Transportation t = new Transportation();
         t.setId(500L);
-        Item item = new Item();
-        item.setId(501L);
-        t.setItem(item);
+        t.setItemId(501L);
         Vehicle vehicle = new Vehicle();
         vehicle.setId(502L);
         t.setVehicle(vehicle);
-        User driver = new User();
-        driver.setId(503L);
-        t.setDriver(driver);
+        t.setDriverId(503L);
         Storage from = new Storage();
         from.setId(504L);
         t.setFromStorage(from);
