@@ -25,6 +25,7 @@ services:
       - "8761:8761"
     environment:
       - SERVER_PORT=8761
+      - SPRING_PROFILES_ACTIVE=docker,native
 
   # API Gateway
   gateway:
@@ -37,7 +38,8 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
       - SPRING_CLOUD_CONFIG_URI=http://eureka:8761
     depends_on:
-      - eureka
+      eureka:
+        condition: service_healthy
 
   # Item Service
   item-service:
@@ -53,8 +55,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=liquibase
       - SPRING_DATASOURCE_PASSWORD=securepassword
     depends_on:
-      - postgres
-      - eureka
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
 
   # Storage Service
   storage-service:
@@ -70,8 +74,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=liquibase
       - SPRING_DATASOURCE_PASSWORD=securepassword
     depends_on:
-      - postgres
-      - eureka
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
 
   # User Service
   user-service:
@@ -87,8 +93,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=liquibase
       - SPRING_DATASOURCE_PASSWORD=securepassword
     depends_on:
-      - postgres
-      - eureka
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
 
 volumes:
   postgres_data:
