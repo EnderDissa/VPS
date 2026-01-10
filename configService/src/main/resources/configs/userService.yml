@@ -1,12 +1,11 @@
 server:
-  port: 8085
+  port: 8083
 
 spring:
-  datasource:
-    url: jdbc:postgresql://postgres:5432/warehouse
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/warehouse
     username: liquibase
     password: securepassword
-    driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:./db.changelog-master.yaml
   jpa:
@@ -17,11 +16,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
-logging:
-  level:
-    com.zaxxer.hikari: DEBUG
-    org.springframework.jdbc: DEBUG
-
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -31,6 +25,6 @@ springdoc:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka:8761/eureka
+      defaultZone: http://localhost:8761/eureka
   instance:
     prefer-ip-address: true

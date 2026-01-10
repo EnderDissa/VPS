@@ -16,11 +16,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
-logging:
-  level:
-    com.zaxxer.hikari: DEBUG
-    org.springframework.jdbc: DEBUG
-
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
