@@ -32,6 +32,7 @@ databaseChangeLog:
             referencedTableName: users
             referencedColumnNames: id
             constraintName: fk_access_user
+            onDelete: CASCADE
 
         - addForeignKeyConstraint:
             baseTableName: user_storage_access
@@ -39,6 +40,7 @@ databaseChangeLog:
             referencedTableName: users
             referencedColumnNames: id
             constraintName: fk_access_granted_by
+            onDelete: CASCADE
 
   - changeSet:
       id: user-1.1
@@ -56,6 +58,7 @@ databaseChangeLog:
             referencedTableName: storages
             referencedColumnNames: id
             constraintName: fk_access_storage
+            onDelete: CASCADE
 
         - addUniqueConstraint:
             tableName: user_storage_access

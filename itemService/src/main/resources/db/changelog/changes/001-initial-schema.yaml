@@ -56,6 +56,7 @@ databaseChangeLog:
             referencedTableName: items
             referencedColumnNames: id
             constraintName: fk_keeping_item
+            onDelete: CASCADE
 
         - addForeignKeyConstraint:
             baseTableName: borrowings
@@ -63,6 +64,7 @@ databaseChangeLog:
             referencedTableName: items
             referencedColumnNames: id
             constraintName: fk_borrowing_item
+            onDelete: CASCADE
 
         - addForeignKeyConstraint:
             baseTableName: item_maintenance
@@ -70,6 +72,7 @@ databaseChangeLog:
             referencedTableName: items
             referencedColumnNames: id
             constraintName: fk_maintenance_item
+            onDelete: CASCADE
 
         - createIndex:
             indexName: idx_keeping_storage_item
@@ -99,6 +102,7 @@ databaseChangeLog:
             referencedTableName: storages
             referencedColumnNames: id
             constraintName: fk_keeping_storage
+            onDelete: CASCADE
 
   - changeSet:
       id: items-1.2
@@ -116,6 +120,7 @@ databaseChangeLog:
             referencedTableName: users
             referencedColumnNames: id
             constraintName: fk_borrowing_user
+            onDelete: CASCADE
 
         - addForeignKeyConstraint:
             baseTableName: item_maintenance
@@ -123,4 +128,5 @@ databaseChangeLog:
             referencedTableName: users
             referencedColumnNames: id
             constraintName: fk_maintenance_technician
+            onDelete: CASCADE
 
