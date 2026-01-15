@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
 
-@ReactiveFeignClient(name = "USER-SERVICE", fallback = Fallback.class)
+@ReactiveFeignClient(name = "USERSERVICE", fallback = Fallback.class)
 public interface UserServiceClient {
 
     @GetMapping("/api/v1/users/{id}")
