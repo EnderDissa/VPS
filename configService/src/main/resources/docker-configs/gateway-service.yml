@@ -46,3 +46,11 @@ eureka:
       defaultZone: http://eureka:8761/eureka
   instance:
     prefer-ip-address: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    configUrl: "/swagger-config.json"
+
