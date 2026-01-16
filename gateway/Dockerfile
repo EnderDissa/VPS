@@ -1,17 +1,16 @@
-FROM gradle:jdk17-alpine AS cache
-RUN mkdir -p /home/gradle/cache_home
-ENV GRADLE_USER_HOME /home/gradle/cache_home
-COPY build.gradle /home/gradle/java-code/
-WORKDIR /home/gradle/java-code
-RUN gradle clean build -i --stacktrace --no-daemon
+FROM gradle:jdk17-alpine AS gradle-cache
+WORKDIR /home/gradle/src
+COPY build.gradle settings.gradle ./
+RUN gradle dependencies --no-daemon
 
 FROM gradle:jdk17-alpine AS builder
-COPY --from=cache /home/gradle/cache_home /home/gradle/.gradle
 WORKDIR /app
+COPY --from=gradle-cache /home/gradle/.gradle /home/gradle/.gradle
 COPY . .
-RUN gradle bootJar --no-daemon -i --stacktrace
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+    gradle clean bootJar --no-daemon
 
-FROM gradle:jdk17-alpine
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 EXPOSE 8080
