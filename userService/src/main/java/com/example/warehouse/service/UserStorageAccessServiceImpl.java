@@ -91,6 +91,10 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
                     existingAccess.setAccessLevel(userStorageAccess.getAccessLevel());
                     existingAccess.setExpiresAt(userStorageAccess.getExpiresAt());
                     existingAccess.setIsActive(userStorageAccess.getIsActive());
+                    existingAccess.setGrantedAt(userStorageAccess.getGrantedAt());
+                    existingAccess.setGrantedById(userStorageAccess.getGrantedById());
+                    existingAccess.setUserId(userStorageAccess.getUserId());
+                    existingAccess.setStorageId(userStorageAccess.getStorageId());
                 })
                 .flatMap(userStorageAccessRepository::save)
                 .doOnSuccess(v -> log.info("User storage access with ID: {} updated successfully", id))

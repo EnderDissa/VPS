@@ -84,12 +84,12 @@ public class UserServiceImpl implements UserService {
                                     if (exists) {
                                         return Mono.error(new UserAlreadyExistsException("Email " + user.getEmail() + " is already taken"));
                                     }
-
+                                    user.setId(id);
                                     user.setCreatedAt(existingUser.getCreatedAt());
                                     return userRepository.save(user);
                                 });
                     } else {
-
+                        user.setId(id);
                         user.setCreatedAt(existingUser.getCreatedAt());
                         return userRepository.save(user);
                     }
