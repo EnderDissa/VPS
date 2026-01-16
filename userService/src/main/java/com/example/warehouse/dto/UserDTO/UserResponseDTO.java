@@ -1,10 +1,12 @@
 package com.example.warehouse.dto.UserDTO;
 
 import com.example.warehouse.entity.User;
+import com.example.warehouse.enumeration.AccessLevel;
 import com.example.warehouse.enumeration.RoleType;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserResponseDTO(

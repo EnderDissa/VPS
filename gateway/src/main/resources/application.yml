@@ -12,3 +12,8 @@ spring:
         max-interval: 5000
         multiplier: 1.1
         max-attempts: 10
+
+mastik:
+  corp:
+    jwt-secret: ==========very+super+strong+secret+key+for+that+lab==========
+    jwt-expires: 21600000

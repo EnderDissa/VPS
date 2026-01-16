@@ -10,11 +10,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @JsonNaming(value = com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserRequestDTO(
-        @Schema(hidden = true)
-        Long id,
 
         @NotBlank(message = "First name is required")
         @Size(max = 100)
@@ -34,5 +33,6 @@ public record UserRequestDTO(
         @Email
         String email,
 
-        LocalDateTime createdAt
+        @NotBlank(message = "Password is required")
+        String password
 ) {}

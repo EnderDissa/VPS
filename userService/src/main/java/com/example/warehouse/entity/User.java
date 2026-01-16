@@ -47,4 +47,7 @@ public class User {
 
     @Column("created_at")
     private LocalDateTime createdAt;
+
+    @Column("password")
+    private String password;
 }
