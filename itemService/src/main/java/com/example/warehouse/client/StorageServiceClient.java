@@ -12,6 +12,6 @@ import reactor.core.publisher.Mono;
 @ReactiveFeignClient(name = "STORAGESERVICE", fallback = Fallback.class)
 public interface StorageServiceClient {
 
-    @GetMapping("/api/storage/{id}")
+    @GetMapping("/api/v1/storages/{id}")
     Mono<Storage> getById(@RequestParam("id") Long id);
 }
