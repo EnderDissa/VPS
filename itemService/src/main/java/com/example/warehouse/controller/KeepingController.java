@@ -45,9 +45,10 @@ public class KeepingController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get keeping by id")
-    public Mono<KeepingDTO> getById(@PathVariable Long id) {
+    public Mono<ResponseEntity<KeepingDTO>> getById(@PathVariable Long id) {
         return service.getById(id)
-                .map(mapper::toDTO);
+                .map(mapper::toDTO)
+                .map(get -> ResponseEntity.status(HttpStatus.OK).body(get));
     }
 
     @PutMapping("/{id}")
