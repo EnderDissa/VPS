@@ -6,28 +6,31 @@ spring:
     gateway:
       routes:
         - id: itemService
-          uri: lb://SERVICE1
+          uri: lb://ITEMSERVICE
           predicates:
             - Path=/api/itemService/**
           filters:
+            - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: defaultCircuitBreaker
                 fallbackUri: forward:/fallback/itemService
         - id: storageService
-          uri: lb://SERVICE2
+          uri: lb://STORAGESERVICE
           predicates:
             - Path=/api/storageService/**
           filters:
+            - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: defaultCircuitBreaker
                 fallbackUri: forward:/fallback/storageService
         - id: userService
-          uri: lb://SERVICE3
+          uri: lb://USERSERVICE
           predicates:
             - Path=/api/userService/**
           filters:
+            - StripPrefix=2
             - name: CircuitBreaker
               args:
                 name: defaultCircuitBreaker
