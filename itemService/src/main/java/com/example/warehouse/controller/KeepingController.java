@@ -5,6 +5,7 @@ import com.example.warehouse.entity.Keeping;
 import com.example.warehouse.mapper.KeepingMapper;
 import com.example.warehouse.service.interfaces.KeepingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -24,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/keeping")
 @Tag(name = "Keeping")
+@SecurityRequirement(name = "bearerAuth")
 public class KeepingController {
 
     private final KeepingService service;

@@ -1,7 +1,8 @@
-package com.mastik.gateway.auth.jwt;
+package com.example.warehouse.auth.jwt;
 
-import com.mastik.gateway.auth.CrossServiceUserRepository;
-import lombok.extern.slf4j.Slf4j;
+
+import com.example.warehouse.auth.CrossServiceUserRepository;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,10 +13,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
-import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Component
 @Slf4j

@@ -6,6 +6,7 @@ import com.example.warehouse.enumeration.MaintenanceStatus;
 import com.example.warehouse.mapper.ItemMaintenanceMapper;
 import com.example.warehouse.service.interfaces.ItemMaintenanceService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -25,6 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/maintenance")
 @Tag(name = "Maintenance")
+@SecurityRequirement(name = "bearerAuth")
 public class ItemMaintenanceController {
 
     private final ItemMaintenanceService service;

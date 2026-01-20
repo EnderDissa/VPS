@@ -7,6 +7,7 @@ import com.example.warehouse.exception.StorageNotFoundException;
 import com.example.warehouse.mapper.StorageMapper;
 import com.example.warehouse.service.interfaces.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/storages")
 @Tag(name = "Storages")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class StorageController {
 
     private final StorageService service;

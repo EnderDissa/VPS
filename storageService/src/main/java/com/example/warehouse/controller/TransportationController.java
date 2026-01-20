@@ -6,6 +6,7 @@ import com.example.warehouse.enumeration.TransportStatus;
 import com.example.warehouse.mapper.TransportationMapper;
 import com.example.warehouse.service.interfaces.TransportationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -26,6 +27,7 @@ import java.util.List;
 @RequestMapping("/api/v1/transportations")
 @Tag(name = "Transportations", description = "Transportation management API")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class TransportationController {
 
     private final TransportationService service;

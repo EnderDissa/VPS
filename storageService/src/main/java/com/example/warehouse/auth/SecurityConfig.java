@@ -1,8 +1,7 @@
-package com.mastik.gateway.auth;
+package com.example.warehouse.auth;
 
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
-import com.mastik.gateway.auth.jwt.JWTAuthFilter;
+import com.example.warehouse.auth.jwt.JWTAuthFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -36,14 +35,16 @@ class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(auth ->
                         auth
-                                .pathMatchers(HttpMethod.POST, "/api/userService/v1/users/login")
+                                .pathMatchers("/v3/api-docs")
                                 .permitAll()
-                                .pathMatchers("/webjars/swagger-ui/*", "/swagger-config.json")
-                                .permitAll()
-                                .pathMatchers("/api/userService/v3/api-docs", "/api/itemService/v3/api-docs", "/api/storageService/v3/api-docs")
-                                .permitAll()
+                                .pathMatchers("/api/v1/storages", "/api/v1/storages/**")
+                                .hasAnyRole("MANAGER", "ADMIN")
+                                .pathMatchers("/api/v1/transportations", "/api/v1/transportations/**")
+                                .hasAnyRole("DRIVER","ADMIN")
+                                .pathMatchers("/api/v1/vehicles", "/api/v1/vehicles/**")
+                                .hasAnyRole("DRIVER","ADMIN")
                                 .anyExchange()
-                                .authenticated()
+                                .hasRole("ADMIN")
                 )
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)

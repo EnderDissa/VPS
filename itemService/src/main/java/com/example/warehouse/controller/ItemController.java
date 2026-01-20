@@ -7,6 +7,7 @@ import com.example.warehouse.enumeration.ItemType;
 import com.example.warehouse.mapper.ItemMapper;
 import com.example.warehouse.service.interfaces.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -21,6 +22,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -33,6 +35,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/items")
 @Tag(name = "Items")
+@SecurityRequirement(name = "bearerAuth")
 public class ItemController {
 
     private final ItemService service;

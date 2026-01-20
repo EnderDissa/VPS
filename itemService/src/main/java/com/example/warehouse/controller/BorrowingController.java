@@ -6,6 +6,7 @@ import com.example.warehouse.enumeration.BorrowStatus;
 import com.example.warehouse.mapper.BorrowingMapper;
 import com.example.warehouse.service.interfaces.BorrowingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -27,6 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/borrowings")
 @Tag(name = "Borrowings")
+@SecurityRequirement(name = "bearerAuth")
 public class BorrowingController {
 
     private final BorrowingService service;

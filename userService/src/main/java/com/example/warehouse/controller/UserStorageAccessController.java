@@ -6,6 +6,7 @@ import com.example.warehouse.enumeration.AccessLevel;
 import com.example.warehouse.mapper.UserStorageAccessMapper;
 import com.example.warehouse.service.interfaces.UserStorageAccessService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -25,6 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/user-storage-access")
 @Tag(name = "UserStorageAccess")
+@SecurityRequirement(name = "bearerAuth")
 public class UserStorageAccessController {
 
     private final UserStorageAccessService service;

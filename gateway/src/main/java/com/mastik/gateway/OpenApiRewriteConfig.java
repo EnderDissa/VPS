@@ -81,7 +81,7 @@ public class OpenApiRewriteConfig {
                 return Mono.just(objectMapper.writeValueAsString(jsonNode));
             } catch (Exception e) {
                 // Log error but return original body
-                return Mono.just(originalBody);
+                return Mono.justOrEmpty(originalBody);
             }
         };
     }

@@ -1,7 +1,9 @@
-package com.mastik.gateway.auth.jwt;
+package com.example.warehouse.auth.jwt;
 
-import com.mastik.gateway.auth.CrossServiceUserRepository;
-import lombok.extern.slf4j.Slf4j;
+import com.example.warehouse.auth.UserDetailsEntity;
+import com.example.warehouse.service.interfaces.UserService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,37 +14,40 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
-import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Component
 @Slf4j
 public class JWTAuthFilter implements WebFilter {
 
-    private final CrossServiceUserRepository userRepository;
+    @Autowired
+    UserService userService;
 
-    public JWTAuthFilter(CrossServiceUserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    JWTUtils jwtUtils;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         try {
             String jwt = exchange.getRequest().getHeaders().getFirst("Authorization");
 
-            if (jwt != null) {
+            if (jwt != null && jwtUtils.validateJwtToken(jwt.substring(7))) {
                 jwt = jwt.substring(7);
-                UserDetailsService userDetailsService = userRepository.getUserDetailsService();
 
                 String finalJwt = jwt;
-                return Mono.fromCallable(() -> userDetailsService.loadUserByUsername(finalJwt))
+                return userService.getUserById(Long.parseLong(jwtUtils.getUserNameFromJwtToken(finalJwt)))
                         .onErrorResume(ex -> {
                             log.warn("Failed to load user details for username: {}", finalJwt, ex);
                             return Mono.empty();
                         })
-                        .flatMap(userDetails -> {
+                        .flatMap(user -> {
+                            UserDetailsEntity ent = new UserDetailsEntity(user.getId().toString(), "1", new String[]{"ROLE_" + user.getRole().name()});
+                            UserDetails userDetails = ent.toUserDetails();
                             Authentication authentication = buildAuthentication(userDetails);
                             return chain.filter(exchange)
                                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
@@ -58,6 +63,7 @@ public class JWTAuthFilter implements WebFilter {
 
         return chain.filter(exchange);
     }
+
     private Authentication buildAuthentication(UserDetails userDetails) {
         return new UsernamePasswordAuthenticationToken(
                 userDetails,

@@ -1,8 +1,7 @@
-package com.mastik.gateway.auth;
+package com.example.warehouse.auth;
 
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
-import com.mastik.gateway.auth.jwt.JWTAuthFilter;
+import com.example.warehouse.auth.jwt.JWTAuthFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -36,19 +35,23 @@ class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(auth ->
                         auth
-                                .pathMatchers(HttpMethod.POST, "/api/userService/v1/users/login")
+                                .pathMatchers("/v3/api-docs")
                                 .permitAll()
-                                .pathMatchers("/webjars/swagger-ui/*", "/swagger-config.json")
-                                .permitAll()
-                                .pathMatchers("/api/userService/v3/api-docs", "/api/itemService/v3/api-docs", "/api/storageService/v3/api-docs")
-                                .permitAll()
+                                .pathMatchers("/api/v1/items", "/api/v1/items/**")
+                                .hasAnyRole("MANAGER", "ADMIN")
+                                .pathMatchers("/api/v1/borrowings", "/api/v1/borrowings/**")
+                                .hasAnyRole("DRIVER", "MANAGER", "ADMIN")
+                                .pathMatchers("/api/v1/maintenance", "/api/v1/maintenance/**")
+                                .hasAnyRole("MANAGER", "ADMIN")
+                                .pathMatchers("/api/v1/keeping", "/api/v1/keeping/**")
+                                .hasAnyRole("MANAGER", "ADMIN")
                                 .anyExchange()
-                                .authenticated()
+                                .hasRole("ADMIN")
                 )
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
-                .addFilterAt(jwtFilter, SecurityWebFiltersOrder.LOGOUT)
+                .addFilterAt(jwtFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .build();
     }
 

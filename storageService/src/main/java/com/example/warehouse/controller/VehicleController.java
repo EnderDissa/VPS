@@ -5,6 +5,7 @@ import com.example.warehouse.enumeration.VehicleStatus;
 import com.example.warehouse.mapper.VehicleMapper;
 import com.example.warehouse.service.interfaces.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/vehicles")
 @Tag(name = "Vehicles")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class VehicleController {
 
     private final VehicleService service;

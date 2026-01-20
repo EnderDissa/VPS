@@ -69,7 +69,7 @@ class BorrowingServiceImplTest {
                 .firstName("John")
                 .secondName("Johnovic")
                 .lastName("Doe")
-                .role(RoleType.STUDENT)
+                .role(RoleType.DRIVER)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -79,7 +79,7 @@ class BorrowingServiceImplTest {
                 .firstName("Jane")
                 .secondName("Johnovic")
                 .lastName("Smith")
-                .role(RoleType.STUDENT)
+                .role(RoleType.DRIVER)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -145,7 +145,7 @@ class BorrowingServiceImplTest {
                 .firstName("John")
                 .secondName("Johnovic")
                 .lastName("Doe")
-                .role(RoleType.STUDENT)
+                .role(RoleType.DRIVER)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -155,7 +155,7 @@ class BorrowingServiceImplTest {
                 .firstName("Jane")
                 .secondName("Johnovic")
                 .lastName("Smith")
-                .role(RoleType.STUDENT)
+                .role(RoleType.DRIVER)
                 .createdAt(LocalDateTime.now())
                 .build();
 

@@ -82,11 +82,13 @@ public class AuthController {
 
                     UserDetailsEntity ent = new UserDetailsEntity();
                     ent.setUsername(user.getFirstName());
-                    ent.setAuthorities(new String[]{user.getRole().name()});
+                    ent.setAuthorities(new String[]{"ROLE_" + user.getRole().name()});
                     ent.setAccountNonExpired(true);
                     ent.setAccountNonLocked(true);
                     ent.setCredentialsNonExpired(true);
                     ent.setEnabled(true);
+
+                    System.out.println("Auth user: " + ent);
 
                     return Mono.just(ent);
                 });

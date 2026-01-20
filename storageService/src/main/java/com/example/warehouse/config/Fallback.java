@@ -1,5 +1,6 @@
 package com.example.warehouse.config;
 
+import com.example.warehouse.auth.UserDetailsEntity;
 import com.example.warehouse.client.ItemServiceClient;
 import com.example.warehouse.client.UserServiceClient;
 import com.example.warehouse.entity.Item;
@@ -42,5 +43,11 @@ public class Fallback implements UserServiceClient, ItemServiceClient {
     public Mono<Long> countKeepingsByStorageId(Long id) {
         log.warn("Fallback: Returning error for keeping count: {}", id);
         return Mono.error(new RuntimeException("ItemService is currently unavailable (fallback). Original cause: " + cause));
+    }
+
+    @Override
+    public Mono<UserDetailsEntity> checkUserAuth(String token) {
+        log.warn("Fallback: Returning error for user: {}", token);
+        return Mono.error(new RuntimeException("UserService is currently unavailable (fallback)."));
     }
 }

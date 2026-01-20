@@ -7,6 +7,7 @@ import com.example.warehouse.enumeration.RoleType;
 import com.example.warehouse.mapper.UserMapper;
 import com.example.warehouse.service.interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -26,6 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/users")
 @Tag(name = "Users")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private final UserService service;
