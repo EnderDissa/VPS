@@ -21,6 +21,9 @@ databaseChangeLog:
               - column:
                   name: email
                   value: "admin@warehouse.com"
+              - column:
+                  name: password
+                  value: $2a$10$/2ShF6J3ijXbvD8Wc8Ofre71zilem.JLXcHnszMbR/wCLljsqPZsK
 
         - insert:
             tableName: users
@@ -40,6 +43,10 @@ databaseChangeLog:
               - column:
                   name: email
                   value: "manager@warehouse.com"
+              - column:
+                  name: password
+                  value: $2a$10$6sf04Zuu5unjmdo44K6.IeAkzxhlzymskTO7RX6HGgDBb/pjHHiVq
+
 
         - insert:
             tableName: users
@@ -59,3 +66,7 @@ databaseChangeLog:
               - column:
                   name: email
                   value: "driver@warehouse.com"
+              - column:
+                  name: password
+                  value: $2a$10$GHP86lhfzvnGp8T9J16nZOinNyQLzyJXyritZFzKSCuaP6BfR7.my
+

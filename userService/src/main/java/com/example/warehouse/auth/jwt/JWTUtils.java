@@ -1,4 +1,14 @@
-package com.mastik.gateway.auth.jwt;
+package com.example.warehouse.auth.jwt;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+import javax.crypto.SecretKey;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -7,14 +17,6 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-import java.util.Date;
 
 @Component
 @Slf4j
@@ -70,6 +72,7 @@ public class JWTUtils {
 
     public boolean validateJwtToken(String authToken) {
         try {
+            System.out.println("Validate: " + authToken);
             Jwts.parser()
                     .verifyWith((SecretKey) key())
                     .build()

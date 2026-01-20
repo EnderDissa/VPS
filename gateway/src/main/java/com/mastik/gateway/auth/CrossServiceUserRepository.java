@@ -35,7 +35,7 @@ public class CrossServiceUserRepository {
             }
 
             if (response.getStatus() == AuthRequest.SUCCESS) {
-                return (UserDetails) response.getResult();
+                return (User) response.getResult();
             } else {
                 throw new UsernameNotFoundException((String) response.getResult());
             }

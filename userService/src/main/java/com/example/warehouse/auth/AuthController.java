@@ -1,105 +1,94 @@
 package com.example.warehouse.auth;
 
+import com.example.warehouse.auth.jwt.JWTUtils;
+import com.example.warehouse.dto.UserDTO.AuthRequestDTO;
 import com.example.warehouse.dto.UserDTO.UserRequestDTO;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.mastik.gateway.auth.jwt.JWTUtils;
+import com.example.warehouse.entity.User;
+import com.example.warehouse.exception.UserNotFoundException;
+import com.example.warehouse.service.interfaces.UserService;
 
 import lombok.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
-import java.time.Instant;
+import java.nio.file.AccessDeniedException;
+import java.util.Map;
 
 @RestController
 public class AuthController {
 
     @Autowired
-    private ServiceUserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
     private JWTUtils jwtUtils;
 
-    @Value
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    static class ApiSuccessResponse {
-        int success = 1;
-        Object result;
+    @Autowired
+    private UserService userService;
 
-        public ApiSuccessResponse(Object result) {
-            this.result = result;
-        }
+    @PostMapping("/v1/users/login")
+    public Mono<ResponseEntity<String>> login(@RequestBody AuthRequestDTO dto) {
+        return userService.loginUser(dto.email(), dto.password())
+                .doOnNext(match -> System.out.println("Auth result: " + match)) // Debug
+                .flatMap(match -> {
+                    if (match != null) {
+                        try {
+                            String token = jwtUtils.generateTokenFromUsername(match.getId().toString());
+                            System.out.println("Generated token: " + token.substring(0, 10) + "..."); // Debug truncated token
+                            return Mono.just(ResponseEntity.ok()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .body("{\"token\":\"" + token + "\"}"));
+                        } catch (Exception e) {
+                            System.err.println("Token generation failed: " + e.getMessage());
+                            return Mono.just(ResponseEntity.status(500)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .body("{\"error\":\"Token generation failed\"}"));
+                        }
+                    } else {
+                        System.out.println("Invalid credentials for: " + dto.email()); // Debug
+                        return Mono.just(ResponseEntity.status(401)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body("{\"error\":\"Invalid credentials\"}"));
+                    }
+                })
+                .onErrorResume(e -> {
+                    System.err.println("Auth error: " + e.getMessage());
+                    e.printStackTrace();
+                    return Mono.just(ResponseEntity.status(500)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body("{\"error\":\"Authentication service error: " + e.getMessage() + "\"}"));
+                });
     }
 
-    @Value
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    static class ApiErrorResponse {
-        int success = 0;
-        String error;
 
-        public ApiErrorResponse(String error) {
-            this.error = error;
-        }
-    }
-
-    @Value
-    static class LoginResult {
-        String user;
-        String token;
-        long expires;
-
-        public LoginResult(String user, String token, long expires) {
-            this.user = user;
-            this.token = token;
-            this.expires = expires;
-        }
-    }
-
-    @PostMapping("/internal/login")
+    @PostMapping("/internal/validate")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Mono<ResponseEntity<Object>> login(@RequestBody UserRequestDTO user) {
-        Authentication auth = new UsernamePasswordAuthenticationToken(
-                user.email(),
-                user.password()
-        );
-        String error = "user not exists";
-        ResponseEntity.BodyBuilder response = ResponseEntity.ok();
-
-        try {
-            auth = authenticationManager.authenticate(auth);
-            if (auth != null && auth.isAuthenticated()) {
-                UserDetails userDetails = (UserDetails) auth.getPrincipal();
-                ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
-                return Mono.just(response.body(
-                        new ApiSuccessResponse(new LoginResult(
-                                user.email(),
-                                jwtCookie.toString(),
-                                Instant.now().plusMillis(jwtUtils.getJwtExpirationMs()).toEpochMilli()
-                        ))
-                ));
-            }
-        } catch (BadCredentialsException e) {
-            error = "invalid password";
+    public Mono<UserDetailsEntity> validate(@RequestBody String token) {
+        if (!jwtUtils.validateJwtToken(token)) {
+            return Mono.error(new AccessDeniedException("Not valid"));
         }
+        String username = jwtUtils.getUserNameFromJwtToken(token);
 
-        return Mono.just(response.body(new ApiErrorResponse(error)));
+        return userService.getUserById(Long.parseLong(username))
+                .flatMap(user -> {
+                    if (user == null) {
+                        return Mono.error(new UserNotFoundException("Not found"));
+                    }
+
+                    UserDetailsEntity ent = new UserDetailsEntity();
+                    ent.setUsername(user.getFirstName());
+                    ent.setAuthorities(new String[]{user.getRole().name()});
+                    ent.setAccountNonExpired(true);
+                    ent.setAccountNonLocked(true);
+                    ent.setCredentialsNonExpired(true);
+                    ent.setEnabled(true);
+
+                    return Mono.just(ent);
+                });
     }
 }

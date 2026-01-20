@@ -14,8 +14,8 @@ public class Fallback implements UserServiceClient {
     }
 
     @Override
-    public Mono<UserDetailsEntity> checkUserAuth(String email, String password) {
-        log.warn("Fallback: Returning error for user: {}", email);
-        return Mono.error(new RuntimeException("ItemService is currently unavailable (fallback)."));
+    public Mono<UserDetailsEntity> checkUserAuth(String token) {
+        log.warn("Fallback: Returning error for user: {}", token);
+        return Mono.error(new RuntimeException("UserService is currently unavailable (fallback)."));
     }
 }

@@ -52,6 +52,10 @@ dependencies {
 	testImplementation 'org.testcontainers:junit-jupiter:1.20.4'
 	testImplementation 'org.testcontainers:postgresql:1.20.4'
 	testImplementation 'org.postgresql:r2dbc-postgresql:1.1.1.RELEASE'
+
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5' // or gson
 }
 
 dependencyManagement {

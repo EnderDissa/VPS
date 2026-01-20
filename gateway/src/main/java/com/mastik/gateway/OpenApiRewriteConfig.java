@@ -63,7 +63,7 @@ public class OpenApiRewriteConfig {
         return (exchange, originalBody) -> {
             String path = exchange.getRequest().getPath().value();
             if (!path.endsWith("/v3/api-docs")) {
-                return Mono.just(originalBody);
+                return Mono.justOrEmpty(originalBody);
             }
 
             try {

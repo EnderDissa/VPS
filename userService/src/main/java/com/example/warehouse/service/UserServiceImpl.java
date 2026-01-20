@@ -11,10 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -119,5 +122,24 @@ public class UserServiceImpl implements UserService {
     public Mono<Long> countUsersByRole(String role) {
         log.debug("Counting users with role: {}", role);
         return userRepository.countByRole(role);
+    }
+
+    @Override
+    public Mono<User> loginUser(String login, String password) {
+        return userRepository.findByEmail(login)
+                .flatMap(user -> {
+                    System.out.println("User found: " + user);
+                    if (user == null)
+                        return Mono.error(new UserNotFoundException());
+
+                    if (getEncoder().matches(password, user.getPassword()))
+                        return Mono.just(user);
+                    return Mono.error(new AccessDeniedException("Wrong password"));
+                });
+
+    }
+
+    PasswordEncoder getEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

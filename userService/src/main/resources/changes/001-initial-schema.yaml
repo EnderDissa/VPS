@@ -13,6 +13,7 @@ databaseChangeLog:
               - column: {name: role, type: VARCHAR(50), constraints: {nullable: false}}
               - column: {name: email, type: VARCHAR(255), constraints: {nullable: false, unique: true}}
               - column: {name: created_at, type: TIMESTAMP, defaultValueComputed: "CURRENT_TIMESTAMP"}
+              - column: {name: password, type: TEXT}
 
         - createTable:
             tableName: user_storage_access

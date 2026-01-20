@@ -5,6 +5,7 @@ import com.mastik.gateway.auth.jwt.JWTAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -33,11 +34,7 @@ class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(auth ->
                         auth
-                                .pathMatchers("/register")
-                                .permitAll()
-                                .pathMatchers("/login")
-                                .permitAll()
-                                .pathMatchers("/logout")
+                                .pathMatchers(HttpMethod.POST, "/api/userService/v1/users/login")
                                 .permitAll()
                                 .anyExchange()
                                 .authenticated()

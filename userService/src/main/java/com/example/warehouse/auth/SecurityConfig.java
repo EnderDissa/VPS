@@ -1,20 +1,16 @@
 package com.example.warehouse.auth;
 
-import com.mastik.gateway.auth.jwt.JWTAuthFilter;
+import com.example.warehouse.auth.jwt.JWTAuthFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-
 
 
 @Configuration
@@ -22,10 +18,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 class SecurityConfig {
 
     @Autowired
-    ServiceUserRepository userRepository = null;
-
-    @Autowired
-    JWTAuthFilter jwtFilter = null;
+    JWTAuthFilter jwtFilter;
 
     @Bean
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -33,7 +26,9 @@ class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(auth ->
                         auth
-                                .pathMatchers("/internal/login")
+                                .pathMatchers(HttpMethod.POST, "/v1/users/login")
+                                .permitAll()
+                                .pathMatchers(HttpMethod.POST, "/internal/validate")
                                 .permitAll()
                                 .anyExchange()
                                 .authenticated()
@@ -41,27 +36,8 @@ class SecurityConfig {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
-                .addFilterAt(jwtFilter, SecurityWebFiltersOrder.LOGOUT)
+                .addFilterBefore(jwtFilter, SecurityWebFiltersOrder.LOGOUT)
             .build();
     }
 
-    @Bean
-    AuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(this.userRepository.getUserDetailsService());
-        provider.setPasswordEncoder(passwordEncoder());
-//        provider.setUserDetailsPasswordService(this.userRepository.getUserDetailsPasswordService());
-        return provider;
-    }
-
-
-    @Bean
-    UserDetailsService userDetailsService(PasswordEncoder encoder) {
-        return this.userRepository.getUserDetailsService();
-    }
-
-    @Bean
-    BCryptPasswordEncoder passwordEncoder()
-    {
-        return new BCryptPasswordEncoder();
-    }
 }

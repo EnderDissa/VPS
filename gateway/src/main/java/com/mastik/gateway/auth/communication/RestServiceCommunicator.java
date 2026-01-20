@@ -13,6 +13,7 @@ import reactor.core.scheduler.Schedulers;
 @Service
 public class RestServiceCommunicator {
 
+    @Autowired
     private final UserServiceClient userService;
 
     @Autowired
@@ -31,7 +32,7 @@ public class RestServiceCommunicator {
                     blockingWrapper = Mono.fromCallable(() -> {
                         try {
                             String login = (String) request.getPayload();
-                            UserDetailsEntity entity = userService.checkUserExists(login).block();
+                            UserDetailsEntity entity = userService.checkUserAuth(login).block();
 
                             if (entity != null) {
                                 UserDetails userDetails = entity.toUserDetails();

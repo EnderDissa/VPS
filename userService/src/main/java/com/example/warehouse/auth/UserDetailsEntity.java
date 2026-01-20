@@ -1,4 +1,4 @@
-package com.mastik.gateway.auth;
+package com.example.warehouse.auth;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class UserDetailsEntity implements Serializable {
     private static final long serialVersionUID = 3446634L;
 
@@ -27,8 +29,18 @@ public class UserDetailsEntity implements Serializable {
     public UserDetailsEntity() {
     }
 
+    public UserDetailsEntity(String username, String password, String[] auth){
+        this.username = username;
+        this.password = password;
+        this.accountNonExpired = true;
+        this.enabled = true;
+        this.accountNonLocked = true;
+        this.credentialsNonExpired = true;
+        this.authorities = auth;
+    }
+
     public UserDetails toUserDetails() {
-        if (username == null) {
+        if (username == null || password == null) {
             return null;
         }
 
@@ -40,7 +52,7 @@ public class UserDetailsEntity implements Serializable {
 
         return User.builder()
                 .username(username)
-                .password(password == null ? "1" : password)
+                .password(password)
                 .authorities(authorityList)
                 .accountExpired(accountNonExpired == null || !accountNonExpired)
                 .accountLocked(accountNonLocked == null || !accountNonLocked)

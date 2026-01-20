@@ -16,4 +16,5 @@ public interface UserService {
     Mono<Boolean> existsByEmail(String email);
     Flux<User> getUsersCreatedBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
     Mono<Long> countUsersByRole(String role); // Use String
+    Mono<User> loginUser(String login, String password);
 }

@@ -21,26 +21,25 @@ import java.util.List;
 @Slf4j
 public class JWTAuthFilter implements WebFilter {
 
-    private final JWTUtils jwtUtils;
     private final CrossServiceUserRepository userRepository;
 
-    public JWTAuthFilter(JWTUtils jwtUtils, CrossServiceUserRepository userRepository) {
-        this.jwtUtils = jwtUtils;
+    public JWTAuthFilter(CrossServiceUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         try {
-            String jwt = parseJwt(exchange);
+            String jwt = exchange.getRequest().getHeaders().getFirst("Authorization");
 
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                String username = jwtUtils.getUserNameFromJwtToken(jwt);
+            if (jwt != null) {
+                jwt = jwt.substring(7);
                 UserDetailsService userDetailsService = userRepository.getUserDetailsService();
 
-                return Mono.fromCallable(() -> userDetailsService.loadUserByUsername(username))
+                String finalJwt = jwt;
+                return Mono.fromCallable(() -> userDetailsService.loadUserByUsername(finalJwt))
                         .onErrorResume(ex -> {
-                            log.warn("Failed to load user details for username: {}", username, ex);
+                            log.warn("Failed to load user details for username: {}", finalJwt, ex);
                             return Mono.empty();
                         })
                         .flatMap(userDetails -> {
@@ -59,11 +58,6 @@ public class JWTAuthFilter implements WebFilter {
 
         return chain.filter(exchange);
     }
-
-    private String parseJwt(ServerWebExchange exchange) {
-        return jwtUtils.getJwtFromCookies(exchange.getRequest());
-    }
-
     private Authentication buildAuthentication(UserDetails userDetails) {
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(
                 new SimpleGrantedAuthority("USER")
