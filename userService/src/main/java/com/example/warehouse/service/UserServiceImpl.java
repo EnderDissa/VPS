@@ -37,6 +37,7 @@ public class UserServiceImpl implements UserService {
                         return Mono.error(new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists"));
                     }
                     user.setCreatedAt(LocalDateTime.now());
+                    user.setPassword(this.getEncoder().encode(user.getPassword()));
                     return userRepository.save(user);
                 })
                 .doOnSuccess(savedUser -> log.info("User created successfully with ID: {}", savedUser.getId()));
