@@ -86,6 +86,7 @@ class UserServiceImplTest {
                 .secondName("Middle")
                 .lastName("User")
                 .role(RoleType.STUDENT)
+                .password("1243534")
                 .email("new.user@example.com")
                 .createdAt(null)
                 .build();
@@ -97,6 +98,7 @@ class UserServiceImplTest {
                 .lastName("User")
                 .role(RoleType.STUDENT)
                 .email("new.user@example.com")
+                .password("1243534")
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -421,6 +423,7 @@ class UserServiceImplTest {
                 .lastName("Name")
                 .role(RoleType.DRIVER)
                 .email("nomiddle.name@example.com")
+                .password("1243534")
                 .createdAt(null)
                 .build();
 
@@ -432,6 +435,7 @@ class UserServiceImplTest {
                 .role(RoleType.DRIVER)
                 .email("nomiddle.name@example.com")
                 .createdAt(LocalDateTime.now())
+                .password("1243534")
                 .build();
 
         when(userRepository.existsByEmail("nomiddle.name@example.com")).thenReturn(Mono.just(false));
@@ -596,6 +600,7 @@ class UserServiceImplTest {
                 .firstName("Test")
                 .lastName("User")
                 .role(RoleType.STUDENT)
+                .password("1243534")
                 .email("test.user@example.com")
                 .build();
 

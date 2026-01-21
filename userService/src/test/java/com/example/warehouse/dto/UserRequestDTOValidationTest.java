@@ -26,27 +26,25 @@ class UserRequestDTOValidationTest {
                 null,
                 "",
                 null,
-                "",
+                RoleType.ADMIN,
                 null,
-                "bad",
-                LocalDateTime.now()
+                "bad"
         );
 
         var v = validator.validate(rq);
         assertThat(v).extracting(cv -> cv.getPropertyPath().toString())
-                .contains("firstName","lastName","email","role");
+                .contains("firstName","lastName","email");
     }
 
     @Test
     void valid() {
         UserRequestDTO rq = new UserRequestDTO(
-                null,
+                "534534",
                 "Neo",
                 "The",
-                "One",
                 RoleType.STUDENT,
                 "neo@matrix.io",
-                LocalDateTime.now()
+                "neo@matrix.io"
         );
 
 
