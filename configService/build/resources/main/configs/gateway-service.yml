@@ -1,0 +1,59 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: itemService
+          uri: lb://ITEMSERVICE
+          predicates:
+            - Path=/api/itemService/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: defaultCircuitBreaker
+                fallbackUri: forward:/fallback/itemService
+        - id: storageService
+          uri: lb://STORAGESERVICE
+          predicates:
+            - Path=/api/storageService/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: defaultCircuitBreaker
+                fallbackUri: forward:/fallback/storageService
+        - id: userService
+          uri: lb://USERSERVICE
+          predicates:
+            - Path=/api/userService/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: defaultCircuitBreaker
+                fallbackUri: forward:/fallback/userService
+    circuitbreaker:
+      resilience4j:
+        instances:
+          defaultCircuitBreaker:
+            sliding-window-size: 10
+            failure-rate-threshold: 50
+            wait-duration-in-open-state: 5s
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    configUrl: "/swagger-config.json"
+

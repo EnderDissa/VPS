@@ -1,0 +1,35 @@
+server:
+  port: 0
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://postgres:5432/warehouse
+    username: liquibase
+    password: securepassword
+  liquibase:
+    change-log: classpath:./db.changelog-master.yaml
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka:8761/eureka
+  instance:
+    prefer-ip-address: true
+
+mastik:
+  corp:
+    jwt-secret: ==========very+super+strong+secret+key+for+that+lab==========
+    jwt-expires: 21600000
