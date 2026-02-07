@@ -1,5 +1,6 @@
 package com.example.warehouse.mapper;
 
+import com.example.warehouse.infrastructure.web.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import java.lang.reflect.Constructor;

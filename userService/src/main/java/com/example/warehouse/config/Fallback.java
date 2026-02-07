@@ -1,8 +1,7 @@
 package com.example.warehouse.config;
 
-import com.example.warehouse.client.StorageServiceClient;
-import com.example.warehouse.entity.Storage;
-import com.example.warehouse.entity.User;
+import com.example.warehouse.infrastructure.client.StorageServiceClient;
+import com.example.warehouse.infrastructure.persistence.entity.Storage;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;

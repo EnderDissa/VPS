@@ -1,11 +1,11 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.auth.AuthController;
-import com.example.warehouse.auth.jwt.JWTUtils;
-import com.example.warehouse.dto.UserDTO.AuthRequestDTO;
-import com.example.warehouse.entity.User;
-import com.example.warehouse.enumeration.RoleType;
-import com.example.warehouse.service.interfaces.UserService;
+import com.example.warehouse.infrastructure.auth.AuthController;
+import com.example.warehouse.infrastructure.auth.jwt.JWTUtils;
+import com.example.warehouse.infrastructure.web.dto.UserDTO.AuthRequestDTO;
+import com.example.warehouse.infrastructure.persistence.entity.User;
+import com.example.warehouse.domain.enumeration.RoleType;
+import com.example.warehouse.application.input.interfaces.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

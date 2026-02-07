@@ -1,7 +1,7 @@
 package com.example.warehouse.dto;
 
-import com.example.warehouse.entity.*;
-import com.example.warehouse.enumeration.*;
+import com.example.warehouse.infrastructure.persistence.entity.Storage;
+import com.example.warehouse.infrastructure.web.dto.StorageDTO;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.*;

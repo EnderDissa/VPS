@@ -1,11 +1,12 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.entity.UserStorageAccess;
-import com.example.warehouse.enumeration.AccessLevel;
+import com.example.warehouse.infrastructure.persistence.entity.UserStorageAccess;
+import com.example.warehouse.domain.enumeration.AccessLevel;
 import com.example.warehouse.exception.DuplicateUserStorageAccessException;
 import com.example.warehouse.exception.OperationNotAllowedException;
 import com.example.warehouse.exception.UserStorageAccessNotFoundException;
-import com.example.warehouse.repository.UserStorageAccessRepository;
+import com.example.warehouse.application.input.UserStorageAccessServiceImpl;
+import com.example.warehouse.application.output.UserStorageAccessRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

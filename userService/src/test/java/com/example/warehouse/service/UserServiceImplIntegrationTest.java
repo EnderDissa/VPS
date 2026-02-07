@@ -1,10 +1,11 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.entity.User;
-import com.example.warehouse.enumeration.RoleType;
+import com.example.warehouse.infrastructure.persistence.entity.User;
+import com.example.warehouse.domain.enumeration.RoleType;
 import com.example.warehouse.exception.UserAlreadyExistsException;
 import com.example.warehouse.exception.UserNotFoundException;
-import com.example.warehouse.repository.UserRepository;
+import com.example.warehouse.application.input.UserServiceImpl;
+import com.example.warehouse.application.output.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

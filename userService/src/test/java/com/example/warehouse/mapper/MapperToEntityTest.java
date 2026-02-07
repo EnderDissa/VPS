@@ -1,12 +1,13 @@
 package com.example.warehouse.mapper;
 
-import com.example.warehouse.dto.*;
-import com.example.warehouse.entity.*;
-import com.example.warehouse.enumeration.*;
+import com.example.warehouse.domain.enumeration.AccessLevel;
+import com.example.warehouse.infrastructure.persistence.entity.UserStorageAccess;
+import com.example.warehouse.infrastructure.web.dto.UserStorageAccessDTO;
+import com.example.warehouse.infrastructure.web.mapper.UserStorageAccessMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.*;
 

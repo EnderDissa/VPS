@@ -1,8 +1,9 @@
 package com.example.warehouse.mapper;
 
-import com.example.warehouse.dto.UserDTO.UserResponseDTO;
-import com.example.warehouse.entity.User;
-import com.example.warehouse.enumeration.RoleType;
+import com.example.warehouse.infrastructure.web.dto.UserDTO.UserResponseDTO;
+import com.example.warehouse.infrastructure.persistence.entity.User;
+import com.example.warehouse.domain.enumeration.RoleType;
+import com.example.warehouse.infrastructure.web.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import static org.assertj.core.api.Assertions.assertThat;
