@@ -1,15 +1,17 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.client.UserServiceClient;
-import com.example.warehouse.entity.Item;
-import com.example.warehouse.entity.ItemMaintenance;
-import com.example.warehouse.entity.User;
-import com.example.warehouse.enumeration.ItemCondition;
-import com.example.warehouse.enumeration.ItemType;
-import com.example.warehouse.enumeration.MaintenanceStatus;
-import com.example.warehouse.enumeration.RoleType;
+import com.example.warehouse.application.ports.input.ItemMaintenanceServiceImpl;
+import com.example.warehouse.application.ports.input.ItemServiceImpl;
+import com.example.warehouse.infrastructure.client.UserServiceClient;
+import com.example.warehouse.infrastructure.persistence.entity.Item;
+import com.example.warehouse.infrastructure.persistence.entity.ItemMaintenance;
+import com.example.warehouse.infrastructure.persistence.entity.User;
+import com.example.warehouse.domain.enumeration.ItemCondition;
+import com.example.warehouse.domain.enumeration.ItemType;
+import com.example.warehouse.domain.enumeration.MaintenanceStatus;
+import com.example.warehouse.domain.enumeration.RoleType;
 import com.example.warehouse.exception.ItemMaintenanceNotFoundException;
-import com.example.warehouse.repository.ItemMaintenanceRepository;
+import com.example.warehouse.application.ports.output.ItemMaintenanceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

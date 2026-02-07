@@ -1,7 +1,8 @@
 package com.example.warehouse.dto;
 
-import com.example.warehouse.enumeration.ItemCondition;
-import com.example.warehouse.enumeration.ItemType;
+import com.example.warehouse.domain.enumeration.ItemCondition;
+import com.example.warehouse.domain.enumeration.ItemType;
+import com.example.warehouse.infrastructure.web.dto.ItemDTO;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;

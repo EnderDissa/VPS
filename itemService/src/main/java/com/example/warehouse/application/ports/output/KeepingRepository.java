@@ -1,0 +1,26 @@
+package com.example.warehouse.application.ports.output;
+
+import com.example.warehouse.infrastructure.persistence.entity.Keeping;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface KeepingRepository extends JpaRepository<Keeping, Long> {
+
+    boolean existsByStorageIdAndItemId(Long storageId, Long itemId);
+
+
+    Page<Keeping> findByStorageId(Long storageId, Pageable pageable);
+
+    Page<Keeping> findByItemId(Long itemId, Pageable pageable);
+
+    Page<Keeping> findByStorageIdAndItemId(Long storageId, Long itemId, Pageable pageable);
+
+    long countByStorageId(Long storageId);
+    long countByItemId(Long itemId);
+    long countByStorageIdAndItemId(Long storageId, Long itemId);
+
+    boolean existsByStorageIdAndItemIdAndIdNot(Long storageId, Long itemId, Long id);
+}

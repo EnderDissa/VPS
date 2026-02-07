@@ -1,9 +1,10 @@
 package com.example.warehouse.mapper;
 
-import com.example.warehouse.dto.ItemDTO;
-import com.example.warehouse.entity.Item;
-import com.example.warehouse.enumeration.ItemCondition;
-import com.example.warehouse.enumeration.ItemType;
+import com.example.warehouse.infrastructure.web.dto.ItemDTO;
+import com.example.warehouse.infrastructure.persistence.entity.Item;
+import com.example.warehouse.domain.enumeration.ItemCondition;
+import com.example.warehouse.domain.enumeration.ItemType;
+import com.example.warehouse.infrastructure.web.mapper.ItemMapper;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import static org.assertj.core.api.Assertions.assertThat;

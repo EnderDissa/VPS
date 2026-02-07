@@ -1,8 +1,17 @@
 package com.example.warehouse.dto;
 
-import com.example.warehouse.entity.*;
-import com.example.warehouse.enumeration.*;
-import org.junit.Ignore;
+import com.example.warehouse.domain.enumeration.BorrowStatus;
+import com.example.warehouse.domain.enumeration.ItemCondition;
+import com.example.warehouse.domain.enumeration.ItemType;
+import com.example.warehouse.domain.enumeration.MaintenanceStatus;
+import com.example.warehouse.infrastructure.persistence.entity.Borrowing;
+import com.example.warehouse.infrastructure.persistence.entity.Item;
+import com.example.warehouse.infrastructure.persistence.entity.ItemMaintenance;
+import com.example.warehouse.infrastructure.persistence.entity.Keeping;
+import com.example.warehouse.infrastructure.web.dto.BorrowingDTO;
+import com.example.warehouse.infrastructure.web.dto.ItemDTO;
+import com.example.warehouse.infrastructure.web.dto.ItemMaintenanceDTO;
+import com.example.warehouse.infrastructure.web.dto.KeepingDTO;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

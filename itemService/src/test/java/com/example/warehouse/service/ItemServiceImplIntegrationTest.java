@@ -1,11 +1,12 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.entity.Item;
-import com.example.warehouse.enumeration.ItemCondition;
-import com.example.warehouse.enumeration.ItemType;
+import com.example.warehouse.application.ports.input.ItemServiceImpl;
+import com.example.warehouse.infrastructure.persistence.entity.Item;
+import com.example.warehouse.domain.enumeration.ItemCondition;
+import com.example.warehouse.domain.enumeration.ItemType;
 import com.example.warehouse.exception.ItemNotFoundException;
 import com.example.warehouse.exception.DuplicateSerialNumberException;
-import com.example.warehouse.repository.ItemRepository;
+import com.example.warehouse.application.ports.output.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;

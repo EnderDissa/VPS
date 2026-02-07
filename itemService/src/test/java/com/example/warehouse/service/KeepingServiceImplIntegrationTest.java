@@ -1,15 +1,16 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.client.StorageServiceClient;
-import com.example.warehouse.entity.Item;
-import com.example.warehouse.entity.Keeping;
-import com.example.warehouse.entity.Storage;
-import com.example.warehouse.enumeration.ItemCondition;
-import com.example.warehouse.enumeration.ItemType;
+import com.example.warehouse.application.ports.input.KeepingServiceImpl;
+import com.example.warehouse.infrastructure.client.StorageServiceClient;
+import com.example.warehouse.infrastructure.persistence.entity.Item;
+import com.example.warehouse.infrastructure.persistence.entity.Keeping;
+import com.example.warehouse.infrastructure.persistence.entity.Storage;
+import com.example.warehouse.domain.enumeration.ItemCondition;
+import com.example.warehouse.domain.enumeration.ItemType;
 import com.example.warehouse.exception.DuplicateKeepingException;
 import com.example.warehouse.exception.KeepingNotFoundException;
-import com.example.warehouse.repository.KeepingRepository;
-import com.example.warehouse.service.interfaces.ItemService;
+import com.example.warehouse.application.ports.output.KeepingRepository;
+import com.example.warehouse.application.ports.input.interfaces.ItemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

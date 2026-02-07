@@ -1,8 +1,21 @@
 package com.example.warehouse.mapper;
 
-import com.example.warehouse.dto.*;
-import com.example.warehouse.entity.*;
-import com.example.warehouse.enumeration.*;
+import com.example.warehouse.domain.enumeration.BorrowStatus;
+import com.example.warehouse.domain.enumeration.ItemCondition;
+import com.example.warehouse.domain.enumeration.ItemType;
+import com.example.warehouse.domain.enumeration.MaintenanceStatus;
+import com.example.warehouse.infrastructure.persistence.entity.Borrowing;
+import com.example.warehouse.infrastructure.persistence.entity.Item;
+import com.example.warehouse.infrastructure.persistence.entity.ItemMaintenance;
+import com.example.warehouse.infrastructure.persistence.entity.Keeping;
+import com.example.warehouse.infrastructure.web.dto.BorrowingDTO;
+import com.example.warehouse.infrastructure.web.dto.ItemDTO;
+import com.example.warehouse.infrastructure.web.dto.ItemMaintenanceDTO;
+import com.example.warehouse.infrastructure.web.dto.KeepingDTO;
+import com.example.warehouse.infrastructure.web.mapper.BorrowingMapper;
+import com.example.warehouse.infrastructure.web.mapper.ItemMaintenanceMapper;
+import com.example.warehouse.infrastructure.web.mapper.ItemMapper;
+import com.example.warehouse.infrastructure.web.mapper.KeepingMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
