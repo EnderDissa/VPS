@@ -225,14 +225,16 @@ public class TransportationServiceImpl implements TransportationService {
         return Mono.empty();
     }
 
-    private Mono<Void> updateDriverIfNeeded(Transportation existing, Transportation updated) {
+    private Mono<Transportation> updateDriverIfNeeded(Transportation existing, Transportation updated) {
         if (!existing.getDriverId().equals(updated.getDriverId())) {
             return ReactiveSecurityContextHolder
                     .getContext()
                     .flatMap(context -> userServiceClient.getUserById(updated.getDriverId(), (String) context.getAuthentication().getCredentials())
-                    .switchIfEmpty(Mono.error(new UserNotFoundException("User not found with ID: " + updated.getDriverId())))
-                    .doOnNext(existing::setDriverId)
-                    .then());
+                            .switchIfEmpty(Mono.error(new UserNotFoundException("User not found with ID: " + updated.getDriverId())))
+                            .map(user -> {
+                                existing.setDriverId(user);
+                                return existing;
+                            }));
         }
         return Mono.empty();
     }
