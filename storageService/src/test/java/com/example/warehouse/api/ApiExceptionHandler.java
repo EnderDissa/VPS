@@ -1,5 +1,6 @@
 package com.example.warehouse.api;
 
+import com.example.warehouse.infrastructure.api.ApiExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -17,11 +18,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.WebExchangeBindException;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
@@ -36,27 +35,27 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.example.warehouse.exception.AccessDeniedException;
-import com.example.warehouse.exception.BorrowingNotFoundException;
-import com.example.warehouse.exception.BusinessRuleException;
-import com.example.warehouse.exception.ConflictException;
-import com.example.warehouse.exception.DuplicateKeepingException;
-import com.example.warehouse.exception.DuplicateLicensePlateException;
-import com.example.warehouse.exception.DuplicateSerialNumberException;
-import com.example.warehouse.exception.DuplicateStorageException;
-import com.example.warehouse.exception.DuplicateUserStorageAccessException;
-import com.example.warehouse.exception.ItemMaintenanceNotFoundException;
-import com.example.warehouse.exception.ItemNotFoundException;
-import com.example.warehouse.exception.KeepingNotFoundException;
-import com.example.warehouse.exception.OperationNotAllowedException;
-import com.example.warehouse.exception.StorageNotEmptyException;
-import com.example.warehouse.exception.StorageNotFoundException;
-import com.example.warehouse.exception.TransportationNotFoundException;
-import com.example.warehouse.exception.UserAlreadyExistsException;
-import com.example.warehouse.exception.UserNotFoundException;
-import com.example.warehouse.exception.UserStorageAccessNotFoundException;
-import com.example.warehouse.exception.ValidationException;
-import com.example.warehouse.exception.VehicleNotFoundException;
+import com.example.warehouse.domain.exception.AccessDeniedException;
+import com.example.warehouse.domain.exception.BorrowingNotFoundException;
+import com.example.warehouse.domain.exception.BusinessRuleException;
+import com.example.warehouse.domain.exception.ConflictException;
+import com.example.warehouse.domain.exception.DuplicateKeepingException;
+import com.example.warehouse.domain.exception.DuplicateLicensePlateException;
+import com.example.warehouse.domain.exception.DuplicateSerialNumberException;
+import com.example.warehouse.domain.exception.DuplicateStorageException;
+import com.example.warehouse.domain.exception.DuplicateUserStorageAccessException;
+import com.example.warehouse.domain.exception.ItemMaintenanceNotFoundException;
+import com.example.warehouse.domain.exception.ItemNotFoundException;
+import com.example.warehouse.domain.exception.KeepingNotFoundException;
+import com.example.warehouse.domain.exception.OperationNotAllowedException;
+import com.example.warehouse.domain.exception.StorageNotEmptyException;
+import com.example.warehouse.domain.exception.StorageNotFoundException;
+import com.example.warehouse.domain.exception.TransportationNotFoundException;
+import com.example.warehouse.domain.exception.UserAlreadyExistsException;
+import com.example.warehouse.domain.exception.UserNotFoundException;
+import com.example.warehouse.domain.exception.UserStorageAccessNotFoundException;
+import com.example.warehouse.domain.exception.ValidationException;
+import com.example.warehouse.domain.exception.VehicleNotFoundException;
 
 @WebFluxTest(
         controllers = DummyController.class,

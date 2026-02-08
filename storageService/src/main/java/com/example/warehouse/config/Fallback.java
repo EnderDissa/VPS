@@ -1,10 +1,10 @@
 package com.example.warehouse.config;
 
-import com.example.warehouse.auth.UserDetailsEntity;
-import com.example.warehouse.client.ItemServiceClient;
-import com.example.warehouse.client.UserServiceClient;
-import com.example.warehouse.entity.Item;
-import com.example.warehouse.entity.User;
+import com.example.warehouse.infrastructure.auth.UserDetailsEntity;
+import com.example.warehouse.infrastructure.client.ItemServiceClient;
+import com.example.warehouse.infrastructure.client.UserServiceClient;
+import com.example.warehouse.infrastructure.persistence.entity.Item;
+import com.example.warehouse.infrastructure.persistence.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 

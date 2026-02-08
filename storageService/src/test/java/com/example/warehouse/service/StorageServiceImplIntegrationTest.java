@@ -1,11 +1,12 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.client.ItemServiceClient;
-import com.example.warehouse.entity.Storage;
-import com.example.warehouse.exception.DuplicateStorageException;
-import com.example.warehouse.exception.StorageNotFoundException;
-import com.example.warehouse.exception.StorageNotEmptyException;
-import com.example.warehouse.repository.StorageRepository;
+import com.example.warehouse.application.input.StorageServiceImpl;
+import com.example.warehouse.infrastructure.client.ItemServiceClient;
+import com.example.warehouse.infrastructure.persistence.entity.Storage;
+import com.example.warehouse.domain.exception.DuplicateStorageException;
+import com.example.warehouse.domain.exception.StorageNotFoundException;
+import com.example.warehouse.domain.exception.StorageNotEmptyException;
+import com.example.warehouse.application.output.StorageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

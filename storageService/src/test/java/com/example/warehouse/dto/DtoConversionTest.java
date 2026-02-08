@@ -1,10 +1,19 @@
 package com.example.warehouse.dto;
 
-import com.example.warehouse.entity.*;
-import com.example.warehouse.enumeration.*;
-import org.junit.Ignore;
+import com.example.warehouse.domain.enumeration.ItemCondition;
+import com.example.warehouse.domain.enumeration.ItemType;
+import com.example.warehouse.domain.enumeration.TransportStatus;
+import com.example.warehouse.domain.enumeration.VehicleStatus;
+import com.example.warehouse.infrastructure.persistence.entity.Item;
+import com.example.warehouse.infrastructure.persistence.entity.Storage;
+import com.example.warehouse.infrastructure.persistence.entity.Transportation;
+import com.example.warehouse.infrastructure.persistence.entity.Vehicle;
+import com.example.warehouse.infrastructure.web.dto.ItemDTO;
+import com.example.warehouse.infrastructure.web.dto.StorageDTO;
+import com.example.warehouse.infrastructure.web.dto.TransportationDTO;
+import com.example.warehouse.infrastructure.web.dto.VehicleDTO;
 import org.junit.jupiter.api.Test;
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.*;
 

@@ -8,7 +8,7 @@ import reactivefeign.spring.config.EnableReactiveFeignClients;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableReactiveFeignClients(basePackages = "com.example.warehouse.client")
+@EnableReactiveFeignClients(basePackages = "com.example.warehouse.infrastructure.client")
 public class WarehouseApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(WarehouseApplication.class, args);

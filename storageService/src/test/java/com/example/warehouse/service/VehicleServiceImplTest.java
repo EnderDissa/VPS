@@ -1,10 +1,11 @@
 package com.example.warehouse.service;
 
-import com.example.warehouse.entity.Vehicle;
-import com.example.warehouse.enumeration.VehicleStatus;
-import com.example.warehouse.exception.DuplicateLicensePlateException;
-import com.example.warehouse.exception.VehicleNotFoundException;
-import com.example.warehouse.repository.VehicleRepository;
+import com.example.warehouse.application.input.VehicleServiceImpl;
+import com.example.warehouse.infrastructure.persistence.entity.Vehicle;
+import com.example.warehouse.domain.enumeration.VehicleStatus;
+import com.example.warehouse.domain.exception.DuplicateLicensePlateException;
+import com.example.warehouse.domain.exception.VehicleNotFoundException;
+import com.example.warehouse.application.output.VehicleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +17,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;

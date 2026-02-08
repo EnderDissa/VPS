@@ -1,0 +1,18 @@
+package com.example.warehouse.infrastructure.client;
+
+import com.example.warehouse.config.Fallback;
+import com.example.warehouse.infrastructure.persistence.entity.Item;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import reactivefeign.spring.config.ReactiveFeignClient;
+import reactor.core.publisher.Mono;
+
+@ReactiveFeignClient(name = "ITEMSERVICE", fallback = Fallback.class)
+public interface ItemServiceClient {
+
+    @GetMapping("/api/v1/items/{id}")
+    Mono<Item> getItemById(@PathVariable("id") Long id);
+
+    @GetMapping("/api/v1/keeping/countByStorage/{id}")
+    Mono<Long> countKeepingsByStorageId(@PathVariable("id") Long id);
+}

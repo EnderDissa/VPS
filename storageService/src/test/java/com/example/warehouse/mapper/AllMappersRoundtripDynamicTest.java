@@ -15,9 +15,9 @@ class AllMappersRoundtripDynamicTest {
             "com.example.warehouse.mapper.BorrowingMapper",
             "com.example.warehouse.mapper.ItemMaintenanceMapper",
             "com.example.warehouse.mapper.UserStorageAccessMapper",
-            "com.example.warehouse.mapper.TransportationMapper",
+            "com.example.warehouse.infrastructure.web.mapper.TransportationMapper",
             "com.example.warehouse.mapper.UserMapper",
-            "com.example.warehouse.mapper.VehicleMapper",
+            "com.example.warehouse.infrastructure.web.mapper.VehicleMapper",
             "com.example.warehouse.mapper.KeepingMapper"
     );
 

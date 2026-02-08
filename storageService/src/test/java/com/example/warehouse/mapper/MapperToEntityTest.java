@@ -1,17 +1,22 @@
 package com.example.warehouse.mapper;
 
-import com.example.warehouse.api.ApiExceptionHandler;
-import com.example.warehouse.dto.*;
-import com.example.warehouse.entity.*;
-import com.example.warehouse.enumeration.*;
+import com.example.warehouse.domain.enumeration.TransportStatus;
+import com.example.warehouse.domain.enumeration.VehicleStatus;
+import com.example.warehouse.infrastructure.persistence.entity.Storage;
+import com.example.warehouse.infrastructure.persistence.entity.Transportation;
+import com.example.warehouse.infrastructure.persistence.entity.Vehicle;
+import com.example.warehouse.infrastructure.web.dto.StorageDTO;
+import com.example.warehouse.infrastructure.web.dto.TransportationDTO;
+import com.example.warehouse.infrastructure.web.dto.VehicleDTO;
+import com.example.warehouse.infrastructure.web.mapper.StorageMapper;
+import com.example.warehouse.infrastructure.web.mapper.TransportationMapper;
+import com.example.warehouse.infrastructure.web.mapper.VehicleMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.*;
 
