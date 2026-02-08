@@ -231,7 +231,7 @@ class TransportationServiceImplTest {
                 .build();
 
         when(itemServiceClient.getItemById(1L)).thenReturn(Mono.just(testItem1));
-        when(userServiceClient.getUserById(1L)).thenReturn(Mono.just(testDriver1));
+        when(userServiceClient.getUserById(1L, "")).thenReturn(Mono.just(testDriver1.getId()));
         when(vehicleService.getById(1L)).thenReturn(Mono.just(testVehicle1));
         when(storageService.getById(1L)).thenReturn(Mono.just(testStorage1));
         when(storageService.getById(2L)).thenReturn(Mono.just(testStorage2));
@@ -252,7 +252,7 @@ class TransportationServiceImplTest {
                 .verifyComplete();
 
         verify(itemServiceClient).getItemById(1L);
-        verify(userServiceClient).getUserById(1L);
+        verify(userServiceClient).getUserById(1L, "");
         verify(vehicleService).getById(1L);
         verify(storageService).getById(1L);
         verify(storageService).getById(2L);
@@ -280,7 +280,7 @@ class TransportationServiceImplTest {
                 .verify();
 
         verify(itemServiceClient, never()).getItemById(anyLong());
-        verify(userServiceClient, never()).getUserById(anyLong());
+        verify(userServiceClient, never()).getUserById(anyLong(), anyString());
         verify(vehicleService, never()).getById(anyLong());
         verify(storageService, never()).getById(anyLong());
         verify(transportationRepository, never()).save(any());
@@ -355,7 +355,7 @@ class TransportationServiceImplTest {
         verify(transportationRepository).findById(1L);
         verify(transportationRepository).save(any(Transportation.class));
         verify(itemServiceClient, never()).getItemById(anyLong());
-        verify(userServiceClient, never()).getUserById(anyLong());
+        verify(userServiceClient, never()).getUserById(anyLong(), anyString());
         verify(vehicleService, never()).getById(anyLong());
         verify(storageService, never()).getById(anyLong());
     }
@@ -376,7 +376,7 @@ class TransportationServiceImplTest {
 
         when(transportationRepository.findById(1L)).thenReturn(Optional.of(testTransportationPlanned));
         when(itemServiceClient.getItemById(2L)).thenReturn(Mono.just(testItem2));
-        when(userServiceClient.getUserById(2L)).thenReturn(Mono.just(testDriver2));
+        when(userServiceClient.getUserById(2L, "")).thenReturn(Mono.just(testDriver2.getId()));
         when(vehicleService.getById(2L)).thenReturn(Mono.just(testVehicle2));
         when(storageService.getById(3L)).thenReturn(Mono.just(testStorage3));
         when(storageService.getById(1L)).thenReturn(Mono.just(testStorage1));
@@ -396,7 +396,7 @@ class TransportationServiceImplTest {
 
         verify(transportationRepository).findById(1L);
         verify(itemServiceClient).getItemById(2L);
-        verify(userServiceClient).getUserById(2L);
+        verify(userServiceClient).getUserById(2L, "");
         verify(vehicleService).getById(2L);
         verify(storageService).getById(3L);
         verify(storageService).getById(1L);
@@ -722,7 +722,7 @@ class TransportationServiceImplTest {
                 .build();
 
         when(itemServiceClient.getItemById(1L)).thenReturn(Mono.just(testItem1));
-        when(userServiceClient.getUserById(1L)).thenReturn(Mono.just(testDriver1));
+        when(userServiceClient.getUserById(1L, "")).thenReturn(Mono.just(testDriver1.getId()));
         when(vehicleService.getById(1L)).thenReturn(Mono.just(testVehicle1));
         when(storageService.getById(1L)).thenReturn(Mono.just(testStorage1));
         when(storageService.getById(2L)).thenReturn(Mono.just(testStorage2));

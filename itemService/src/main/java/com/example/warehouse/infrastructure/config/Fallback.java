@@ -1,5 +1,6 @@
 package com.example.warehouse.infrastructure.config;
 
+import com.example.warehouse.infrastructure.auth.UserDetailsEntity;
 import com.example.warehouse.infrastructure.client.StorageServiceClient;
 import com.example.warehouse.infrastructure.client.UserServiceClient;
 import com.example.warehouse.infrastructure.persistence.entity.Storage;
@@ -18,7 +19,7 @@ public class Fallback implements UserServiceClient, StorageServiceClient {
     }
 
     @Override
-    public Mono<User> getUserById(Long id) {
+    public Mono<Long> getUserById(Long id, String auth) {
         log.warn("Fallback: Returning a default user or error object for id: {}", id);
 
         return Mono.error(new RuntimeException("UserService is currently unavailable (fallback). Original cause: " + cause, null));
@@ -29,5 +30,11 @@ public class Fallback implements UserServiceClient, StorageServiceClient {
         log.warn("Fallback: Returning a default storage or error object for id: {}", id);
 
         return Mono.error(new RuntimeException("StorageService is currently unavailable (fallback). Original cause: " + cause, null));
+    }
+
+    @Override
+    public Mono<UserDetailsEntity> checkUserAuth(String token) {
+        log.warn("Fallback: Returning error for user: {}", token);
+        return Mono.error(new RuntimeException("UserService is currently unavailable (fallback)."));
     }
 }

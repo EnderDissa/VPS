@@ -9,12 +9,16 @@ import com.example.warehouse.application.output.TransportationRepository;
 import com.example.warehouse.application.input.interfaces.StorageService;
 import com.example.warehouse.application.input.interfaces.TransportationService;
 import com.example.warehouse.application.input.interfaces.VehicleService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
+
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -47,7 +51,10 @@ public class TransportationServiceImpl implements TransportationService {
         return Mono.zip(
                         itemServiceClient.getItemById(transportation.getItemId())
                                 .switchIfEmpty(Mono.error(new ItemNotFoundException("Item not found with ID: " + transportation.getItemId()))),
-                        userServiceClient.getUserById(transportation.getDriverId())
+                        ReactiveSecurityContextHolder
+                                .getContext()
+                                .flatMap(context ->
+                                        userServiceClient.getUserById(transportation.getDriverId(), (String) context.getAuthentication().getCredentials()))
                                 .switchIfEmpty(Mono.error(new UserNotFoundException("User not found with ID: " + transportation.getDriverId()))),
                         vehicleService.getById(transportation.getVehicle().getId())
                                 .switchIfEmpty(Mono.error(new VehicleNotFoundException("Vehicle not found with ID: " + transportation.getVehicle().getId()))),
@@ -58,17 +65,17 @@ public class TransportationServiceImpl implements TransportationService {
                 )
                 .flatMap(tuple -> {
                     Item item = tuple.getT1();
-                    User driver = tuple.getT2();
+                    Long driver = tuple.getT2();
                     Vehicle vehicle = tuple.getT3();
                     Storage fromStorage = tuple.getT4();
                     Storage toStorage = tuple.getT5();
 
                     // Проверяем доступность (оставляем как реактивный вызов — клиент или локальная заглушка)
-                    return checkAvailability(driver.getId(), vehicle.getId(),
+                    return checkAvailability(driver, vehicle.getId(),
                             transportation.getScheduledDeparture(), transportation.getScheduledArrival())
                             .then(Mono.fromCallable(() -> {
                                 transportation.setItemId(item.getId());
-                                transportation.setDriverId(driver.getId());
+                                transportation.setDriverId(driver);
                                 transportation.setVehicle(vehicle);
                                 transportation.setFromStorage(fromStorage);
                                 transportation.setToStorage(toStorage);
@@ -205,7 +212,7 @@ public class TransportationServiceImpl implements TransportationService {
                 .then(updateVehicleIfNeeded(existing, updated))
                 .then(updateFromStorageIfNeeded(existing, updated))
                 .then(updateToStorageIfNeeded(existing, updated))
-        .thenReturn(existing);
+                .thenReturn(existing);
     }
 
     private Mono<Void> updateItemIfNeeded(Transportation existing, Transportation updated) {
@@ -220,10 +227,12 @@ public class TransportationServiceImpl implements TransportationService {
 
     private Mono<Void> updateDriverIfNeeded(Transportation existing, Transportation updated) {
         if (!existing.getDriverId().equals(updated.getDriverId())) {
-            return userServiceClient.getUserById(updated.getDriverId())
+            return ReactiveSecurityContextHolder
+                    .getContext()
+                    .flatMap(context -> userServiceClient.getUserById(updated.getDriverId(), (String) context.getAuthentication().getCredentials())
                     .switchIfEmpty(Mono.error(new UserNotFoundException("User not found with ID: " + updated.getDriverId())))
-                    .doOnNext(user -> existing.setDriverId(user.getId()))
-                    .then();
+                    .doOnNext(existing::setDriverId)
+                    .then());
         }
         return Mono.empty();
     }

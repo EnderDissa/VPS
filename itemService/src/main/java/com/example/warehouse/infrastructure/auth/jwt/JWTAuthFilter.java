@@ -29,7 +29,8 @@ public class JWTAuthFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         try {
-            String jwt = exchange.getRequest().getHeaders().getFirst("Authorization");
+            String sourceJwt = exchange.getRequest().getHeaders().getFirst("Authorization");
+            String jwt = sourceJwt;
 
             if (jwt != null) {
                 jwt = jwt.substring(7);
@@ -42,7 +43,7 @@ public class JWTAuthFilter implements WebFilter {
                             return Mono.empty();
                         })
                         .flatMap(userDetails -> {
-                            Authentication authentication = buildAuthentication(userDetails);
+                            Authentication authentication = buildAuthentication(userDetails, sourceJwt);
                             return chain.filter(exchange)
                                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
                         })
@@ -58,10 +59,10 @@ public class JWTAuthFilter implements WebFilter {
         return chain.filter(exchange);
     }
 
-    private Authentication buildAuthentication(UserDetails userDetails) {
+    private Authentication buildAuthentication(UserDetails userDetails, String token) {
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
-                "43dd32434d2d233",
+                token,
                 userDetails.getAuthorities()
         );
     }
