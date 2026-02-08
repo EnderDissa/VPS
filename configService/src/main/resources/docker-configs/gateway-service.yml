@@ -35,6 +35,16 @@ spring:
               args:
                 name: defaultCircuitBreaker
                 fallbackUri: forward:/fallback/userService
+        - id: fileShareService
+          uri: lb://FILESHARESERVICE
+          predicates:
+            - Path=/api/fileShareService/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: defaultCircuitBreaker
+                fallbackUri: forward:/fallback/fileShareService
     circuitbreaker:
       resilience4j:
         instances:

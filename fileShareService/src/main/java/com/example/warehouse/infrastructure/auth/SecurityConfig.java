@@ -1,13 +1,11 @@
-package com.mastik.gateway.auth;
+package com.example.warehouse.infrastructure.auth;
 
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
-import com.mastik.gateway.auth.jwt.JWTAuthFilter;
+import com.example.warehouse.infrastructure.auth.jwt.JWTAuthFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -36,19 +34,15 @@ class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(auth ->
                         auth
-                                .pathMatchers(HttpMethod.POST, "/api/userService/v1/users/login")
-                                .permitAll()
-                                .pathMatchers("/webjars/swagger-ui/*", "/swagger-config.json")
-                                .permitAll()
-                                .pathMatchers("/api/userService/v3/api-docs", "/api/itemService/v3/api-docs", "/api/storageService/v3/api-docs", "/api/fileShareService/v3/api-docs")
+                                .pathMatchers("/v3/api-docs")
                                 .permitAll()
                                 .anyExchange()
-                                .authenticated()
+                                .hasAnyRole("MANAGER", "ADMIN")
                 )
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
-                .addFilterAt(jwtFilter, SecurityWebFiltersOrder.LOGOUT)
+                .addFilterAt(jwtFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .build();
     }
 

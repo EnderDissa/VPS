@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: files-2
+      author: file-service
+      changes:
+        - addColumn:
+            tableName: files
+            columns:
+              - column: {name: file_content, type: BYTEA, constraints: {nullable: true}}

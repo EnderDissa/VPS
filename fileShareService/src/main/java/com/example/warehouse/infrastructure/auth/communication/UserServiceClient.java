@@ -15,4 +15,5 @@ public interface UserServiceClient {
     @PostMapping("/internal/validate")
     Mono<UserDetailsEntity> checkUserAuth(@RequestBody String token);
 
+
 }
