@@ -98,6 +98,21 @@ services:
       eureka:
         condition: service_healthy
 
+  # File Share Service
+  file-share-service:
+    build: ./fileShareService
+    container_name: file-share-service
+    environment:
+      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
+      - SPRING_DATASOURCE_USERNAME=liquibase
+      - SPRING_DATASOURCE_PASSWORD=securepassword
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+
   # Замените секции broker1, broker2, broker3 на:
   broker1:
     image: apache/kafka:latest

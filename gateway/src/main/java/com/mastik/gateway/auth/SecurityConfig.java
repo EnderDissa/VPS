@@ -40,7 +40,7 @@ class SecurityConfig {
                                 .permitAll()
                                 .pathMatchers("/webjars/swagger-ui/*", "/swagger-config.json")
                                 .permitAll()
-                                .pathMatchers("/api/userService/v3/api-docs", "/api/itemService/v3/api-docs", "/api/storageService/v3/api-docs")
+                                .pathMatchers("/api/userService/v3/api-docs", "/api/itemService/v3/api-docs", "/api/storageService/v3/api-docs", "/api/fileShareService/v3/api-docs")
                                 .permitAll()
                                 .anyExchange()
                                 .authenticated()

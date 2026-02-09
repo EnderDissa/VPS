@@ -10,16 +10,24 @@ import com.example.warehouse.infrastructure.persistence.entity.*;
 import com.example.warehouse.application.output.TransportationRepository;
 import com.example.warehouse.application.input.interfaces.StorageService;
 import com.example.warehouse.application.input.interfaces.VehicleService;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -64,6 +72,8 @@ class TransportationServiceImplTest {
     private Transportation testTransportationPlanned;
     private Transportation testTransportationInTransit;
     private Transportation testTransportationDelivered;
+    private MockedStatic<ReactiveSecurityContextHolder> utilities;
+    private SecurityContext ctx;
 
     @BeforeEach
     void setUp() {
@@ -200,6 +210,20 @@ class TransportationServiceImplTest {
                 .actualArrival(LocalDateTime.now().minusDays(2))
                 .createdAt(LocalDateTime.now().minusDays(4))
                 .build();
+
+        ctx =  Mockito.mock(org.springframework.security.core.context.SecurityContextImpl.class);
+
+        utilities = Mockito.mockStatic(ReactiveSecurityContextHolder.class);
+        utilities.when(ReactiveSecurityContextHolder::getContext).thenReturn(Mono.just(ctx));
+
+        ReactiveSecurityContextHolder
+                .getContext()
+                .map(c -> {System.out.println(c);return c;});
+    }
+
+    @AfterEach
+    void tearDown() {
+        utilities.close();
     }
 
     @Test
@@ -231,11 +255,12 @@ class TransportationServiceImplTest {
                 .build();
 
         when(itemServiceClient.getItemById(1L)).thenReturn(Mono.just(testItem1));
-        when(userServiceClient.getUserById(1L)).thenReturn(Mono.just(testDriver1));
+        when(userServiceClient.getUserById(eq(1L), anyString())).thenReturn(Mono.just(testDriver1.getId()));
         when(vehicleService.getById(1L)).thenReturn(Mono.just(testVehicle1));
         when(storageService.getById(1L)).thenReturn(Mono.just(testStorage1));
         when(storageService.getById(2L)).thenReturn(Mono.just(testStorage2));
         when(transportationRepository.save(newTransportation)).thenReturn(savedTransportation);
+        when(ctx.getAuthentication()).thenReturn(new UsernamePasswordAuthenticationToken("", ""));
 
         // Act & Assert
         StepVerifier.create(transportationService.create(newTransportation))
@@ -252,7 +277,7 @@ class TransportationServiceImplTest {
                 .verifyComplete();
 
         verify(itemServiceClient).getItemById(1L);
-        verify(userServiceClient).getUserById(1L);
+        verify(userServiceClient).getUserById(1L, "");
         verify(vehicleService).getById(1L);
         verify(storageService).getById(1L);
         verify(storageService).getById(2L);
@@ -280,7 +305,7 @@ class TransportationServiceImplTest {
                 .verify();
 
         verify(itemServiceClient, never()).getItemById(anyLong());
-        verify(userServiceClient, never()).getUserById(anyLong());
+        verify(userServiceClient, never()).getUserById(anyLong(), anyString());
         verify(vehicleService, never()).getById(anyLong());
         verify(storageService, never()).getById(anyLong());
         verify(transportationRepository, never()).save(any());
@@ -355,7 +380,7 @@ class TransportationServiceImplTest {
         verify(transportationRepository).findById(1L);
         verify(transportationRepository).save(any(Transportation.class));
         verify(itemServiceClient, never()).getItemById(anyLong());
-        verify(userServiceClient, never()).getUserById(anyLong());
+        verify(userServiceClient, never()).getUserById(anyLong(), anyString());
         verify(vehicleService, never()).getById(anyLong());
         verify(storageService, never()).getById(anyLong());
     }
@@ -376,11 +401,12 @@ class TransportationServiceImplTest {
 
         when(transportationRepository.findById(1L)).thenReturn(Optional.of(testTransportationPlanned));
         when(itemServiceClient.getItemById(2L)).thenReturn(Mono.just(testItem2));
-        when(userServiceClient.getUserById(2L)).thenReturn(Mono.just(testDriver2));
+        when(userServiceClient.getUserById(eq(2L), anyString())).thenReturn(Mono.just(testDriver2.getId()));
         when(vehicleService.getById(2L)).thenReturn(Mono.just(testVehicle2));
         when(storageService.getById(3L)).thenReturn(Mono.just(testStorage3));
         when(storageService.getById(1L)).thenReturn(Mono.just(testStorage1));
         when(transportationRepository.save(any(Transportation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(ctx.getAuthentication()).thenReturn(new UsernamePasswordAuthenticationToken("", ""));
 
         // Act & Assert
         StepVerifier.create(transportationService.update(1L, updateData))
@@ -396,7 +422,7 @@ class TransportationServiceImplTest {
 
         verify(transportationRepository).findById(1L);
         verify(itemServiceClient).getItemById(2L);
-        verify(userServiceClient).getUserById(2L);
+        verify(userServiceClient).getUserById(2L, "");
         verify(vehicleService).getById(2L);
         verify(storageService).getById(3L);
         verify(storageService).getById(1L);
@@ -722,11 +748,12 @@ class TransportationServiceImplTest {
                 .build();
 
         when(itemServiceClient.getItemById(1L)).thenReturn(Mono.just(testItem1));
-        when(userServiceClient.getUserById(1L)).thenReturn(Mono.just(testDriver1));
+        when(userServiceClient.getUserById(1L, "")).thenReturn(Mono.just(testDriver1.getId()));
         when(vehicleService.getById(1L)).thenReturn(Mono.just(testVehicle1));
         when(storageService.getById(1L)).thenReturn(Mono.just(testStorage1));
         when(storageService.getById(2L)).thenReturn(Mono.just(testStorage2));
         when(transportationRepository.save(newTransportation)).thenReturn(savedTransportation);
+        when(ctx.getAuthentication()).thenReturn(new UsernamePasswordAuthenticationToken("", ""));
 
         // Act & Assert
         StepVerifier.create(transportationService.create(newTransportation))

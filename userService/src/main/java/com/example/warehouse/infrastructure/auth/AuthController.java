@@ -76,7 +76,7 @@ public class AuthController {
                     }
 
                     UserDetailsEntity ent = new UserDetailsEntity();
-                    ent.setUsername(user.getFirstName());
+                    ent.setUsername(user.getId().toString());
                     ent.setAuthorities(new String[]{"ROLE_" + user.getRole().name()});
                     ent.setAccountNonExpired(true);
                     ent.setAccountNonLocked(true);

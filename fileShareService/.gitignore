@@ -1,0 +1,20 @@
+# ==== Gradle ====
+.gradle/
+**/build/
+out/
+
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+gradle-app.setting
+
+# ==== IntelliJ IDEA ====
+.idea/
+*.iml
+
+.DS_Store
+Thumbs.db
+
+*.log
+logs/
+*.pid
+tmp/

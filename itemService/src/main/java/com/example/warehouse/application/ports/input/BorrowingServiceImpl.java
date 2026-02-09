@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import reactor.core.publisher.Flux;
@@ -53,7 +54,10 @@ public class BorrowingServiceImpl implements BorrowingService {
         log.debug("Creating new borrowing: {}", entity);
 
         return itemService.getById(entity.getItem().getId())
-                .flatMap(item -> userService.getUserById(entity.getUserId())
+                .flatMap(item -> ReactiveSecurityContextHolder
+                        .getContext()
+                        .flatMap(context ->
+                        userService.getUserById(entity.getUserId(), (String) context.getAuthentication().getCredentials())
                         .flatMap(user -> {
                             if (item.getCondition() == ItemCondition.NEEDS_MAINTENANCE ||
                                     item.getCondition() == ItemCondition.UNDER_REPAIR ||
@@ -61,7 +65,7 @@ public class BorrowingServiceImpl implements BorrowingService {
                                 return Mono.error(new IllegalStateException("Cannot borrow item in condition: " + item.getCondition()));
                             }
 
-                            return Mono.fromCallable(() -> borrowingRepository.countActiveBorrowingsByUser(user.getId()))
+                            return Mono.fromCallable(() -> borrowingRepository.countActiveBorrowingsByUser(user))
                                     .subscribeOn(Schedulers.boundedElastic())
                                     .flatMap(activeCount -> {
                                         if (activeCount >= 5) {
@@ -70,13 +74,13 @@ public class BorrowingServiceImpl implements BorrowingService {
 
                                         entity.setId(null);
                                         entity.setItem(item);
-                                        entity.setUserId(user.getId());
+                                        entity.setUserId(user);
                                         entity.setStatus(BorrowStatus.ACTIVE);
 
                                         return Mono.fromCallable(() -> borrowingRepository.save(entity))
                                                 .subscribeOn(Schedulers.boundedElastic());
                                     });
-                        }));
+                        })));
     }
 
     @Override

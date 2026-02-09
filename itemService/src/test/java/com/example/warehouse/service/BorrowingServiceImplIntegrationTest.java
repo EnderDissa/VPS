@@ -263,7 +263,7 @@ class BorrowingServiceImplTest {
 
         when(mapper.toEntity(borrowingDTO)).thenReturn(entity);
         when(itemService.getById(1L)).thenReturn(Mono.just(testItem));
-        when(userService.getUserById(1L)).thenReturn(Mono.just(testUser));
+        when(userService.getUserById(1L, "")).thenReturn(Mono.just(testUser.getId()));
         when(borrowingRepository.countActiveBorrowingsByUser(1L)).thenReturn(2L);
         when(borrowingRepository.save(entity)).thenReturn(savedBorrowing);
 
@@ -281,7 +281,7 @@ class BorrowingServiceImplTest {
 
         verify(mapper).toEntity(borrowingDTO);
         verify(itemService).getById(1L);
-        verify(userService).getUserById(1L);
+        verify(userService).getUserById(1L, "");
         verify(borrowingRepository).countActiveBorrowingsByUser(1L);
         verify(borrowingRepository).save(entity);
     }
@@ -299,7 +299,7 @@ class BorrowingServiceImplTest {
 
         when(mapper.toEntity(borrowingDTO)).thenReturn(entity);
         when(itemService.getById(1L)).thenReturn(Mono.just(testItem));
-        when(userService.getUserById(1L)).thenReturn(Mono.just(testUser));
+        when(userService.getUserById(1L, "")).thenReturn(Mono.just(testUser.getId()));
         when(borrowingRepository.countActiveBorrowingsByUser(1L)).thenReturn(5L);
 
         StepVerifier.create(borrowingService.create(borrowingDTO))
@@ -311,7 +311,7 @@ class BorrowingServiceImplTest {
 
         verify(mapper).toEntity(borrowingDTO);
         verify(itemService).getById(1L);
-        verify(userService).getUserById(1L);
+        verify(userService).getUserById(1L, "");
         verify(borrowingRepository).countActiveBorrowingsByUser(1L);
         verify(borrowingRepository, never()).save(any());
     }
@@ -352,7 +352,7 @@ class BorrowingServiceImplTest {
 
         when(mapper.toEntity(dtoWithoutDefaults)).thenReturn(entity);
         when(itemService.getById(1L)).thenReturn(Mono.just(testItem));
-        when(userService.getUserById(1L)).thenReturn(Mono.just(testUser));
+        when(userService.getUserById(1L, "")).thenReturn(Mono.just(testUser.getId()));
         when(borrowingRepository.countActiveBorrowingsByUser(1L)).thenReturn(2L);
         when(borrowingRepository.save(entity)).thenReturn(savedBorrowing);
 
@@ -790,7 +790,7 @@ class BorrowingServiceImplTest {
 
         when(mapper.toEntity(dtoWithoutQuantity)).thenReturn(entity);
         when(itemService.getById(1L)).thenReturn(Mono.just(testItem));
-        when(userService.getUserById(1L)).thenReturn(Mono.just(testUser));
+        when(userService.getUserById(1L, "")).thenReturn(Mono.just(testUser.getId()));
         when(borrowingRepository.countActiveBorrowingsByUser(1L)).thenReturn(2L);
         when(borrowingRepository.save(entity)).thenReturn(savedBorrowing);
 
@@ -838,7 +838,7 @@ class BorrowingServiceImplTest {
 
         when(mapper.toEntity(dtoWithoutBorrowDate)).thenReturn(entity);
         when(itemService.getById(1L)).thenReturn(Mono.just(testItem));
-        when(userService.getUserById(1L)).thenReturn(Mono.just(testUser));
+        when(userService.getUserById(1L, "")).thenReturn(Mono.just(testUser.getId()));
         when(borrowingRepository.countActiveBorrowingsByUser(1L)).thenReturn(2L);
         when(borrowingRepository.save(entity)).thenReturn(savedBorrowing);
 
@@ -874,7 +874,7 @@ class BorrowingServiceImplTest {
 
         verify(mapper).toEntity(dto);
         verify(itemService).getById(1L);
-        verify(userService, never()).getUserById(anyLong());
+        verify(userService, never()).getUserById(anyLong(), anyString());
     }
 
     @Test
@@ -894,7 +894,7 @@ class BorrowingServiceImplTest {
 
         when(mapper.toEntity(dto)).thenReturn(entity);
         when(itemService.getById(1L)).thenReturn(Mono.just(testItem));
-        when(userService.getUserById(1L)).thenReturn(Mono.error(new RuntimeException("User not found")));
+        when(userService.getUserById(1L, "")).thenReturn(Mono.error(new RuntimeException("User not found")));
 
         StepVerifier.create(borrowingService.create(dto))
                 .expectError(RuntimeException.class)
@@ -902,7 +902,7 @@ class BorrowingServiceImplTest {
 
         verify(mapper).toEntity(dto);
         verify(itemService).getById(1L);
-        verify(userService).getUserById(1L);
+        verify(userService).getUserById(1L, "");
     }
 
 

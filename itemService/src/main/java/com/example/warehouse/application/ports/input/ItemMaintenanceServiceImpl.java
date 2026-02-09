@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import reactor.core.publisher.Flux;
@@ -36,15 +37,19 @@ public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
         log.info("Creating new item maintenance for item ID: {}", maintenance.getItem().getId());
 
         return itemService.getById(maintenance.getItem().getId())
-                .flatMap(item -> userService.getUserById(maintenance.getTechnicianId())
-                        .map(technician -> {
-                            maintenance.setItem(item);
-                            maintenance.setTechnicianId(technician.getId());
-                            return maintenance;
-                        }))
-                .flatMap(maint -> Mono.fromCallable(() -> itemMaintenanceRepository.save(maint))
-                        .subscribeOn(Schedulers.boundedElastic()))
-                .doOnSuccess(savedMaintenance -> log.info("Item maintenance created successfully with ID: {}", savedMaintenance.getId()));
+                .flatMap(item -> ReactiveSecurityContextHolder
+                        .getContext()
+                        .flatMap(context ->
+                                userService.getUserById(maintenance.getTechnicianId(), (String) context.getAuthentication().getCredentials())
+                                        .map(technician -> {
+                                            maintenance.setItem(item);
+                                            maintenance.setTechnicianId(technician);
+                                            log.info("Item maintenance found user {}, saving {}", technician, maintenance);
+                                            return maintenance;
+                                        })))
+                .map(itemMaintenanceRepository::save)
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnSuccess(savedMaintenance -> log.info("Item maintenance created successfully with ID: {}", savedMaintenance));
     }
 
     @Override
@@ -74,11 +79,14 @@ public class ItemMaintenanceServiceImpl implements ItemMaintenanceService {
                             .switchIfEmpty(Mono.just(existingMaintenance.getItem()))
                             .doOnNext(existingMaintenance::setItem);
 
-                    Mono<User> technicianMono = Mono.just(maintenance.getTechnicianId())
+                    Mono<Long> technicianMono = Mono.just(maintenance.getTechnicianId())
                             .filter(techId -> !existingMaintenance.getTechnicianId().equals(techId))
-                            .flatMap( technicianId -> userService.getUserById(technicianId)
+                            .flatMap(technicianId -> ReactiveSecurityContextHolder
+                                    .getContext()
+                                    .flatMap(context ->
+                                        userService.getUserById(technicianId, (String) context.getAuthentication().getCredentials()))
                                     .switchIfEmpty(Mono.error(new UserNotFoundException(maintenance.getTechnicianId()))))
-                            .doOnNext(tech -> existingMaintenance.setTechnicianId(tech.getId()));
+                            .doOnNext(existingMaintenance::setTechnicianId);
 
                     return itemMono.then(technicianMono)
                             .doOnNext(v -> {
