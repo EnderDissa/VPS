@@ -19,21 +19,30 @@ spring:
     bootstrap-servers: broker1:9092,broker2:9092,broker3:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
       properties:
         spring.json.type.mapping: >
           storageRequest:com.example.warehouse.infrastructure.messaging.dto.StorageRequest,
           storageResponse:com.example.warehouse.infrastructure.messaging.dto.StorageResponse
+          ItemRequest:com.example.warehouse.infrastructure.messaging.dto.ItemRequest,
+          ItemResponse:com.example.warehouse.infrastructure.messaging.dto.ItemResponse
+          CountKeepingRequest:com.example.warehouse.infrastructure.messaging.dto.CountKeepingRequest,
+          CountKeepingResponse:com.example.warehouse.infrastructure.messaging.dto.CountKeepingResponse
     consumer:
       group-id: item-service-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       properties:
-        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.StringSerializer
         spring.json.trusted.packages: com.example.warehouse.infrastructure.messaging.dto
         spring.json.type.mapping: >
           storageRequest:com.example.warehouse.infrastructure.messaging.dto.StorageRequest,
           storageResponse:com.example.warehouse.infrastructure.messaging.dto.StorageResponse
+          ItemRequest:com.example.warehouse.infrastructure.messaging.dto.ItemRequest,
+          ItemResponse:com.example.warehouse.infrastructure.messaging.dto.ItemResponse
+          CountKeepingRequest:com.example.warehouse.infrastructure.messaging.dto.CountKeepingRequest,
+          CountKeepingResponse:com.example.warehouse.infrastructure.messaging.dto.CountKeepingResponse
+
     properties:
       security.protocol: PLAINTEXT
       client.dns.lookup: use_all_dns_ips

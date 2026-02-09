@@ -13,3 +13,25 @@ spring:
         multiplier: 1.1
         max-attempts: 10
 
+  kafka:
+    bootstrap-servers: broker1:9092,broker2:9092,broker3:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        spring.json.type.mapping: >
+          storageRequest:com.example.warehouse.infrastructure.messaging.dto.StorageRequest,
+          storageResponse:com.example.warehouse.infrastructure.messaging.dto.StorageResponse
+    consumer:
+      group-id: ${spring.application.name}-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.json.trusted.packages: com.example.warehouse.infrastructure.messaging.dto
+        spring.json.type.mapping: >
+          storageRequest:com.example.warehouse.infrastructure.messaging.dto.StorageRequest,
+          storageResponse:com.example.warehouse.infrastructure.messaging.dto.StorageResponse
+    properties:
+      security.protocol: PLAINTEXT
+      client.dns.lookup: use_all_dns_ips

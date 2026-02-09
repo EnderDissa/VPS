@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
@@ -21,12 +24,13 @@ import java.util.concurrent.TimeUnit;
 
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class StorageServiceClient {
 
     private final ReplyingKafkaTemplate<String, String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+
 
     @Value("${kafka.topic.storage.request:storage-requests}")
     private String requestTopic;

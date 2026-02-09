@@ -30,26 +30,43 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
 
     @Override
     public Mono<UserStorageAccess> create(UserStorageAccess userStorageAccess) {
-        log.info("Creating new user storage access for user ID: {} and storage ID: {}", userStorageAccess.getUserId(), userStorageAccess.getStorageId());
+        log.info("Creating new user storage access for user ID: {} and storage ID: {}",
+                userStorageAccess.getUserId(), userStorageAccess.getStorageId());
 
-
-        if (userStorageAccess.getExpiresAt() != null && userStorageAccess.getExpiresAt().isBefore(LocalDateTime.now())) {
+        // 1. Проверка даты истечения
+        if (userStorageAccess.getExpiresAt() != null &&
+                userStorageAccess.getExpiresAt().isBefore(LocalDateTime.now())) {
             return Mono.error(new OperationNotAllowedException("Expiration date must be in the future"));
         }
 
+        // 2. Проверка существования хранилища
+        return storageService.getById(userStorageAccess.getStorageId())
+                .flatMap(storage -> {
+                    // 3. Проверка дубликата доступа
+                    return userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
+                                    userStorageAccess.getUserId(),
+                                    userStorageAccess.getStorageId(),
+                                    -1L)
+                            .flatMap(exists -> {
+                                if (exists) {
+                                    return Mono.error(new DuplicateUserStorageAccessException(
+                                            "User storage access already exists for user ID: " + userStorageAccess.getUserId() +
+                                                    " and storage ID: " + userStorageAccess.getStorageId()));
+                                }
 
-        return userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(userStorageAccess.getUserId(), userStorageAccess.getStorageId(), -1L)
-                .flatMap(exists -> {
-                    if (exists) {
-                        return Mono.error(new DuplicateUserStorageAccessException(
-                                "User storage access already exists for user ID: " + userStorageAccess.getUserId() +
-                                        " and storage ID: " + userStorageAccess.getStorageId()));
-                    }
-
-                    userStorageAccess.setGrantedAt(LocalDateTime.now());
-                    return userStorageAccessRepository.save(userStorageAccess);
+                                // 4. Установка времени выдачи и сохранение
+                                userStorageAccess.setGrantedAt(LocalDateTime.now());
+                                return userStorageAccessRepository.save(userStorageAccess);
+                            });
                 })
-                .doOnSuccess(savedAccess -> log.info("User storage access created successfully with ID: {}", savedAccess.getId()));
+                .doOnSuccess(savedAccess ->
+                        log.info("User storage access created successfully with ID: {}", savedAccess.getId()))
+                .doOnError(e -> {
+                    if (!(e instanceof DuplicateUserStorageAccessException ||
+                            e instanceof OperationNotAllowedException)) {
+                        log.error("Failed to create user storage access: {}", e.getMessage());
+                    }
+                });
     }
 
     @Override

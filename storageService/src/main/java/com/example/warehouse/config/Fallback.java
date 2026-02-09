@@ -21,7 +21,7 @@ public class Fallback implements UserServiceClient, ItemServiceClient {
     }
 
     @Override
-    public Mono<Long> getUserById(Long id, String token) {
+    public Mono<User> getUserById(Long id) {
         log.warn("Fallback: Returning error for user id: {}", id);
         return Mono.error(new RuntimeException("UserService is currently unavailable (fallback). Original cause: " + cause));
     }
