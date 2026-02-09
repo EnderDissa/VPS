@@ -44,14 +44,14 @@ class FileServiceImplTest {
         
         File savedFile = File.builder()
             .id(1L)
-            .fileName(anyString())
+            .fileName("test.txt")
             .originalFileName(originalFileName)
             .contentType(contentType)
             .fileSize(fileSize)
             .fileContent(fileContent)
             .userId(userId)
-            .uploadedAt(any(LocalDateTime.class))
-            .updatedAt(any(LocalDateTime.class))
+            .uploadedAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
             .build();
         
         when(fileRepository.save(any(File.class))).thenReturn(savedFile);
