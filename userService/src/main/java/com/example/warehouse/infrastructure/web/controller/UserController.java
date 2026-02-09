@@ -97,6 +97,15 @@ public class UserController {
         return service.existsByEmail(email);
     }
 
+    @GetMapping("/existsId/{id}")
+    @Operation(summary = "Check if user exists by ID")
+    public Mono<ResponseEntity<Long>> existsById(@PathVariable Long id) {
+        return service.getUserById(id)
+                .hasElement()
+                .filter(Boolean::booleanValue)
+                .map(exists -> ResponseEntity.ok().body(id))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
     @GetMapping("/created-between")
     @Operation(summary = "Get users created between dates")
     public Flux<UserResponseDTO> getUsersCreatedBetween(
