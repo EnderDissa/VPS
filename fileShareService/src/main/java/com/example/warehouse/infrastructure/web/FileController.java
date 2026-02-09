@@ -6,6 +6,7 @@ import com.example.warehouse.infrastructure.auth.UserService;
 import com.example.warehouse.infrastructure.web.dto.FileDTO;
 import com.example.warehouse.infrastructure.web.mapper.FileMapper;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/files")
+@SecurityRequirement(name = "bearerAuth")
 public class FileController {
 
     private final FileService fileService;

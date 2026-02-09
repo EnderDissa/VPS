@@ -56,6 +56,15 @@ public class OpenApiRewriteConfig {
                                 .modifyResponseBody(String.class, String.class, rewriteOpenApiBody("/api/userService"))
                                 .stripPrefix(2))
                         .uri("lb://USERSERVICE"))
+                .route("fileShareService", r -> r.path("/api/fileShareService/**")
+                        .filters(f -> f
+                                .circuitBreaker(c -> {
+                                    c.setName("defaultCircuitBreaker");
+                                    c.setFallbackUri("forward:/fallback/fileShareService");
+                                })
+                                .modifyResponseBody(String.class, String.class, rewriteOpenApiBody("/api/fileShareService"))
+                                .stripPrefix(2))
+                        .uri("lb://FILESHARESERVICE"))
                 .build();
     }
 

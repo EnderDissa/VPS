@@ -31,6 +31,8 @@ class SecurityConfig {
                                 .permitAll()
                                 .pathMatchers(HttpMethod.POST, "/internal/validate")
                                 .permitAll()
+                                .pathMatchers("/api/v1/users/existsId/**")
+                                .authenticated()
                                 .pathMatchers("/api/v1/users", "/api/v1/users/**")
                                 .hasAnyRole("ADMIN")
                                 .pathMatchers("/api/v1/user-storage-access", "/api/v1/user-storage-access/**")
