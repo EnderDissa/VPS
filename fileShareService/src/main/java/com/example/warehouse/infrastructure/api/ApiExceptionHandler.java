@@ -187,7 +187,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         } else if (ex instanceof ValidationException) {
             status = HttpStatus.BAD_REQUEST;
             errorCode = ErrorCode.VALIDATION_ERROR;
-            // Use field-specific message if available
+            
         } else if (ex instanceof VehicleNotFoundException) {
             status = HttpStatus.NOT_FOUND;
             errorCode = ErrorCode.VEHICLE_NOT_FOUND;

@@ -47,7 +47,7 @@ public class FileController {
 
     @PostMapping(
             path = "/upload",
-            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,  // Accept any binary data
+            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,  
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public Mono<ResponseEntity<FileDTO>> uploadFile(
@@ -55,12 +55,12 @@ public class FileController {
             @RequestHeader("X-Filename") String filename,
             @RequestHeader(value = "Content-Type", required = false) String contentType
     ) {
-        // Validate
+        
         if (fileBytes == null || fileBytes.length == 0) {
             return Mono.just(ResponseEntity.badRequest().build());
         }
 
-        // Guess content type if not provided or generic
+        
         String finalContentType = contentType != null && !MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(contentType)
                 ? contentType
                 : URLConnection.guessContentTypeFromName(filename);
@@ -71,30 +71,30 @@ public class FileController {
 
         long fileSize = fileBytes.length;
 
-        // Extract user ID reactively
+        
         String finalContentType1 = finalContentType;
         return ReactiveSecurityContextHolder.getContext()
                 .flatMap(securityContext -> {
                     try {
                         Authentication authentication = securityContext.getAuthentication();
                         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                        Long userId = Long.parseLong(userDetails.getUsername()); // assuming username = user ID
+                        Long userId = Long.parseLong(userDetails.getUsername()); 
 
-                        // Offload blocking work (DB, disk, etc.)
+                        
                         return Mono.fromCallable(() -> {
-                                    // Call your service with the raw bytes
+                                    
                                     com.example.warehouse.domain.model.File uploadedFile = fileService.uploadFile(
-                                            filename,           // original name
-                                            filename,           // stored name (or generate UUID)
+                                            filename,           
+                                            filename,           
                                             finalContentType1,
                                             fileSize,
-                                            fileBytes,          // ✅ YES, HERE IT IS: fileBytes
+                                            fileBytes,          
                                             userId
                                     );
                                     FileDTO fileDTO = fileMapper.toDTO(uploadedFile);
                                     return ResponseEntity.status(HttpStatus.CREATED).body(fileDTO);
                                 })
-                                .subscribeOn(Schedulers.boundedElastic()) // Run on elastic pool
+                                .subscribeOn(Schedulers.boundedElastic()) 
                                 .onErrorMap(throwable -> {
                                     log.error("Upload failed for user {}: {}", userId, throwable.getMessage(), throwable);
                                     return new RuntimeException("File upload failed", throwable);

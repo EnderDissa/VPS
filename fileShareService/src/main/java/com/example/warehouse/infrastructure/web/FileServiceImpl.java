@@ -18,14 +18,14 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private FileRepository fileRepository;
 
-    // Setter for testing
+    
     public void setFileRepository(FileRepository fileRepository) {
         this.fileRepository = fileRepository;
     }
 
     @Override
     public File uploadFile(String fileName, String originalFileName, String contentType, Long fileSize, byte[] fileContent, Long userId) {
-        // Generate a unique file name to avoid conflicts
+        
         String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
         
         File file = File.builder()
@@ -33,7 +33,7 @@ public class FileServiceImpl implements FileService {
             .originalFileName(originalFileName)
             .contentType(contentType)
             .fileSize(fileSize)
-            .fileContent(fileContent) // Store file content in the database
+            .fileContent(fileContent) 
             .userId(userId)
             .uploadedAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
@@ -47,7 +47,7 @@ public class FileServiceImpl implements FileService {
         File file = fileRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("File not found with id: " + id));
             
-        // Check access permissions
+        
         if (!isAdmin && !file.getUserId().equals(userId)) {
             throw new AccessDeniedException("You don't have permission to access this file");
         }
@@ -58,17 +58,17 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<File> getUserFiles(Long userId, int page, int size, boolean isAdmin) {
         if (isAdmin) {
-            // Admin can see all files
+            
             return fileRepository.findAll(page, size);
         } else {
-            // Regular user can only see their own files
+            
             return fileRepository.findByUserId(userId, page, size);
         }
     }
 
     @Override
     public void deleteFile(Long id, Long userId, boolean isAdmin) {
-        File file = getFileById(id, userId, isAdmin); // This also checks permissions
+        File file = getFileById(id, userId, isAdmin); 
         fileRepository.deleteById(id);
     }
 
@@ -81,7 +81,7 @@ public class FileServiceImpl implements FileService {
         }
     }
     
-    // Method to get file content by ID
+    
     @Override
     public byte[] getFileContent(Long id, Long userId, boolean isAdmin) throws IOException {
         File file = getFileById(id, userId, isAdmin);

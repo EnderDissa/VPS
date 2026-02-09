@@ -11,7 +11,7 @@ public class UserService {
 
     private final UserServiceClient userServiceClient;
     
-    @Value("${jwt.secret:mySecretKey}") // Default secret key, should be configured properly
+    @Value("${jwt.secret:mySecretKey}") 
     private String jwtSecret;
 
     @Autowired
@@ -20,9 +20,9 @@ public class UserService {
     }
 
     public Mono<Long> getUserIdFromToken(String token) {
-        // In a real implementation, this would decode the JWT token to extract the user ID.
-        // For now, we'll return a placeholder since we don't have access to the actual JWT structure.
-        // This should be implemented properly based on how your JWT tokens are structured.
-        return Mono.just(1L); // Placeholder - should be replaced with actual implementation
+        
+        
+        
+        return Mono.just(1L); 
     }
 }
