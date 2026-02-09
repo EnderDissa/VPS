@@ -24,7 +24,6 @@ public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
 
-    // === CREATE ===
     @Override
     public Mono<Vehicle> create(Vehicle vehicle) {
         log.info("Creating new vehicle with license plate: {}", vehicle.getLicensePlate());
@@ -43,7 +42,6 @@ public class VehicleServiceImpl implements VehicleService {
                 .doOnError(error -> log.error("Failed to create vehicle: {}", error.getMessage()));
     }
 
-    // === GET BY ID ===
     @Override
     public Mono<Vehicle> getById(Long id) {
         return Mono.fromCallable(() ->
@@ -58,7 +56,6 @@ public class VehicleServiceImpl implements VehicleService {
                 .doOnError(error -> log.error("Failed to fetch vehicle with ID {}: {}", id, error.getMessage()));
     }
 
-    // === UPDATE ===
     @Override
     public Mono<Vehicle> update(Long id, Vehicle updatedVehicle) {
         log.info("Updating vehicle with ID: {}", id);
@@ -93,7 +90,6 @@ public class VehicleServiceImpl implements VehicleService {
                 .doOnError(error -> log.error("Failed to update vehicle with ID {}: {}", id, error.getMessage()));
     }
 
-    // === DELETE ===
     @Override
     public Mono<Void> delete(Long id) {
         return Mono.fromRunnable(() -> {
@@ -109,7 +105,6 @@ public class VehicleServiceImpl implements VehicleService {
                 .doOnError(error -> log.error("Failed to delete vehicle with ID {}: {}", id, error.getMessage()));
     }
 
-    // === PAGE WITH FILTERS ===
     @Override
     public Mono<Page<Vehicle>> findPage(int page, int size, VehicleStatus status, String brand, String model) {
         log.debug("Finding vehicles page - page: {}, size: {}, status: {}, brand: {}, model: {}",
@@ -146,13 +141,12 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public Flux<Vehicle> findByStatus(VehicleStatus status) {
         return Mono.fromCallable(() ->
-                        vehicleRepository.findByStatus(status, Pageable.unpaged())  // ← Pageable.unpaged()
+                        vehicleRepository.findByStatus(status, Pageable.unpaged())
                 )
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMapMany(page -> Flux.fromIterable(page.getContent()));
     }
 
-    // === FIND BY LICENSE PLATE ===
     @Override
     public Mono<Vehicle> findByLicensePlate(String licensePlate) {
         return Mono.fromCallable(() ->
@@ -167,7 +161,6 @@ public class VehicleServiceImpl implements VehicleService {
                 .doOnError(error -> log.error("Failed to fetch vehicle by license plate: {}", error.getMessage()));
     }
 
-    // === FIND AVAILABLE VEHICLES ===
     @Override
     public Flux<Vehicle> findAvailableVehicles() {
         log.debug("Finding available vehicles (status = {})", VehicleStatus.AVAILABLE);

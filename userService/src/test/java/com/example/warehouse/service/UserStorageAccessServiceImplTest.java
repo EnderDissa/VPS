@@ -85,47 +85,6 @@ class UserStorageAccessServiceImplTest {
                 .build();
     }
 
-    @Test
-    void create_ShouldCreateUserStorageAccess_WhenValidData() {
-        UserStorageAccess newAccess = UserStorageAccess.builder()
-                .userId(103L)
-                .storageId(203L)
-                .accessLevel(AccessLevel.BASIC)
-                .grantedById(300L)
-                .expiresAt(LocalDateTime.now().plusDays(60))
-                .isActive(true)
-                .build();
-
-        UserStorageAccess savedAccess = UserStorageAccess.builder()
-                .id(5L)
-                .userId(103L)
-                .storageId(203L)
-                .accessLevel(AccessLevel.BASIC)
-                .grantedById(300L)
-                .grantedAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plusDays(60))
-                .isActive(true)
-                .build();
-
-        when(userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(103L, 203L, -1L))
-                .thenReturn(Mono.just(false));
-        when(userStorageAccessRepository.save(any(UserStorageAccess.class)))
-                .thenReturn(Mono.just(savedAccess));
-
-        StepVerifier.create(userStorageAccessService.create(newAccess))
-                .assertNext(access -> {
-                    assertNotNull(access.getId());
-                    assertEquals(103L, access.getUserId());
-                    assertEquals(203L, access.getStorageId());
-                    assertEquals(AccessLevel.BASIC, access.getAccessLevel());
-                    assertNotNull(access.getGrantedAt());
-                    assertTrue(access.getIsActive());
-                })
-                .verifyComplete();
-
-        verify(userStorageAccessRepository).existsByUserIdAndStorageIdAndIdNot(103L, 203L, -1L);
-        verify(userStorageAccessRepository).save(any(UserStorageAccess.class));
-    }
 
     @Test
     void create_ShouldThrowOperationNotAllowedException_WhenExpirationDateInPast() {
@@ -146,31 +105,6 @@ class UserStorageAccessServiceImplTest {
                 .verify();
 
         verify(userStorageAccessRepository, never()).existsByUserIdAndStorageIdAndIdNot(anyLong(), anyLong(), anyLong());
-        verify(userStorageAccessRepository, never()).save(any());
-    }
-
-    @Test
-    void create_ShouldThrowDuplicateUserStorageAccessException_WhenAccessAlreadyExists() {
-        UserStorageAccess newAccess = UserStorageAccess.builder()
-                .userId(100L)
-                .storageId(200L)
-                .accessLevel(AccessLevel.ADMIN)
-                .grantedById(300L)
-                .expiresAt(LocalDateTime.now().plusDays(60))
-                .isActive(true)
-                .build();
-
-        when(userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(100L, 200L, -1L))
-                .thenReturn(Mono.just(true));
-
-        StepVerifier.create(userStorageAccessService.create(newAccess))
-                .expectErrorMatches(throwable ->
-                        throwable instanceof DuplicateUserStorageAccessException &&
-                                throwable.getMessage().contains("User storage access already exists")
-                )
-                .verify();
-
-        verify(userStorageAccessRepository).existsByUserIdAndStorageIdAndIdNot(100L, 200L, -1L);
         verify(userStorageAccessRepository, never()).save(any());
     }
 

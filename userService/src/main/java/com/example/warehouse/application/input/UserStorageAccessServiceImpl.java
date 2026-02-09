@@ -33,16 +33,16 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
         log.info("Creating new user storage access for user ID: {} and storage ID: {}",
                 userStorageAccess.getUserId(), userStorageAccess.getStorageId());
 
-        // 1. Проверка даты истечения
+
         if (userStorageAccess.getExpiresAt() != null &&
                 userStorageAccess.getExpiresAt().isBefore(LocalDateTime.now())) {
             return Mono.error(new OperationNotAllowedException("Expiration date must be in the future"));
         }
 
-        // 2. Проверка существования хранилища
+
         return storageService.getById(userStorageAccess.getStorageId())
                 .flatMap(storage -> {
-                    // 3. Проверка дубликата доступа
+
                     return userStorageAccessRepository.existsByUserIdAndStorageIdAndIdNot(
                                     userStorageAccess.getUserId(),
                                     userStorageAccess.getStorageId(),
@@ -54,7 +54,7 @@ public class UserStorageAccessServiceImpl implements UserStorageAccessService {
                                                     " and storage ID: " + userStorageAccess.getStorageId()));
                                 }
 
-                                // 4. Установка времени выдачи и сохранение
+
                                 userStorageAccess.setGrantedAt(LocalDateTime.now());
                                 return userStorageAccessRepository.save(userStorageAccess);
                             });

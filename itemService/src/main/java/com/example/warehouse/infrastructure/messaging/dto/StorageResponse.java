@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StorageResponse {
     private String correlationId;
-    private Storage storage;      // ваша сущность из БД
+    private Storage storage;
     private boolean success;
     private String error;
 }

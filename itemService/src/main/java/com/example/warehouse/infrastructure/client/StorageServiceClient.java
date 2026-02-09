@@ -41,13 +41,11 @@ public class StorageServiceClient {
     public Mono<Storage> getById(Long id) {
         return Mono.fromCallable(() -> {
                     String correlationId = UUID.randomUUID().toString();
-                    // 1. Создаем DTO-объект запроса
                     StorageRequest request = new StorageRequest(correlationId, id);
-                    // 2. Сериализуем его в JSON-строку
                     String requestPayload = objectMapper.writeValueAsString(request);
 
                     ProducerRecord<String, String> record = new ProducerRecord<>(
-                            requestTopic, correlationId, requestPayload // Отправляем строку
+                            requestTopic, correlationId, requestPayload
                     );
                     record.headers().add(new RecordHeader(
                             KafkaHeaders.REPLY_TOPIC,
@@ -61,11 +59,10 @@ public class StorageServiceClient {
                     RequestReplyFuture<String, String, String> future =
                             kafkaTemplate.sendAndReceive(record);
 
-                    // 3. Получаем строку-ответ и десериализуем её в StorageResponse
                     String rawResponse = future.get(5, TimeUnit.SECONDS).value();
                     StorageResponse response = objectMapper.readValue(rawResponse, StorageResponse.class);
 
-                    // 4. Обрабатываем результат
+
                     if (response.isSuccess() && response.getStorage() != null) {
                         return response.getStorage();
                     } else {

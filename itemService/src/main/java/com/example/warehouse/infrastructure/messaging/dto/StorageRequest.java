@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StorageRequest {
-    private String correlationId; // для связки запрос-ответ
+    private String correlationId;
     private Long storageId;
 }

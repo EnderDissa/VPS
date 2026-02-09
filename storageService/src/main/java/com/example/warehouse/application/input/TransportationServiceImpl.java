@@ -38,12 +38,10 @@ public class TransportationServiceImpl implements TransportationService {
                 transportation.getFromStorage().getId(),
                 transportation.getToStorage().getId());
 
-        // Проверяем, что склады разные
         if (transportation.getFromStorage().getId().equals(transportation.getToStorage().getId())) {
             return Mono.error(new OperationNotAllowedException("From and to storage cannot be the same"));
         }
 
-        // Получаем связанные сущности через клиенты (они уже реактивные)
         return Mono.zip(
                         itemServiceClient.getItemById(transportation.getItemId())
                                 .switchIfEmpty(Mono.error(new ItemNotFoundException("Item not found with ID: " + transportation.getItemId()))),
@@ -63,7 +61,6 @@ public class TransportationServiceImpl implements TransportationService {
                     Storage fromStorage = tuple.getT4();
                     Storage toStorage = tuple.getT5();
 
-                    // Проверяем доступность (оставляем как реактивный вызов — клиент или локальная заглушка)
                     return checkAvailability(driver.getId(), vehicle.getId(),
                             transportation.getScheduledDeparture(), transportation.getScheduledArrival())
                             .then(Mono.fromCallable(() -> {
@@ -197,7 +194,6 @@ public class TransportationServiceImpl implements TransportationService {
                         log.error("Failed to fetch transportations page: {}", error.getMessage()));
     }
 
-    // === Вспомогательные методы ===
 
     private Mono<Transportation> updateRelatedEntities(Transportation existing, Transportation updated) {
         return updateItemIfNeeded(existing, updated)
@@ -259,8 +255,6 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
     private Mono<Void> checkAvailability(Long driverId, Long vehicleId, LocalDateTime start, LocalDateTime end) {
-        // Заглушка. Реализация зависит от вашей логики.
-        // Если хотите — могу добавить вызов реактивного клиента или локальную валидацию через JPA (в boundedElastic).
         return Mono.empty();
     }
 

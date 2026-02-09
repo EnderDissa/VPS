@@ -29,7 +29,6 @@ public class Fallback implements UserServiceClient, ItemServiceClient {
     @Override
     public Mono<Boolean> checkUserAvailability(Long userId, String start, String end) {
         log.warn("Fallback: Returning default availability for user id: {}", userId);
-        // В fallback считаем пользователя доступным
         return Mono.just(true);
     }
 

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserResponse {
     private String correlationId;
-    private User user;      // ваша сущность из БД
+    private User user;
     private boolean success;
     private String error;
 }

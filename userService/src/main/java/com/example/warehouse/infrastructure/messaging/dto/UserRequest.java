@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserRequest {
-    private String correlationId; // для связки запрос-ответ
+    private String correlationId;
     private Long userId;
 }

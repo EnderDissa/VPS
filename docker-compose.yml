@@ -1,119 +1,4 @@
 services:
-  # Database service shared by all microservices
-  postgres:
-    image: postgres:15
-    container_name: warehouse-postgres
-    environment:
-      POSTGRES_DB: warehouse
-      POSTGRES_USER: liquibase
-      POSTGRES_PASSWORD: securepassword
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U liquibase -d warehouse"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Spring Cloud Config
-  cloud-config:
-    build: ./configService
-    container_name: cloud-config
-    ports:
-      - "9000:9000"
-    environment:
-      - SERVER_PORT=9000
-      - SPRING_PROFILES_ACTIVE=docker,native
-
-  # Eureka Service Registry
-  eureka:
-    build: ./eureka
-    container_name: eureka-server
-    ports:
-      - "8761:8761"
-    environment:
-      - SERVER_PORT=8761
-      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
-    depends_on:
-      cloud-config:
-        condition: service_healthy
-
-  # API Gateway
-  gateway:
-    build: ./gateway
-    container_name: api-gateway
-    ports:
-      - "8080:8080"
-    environment:
-      - SERVER_PORT=8080
-      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
-    depends_on:
-      eureka:
-        condition: service_healthy
-
-  # Item Service
-  item-service:
-    build: ./itemService
-    container_name: item-service
-    environment:
-      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
-      - SPRING_DATASOURCE_USERNAME=liquibase
-      - SPRING_DATASOURCE_PASSWORD=securepassword
-    depends_on:
-      postgres:
-        condition: service_healthy
-      eureka:
-        condition: service_healthy
-
-  # Storage Service
-  storage-service:
-    build: ./storageService
-    container_name: storage-service
-    environment:
-      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
-      - SPRING_DATASOURCE_USERNAME=liquibase
-      - SPRING_DATASOURCE_PASSWORD=securepassword
-    depends_on:
-      postgres:
-        condition: service_healthy
-      eureka:
-        condition: service_healthy
-
-  # User Service
-  user-service:
-    build: ./userService
-    container_name: user-service
-    environment:
-      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
-      - SPRING_DATASOURCE_USERNAME=liquibase
-      - SPRING_DATASOURCE_PASSWORD=securepassword
-    depends_on:
-      postgres:
-        condition: service_healthy
-      eureka:
-        condition: service_healthy
-
-  # File Share Service
-  file-share-service:
-    build: ./fileShareService
-    container_name: file-share-service
-    environment:
-      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
-      - SPRING_DATASOURCE_USERNAME=liquibase
-      - SPRING_DATASOURCE_PASSWORD=securepassword
-    depends_on:
-      postgres:
-        condition: service_healthy
-      eureka:
-        condition: service_healthy
-
-  # Замените секции broker1, broker2, broker3 на:
   broker1:
     image: apache/kafka:latest
     container_name: broker1
@@ -121,6 +6,8 @@ services:
     environment:
       KAFKA_KRAFT_CLUSTER_ID: Mk3C6h4gRyOwQ5jJ5Z5Kkg
       KAFKA_NODE_ID: 1
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 2
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:9092
@@ -128,7 +15,6 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker1:9093,2@broker2:9093,3@broker3:9093
-    # Не прокидывайте порты наружу - только для внутренней сети
 
   broker2:
     image: apache/kafka:latest
@@ -137,6 +23,8 @@ services:
     environment:
       KAFKA_KRAFT_CLUSTER_ID: Mk3C6h4gRyOwQ5jJ5Z5Kkg
       KAFKA_NODE_ID: 2
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 2
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker2:9092
@@ -152,6 +40,8 @@ services:
     environment:
       KAFKA_KRAFT_CLUSTER_ID: Mk3C6h4gRyOwQ5jJ5Z5Kkg
       KAFKA_NODE_ID: 3
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 2
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker3:9092
@@ -171,6 +61,111 @@ services:
     environment:
       KAFKA_BROKERCONNECT: broker1:9092,broker2:9092,broker3:9092
 
+  postgres:
+    image: postgres:15
+    container_name: warehouse-postgres
+    environment:
+      POSTGRES_DB: warehouse
+      POSTGRES_USER: liquibase
+      POSTGRES_PASSWORD: securepassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liquibase -d warehouse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cloud-config:
+    build: ./configService
+    container_name: cloud-config
+    ports:
+      - "9000:9000"
+    environment:
+      - SERVER_PORT=9000
+      - SPRING_PROFILES_ACTIVE=docker,native
+
+  eureka:
+    build: ./eureka
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - SERVER_PORT=8761
+      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
+    depends_on:
+      cloud-config:
+        condition: service_healthy
+
+  gateway:
+    build: ./gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
+    depends_on:
+      eureka:
+        condition: service_healthy
+
+  item-service:
+    build: ./itemService
+    container_name: item-service
+    environment:
+      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
+      - SPRING_DATASOURCE_USERNAME=liquibase
+      - SPRING_DATASOURCE_PASSWORD=securepassword
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+
+  storage-service:
+    build: ./storageService
+    container_name: storage-service
+    environment:
+      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
+      - SPRING_DATASOURCE_USERNAME=liquibase
+      - SPRING_DATASOURCE_PASSWORD=securepassword
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+
+  user-service:
+    build: ./userService
+    container_name: user-service
+    environment:
+      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
+      - SPRING_DATASOURCE_USERNAME=liquibase
+      - SPRING_DATASOURCE_PASSWORD=securepassword
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+
+  file-share-service:
+    build: ./fileShareService
+    container_name: file-share-service
+    environment:
+      - SPRING_CLOUD_CONFIG_URI=http://cloud-config:9000
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/warehouse
+      - SPRING_DATASOURCE_USERNAME=liquibase
+      - SPRING_DATASOURCE_PASSWORD=securepassword
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
 
 volumes:
   postgres_data:

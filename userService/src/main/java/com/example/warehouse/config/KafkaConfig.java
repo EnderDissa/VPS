@@ -26,7 +26,7 @@ public class KafkaConfig {
     public static final String REQUEST_TOPIC = "storage-requests";
     public static final String REPLY_TOPIC = "storage-requests-responses";
 
-    // Producer Factory теперь работает со String
+
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> config = new HashMap<>();
@@ -36,7 +36,7 @@ public class KafkaConfig {
         return new DefaultKafkaProducerFactory<>(config);
     }
 
-    // Consumer Factory теперь работает со String
+
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> config = new HashMap<>();
@@ -48,7 +48,7 @@ public class KafkaConfig {
         return new DefaultKafkaConsumerFactory<>(config);
     }
 
-    // Бин шаблона теперь ожидает и возвращает String
+
     @Bean
     public ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate() {
         ConcurrentMessageListenerContainer<String, String> replyContainer =

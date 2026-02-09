@@ -17,13 +17,13 @@ import org.springframework.stereotype.Component;
 public class StorageRequestHandler {
 
     private final StorageRepository storageRepository;
-    private final ObjectMapper objectMapper; // Добавляем ObjectMapper
+    private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "storage-requests", groupId = "storage-service-group")
     @SendTo
-    public String handle(String rawRequest) { // Теперь принимаем String
+    public String handle(String rawRequest) {
         try {
-            // 1. Десериализуем строку в объект StorageRequest
+
             StorageRequest request = objectMapper.readValue(rawRequest, StorageRequest.class);
 
             log.debug("Storage request [{}]: id={}", request.getCorrelationId(), request.getStorageId());
@@ -31,7 +31,7 @@ public class StorageRequestHandler {
             Storage storage = storageRepository.findById(request.getStorageId())
                     .orElse(null);
 
-            // 2. Создаем объект ответа
+
             StorageResponse response = new StorageResponse(
                     request.getCorrelationId(),
                     storage,
@@ -39,23 +39,21 @@ public class StorageRequestHandler {
                     storage == null ? "Storage not found" : null
             );
 
-            // 3. Сериализуем объект ответа в JSON-строку для возврата
-            return objectMapper.writeValueAsString(response);
+                        return objectMapper.writeValueAsString(response);
 
         } catch (Exception e) {
             log.error("Error handling storage request", e);
 
-            // В случае ошибки тоже возвращаем JSON-строку
-            try {
+                       try {
                 StorageResponse errorResponse = new StorageResponse(
-                        null, // correlationId может быть неизвестен
+                        null,
                         null,
                         false,
                         "Internal error: " + e.getMessage()
                 );
                 return objectMapper.writeValueAsString(errorResponse);
             } catch (Exception jsonError) {
-                // Если даже сериализация ошибки не удалась
+
                 return "{\"success\":false,\"error\":\"Fatal serialization error\"}";
             }
         }
