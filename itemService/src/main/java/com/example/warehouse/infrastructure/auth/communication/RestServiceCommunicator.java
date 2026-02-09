@@ -3,6 +3,7 @@ package com.example.warehouse.infrastructure.auth.communication;
 import com.example.warehouse.infrastructure.auth.AuthRequest;
 import com.example.warehouse.infrastructure.auth.UserDetailsEntity;
 
+import com.example.warehouse.infrastructure.client.UserServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;

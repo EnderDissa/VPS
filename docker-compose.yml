@@ -98,5 +98,64 @@ services:
       eureka:
         condition: service_healthy
 
+  # Замените секции broker1, broker2, broker3 на:
+  broker1:
+    image: apache/kafka:latest
+    container_name: broker1
+    hostname: broker1
+    environment:
+      KAFKA_KRAFT_CLUSTER_ID: Mk3C6h4gRyOwQ5jJ5Z5Kkg
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker1:9093,2@broker2:9093,3@broker3:9093
+    # Не прокидывайте порты наружу - только для внутренней сети
+
+  broker2:
+    image: apache/kafka:latest
+    container_name: broker2
+    hostname: broker2
+    environment:
+      KAFKA_KRAFT_CLUSTER_ID: Mk3C6h4gRyOwQ5jJ5Z5Kkg
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker2:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker1:9093,2@broker2:9093,3@broker3:9093
+
+  broker3:
+    image: apache/kafka:latest
+    container_name: broker3
+    hostname: broker3
+    environment:
+      KAFKA_KRAFT_CLUSTER_ID: Mk3C6h4gRyOwQ5jJ5Z5Kkg
+      KAFKA_NODE_ID: 3
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker3:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker1:9093,2@broker2:9093,3@broker3:9093
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    depends_on:
+      - broker1
+      - broker2
+      - broker3
+    ports:
+      - 19000:9000
+    environment:
+      KAFKA_BROKERCONNECT: broker1:9092,broker2:9092,broker3:9092
+
+
 volumes:
   postgres_data:
